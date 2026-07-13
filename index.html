@@ -8,6 +8,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #eef2f7; font-family: 'Inter', sans-serif; padding: 12px 10px; color: #4a5568; }
@@ -410,28 +412,45 @@
 </div>
 
 <script>
-  // === GANTI URL DI BAWAH INI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA ===
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw2ZWrMveZHCMHJyl19FrUn2JteJtC1nF4ns2wxaG9U0QPu7SvjlLnnpA-RVVsZhDKb/exec';
+  // === ISI CONFIG FIREBASE LO DI SINI (dari Firebase Console > Project Settings > Web App) ===
+  const firebaseConfig = {
+    apiKey: "AIzaSyCnLPbLi5a0REFooVcRdIeJGPi0OyvPb24",
+    databaseURL: "https://absenputri-5d8a1-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "absenputri-5d8a1"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-  function kirimKeGoogleSheet(tanggal, lembaga, records) {
-    fetch(GOOGLE_SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ tanggal: tanggal, lembaga: lembaga, records: records })
-    })
-    .then(response => response.json())
-    .then(data => console.log('Berhasil sync ke Sheet:', data))
-    .catch(error => console.error('Error sync ke Sheet:', error));
+  function slugKey(s) {
+    return String(s).trim().replace(/[.#$\[\]\/]/g, '_');
   }
 
-  // Tarik data absensi dari Google Sheet (biar absen temen ikut kebaca di sini)
-  function tarikDataDariSheet(lembaga) {
-    return fetch(GOOGLE_SCRIPT_URL + '?lembaga=' + encodeURIComponent(lembaga))
-      .then(response => response.json())
-      .then(data => Array.isArray(data) ? data : [])
-      .catch(error => { console.error('Gagal tarik data Sheet:', error); return []; });
+  // Simpan absensi ke Firebase (key deterministik = otomatis anti-double, timpa kalau sama)
+  function kirimKeFirebase(tanggal, lembaga, records) {
+    const lembagaKey = slugKey(lembaga);
+    records.forEach(rec => {
+      const key = slugKey(rec.kelas) + '__' + slugKey(rec.jam) + '__' + slugKey(rec.guru);
+      db.ref('absensi/' + lembagaKey + '/' + tanggal + '/' + key).set(rec)
+        .catch(err => console.error('Gagal simpan ke Firebase:', err));
+    });
   }
 
-  // Gabungkan data dari Sheet ke data lokal, hindari duplikat, data Sheet jadi acuan utama
+  // Tarik semua data absensi lembaga tertentu dari Firebase
+  function tarikDataDariFirebase(lembaga) {
+    const lembagaKey = slugKey(lembaga);
+    return db.ref('absensi/' + lembagaKey).once('value')
+      .then(snap => {
+        const val = snap.val() || {};
+        const hasil = [];
+        Object.keys(val).forEach(tanggal => {
+          Object.keys(val[tanggal]).forEach(k => hasil.push(val[tanggal][k]));
+        });
+        return hasil;
+      })
+      .catch(err => { console.error('Gagal tarik data Firebase:', err); return []; });
+  }
+
+  // Gabungkan data dari Firebase ke data lokal (Firebase jadi acuan utama, key sudah unik jadi gak akan double)
   function gabungkanDataSheet(dataLokal, dataSheet) {
     const kunci = r => [r.tanggal, r.lembaga, r.kelas, r.jam, r.guru].join('|');
     const map = {};
@@ -831,7 +850,7 @@
       $('areaAksiSimpan').style.display = hasAnyJadwal ? 'flex' : 'none';
 
       if (!tanpaSync) {
-        tarikDataDariSheet('MI Miftahul Ulum').then(dataSheet => {
+        tarikDataDariFirebase('MI Miftahul Ulum').then(dataSheet => {
           const sebelumnya = JSON.stringify(dataAbsensi);
           dataAbsensi = gabungkanDataSheet(dataAbsensi, dataSheet);
           if (JSON.stringify(dataAbsensi) !== sebelumnya) {
@@ -873,8 +892,8 @@
         saveDataAbsen();
         statusEl.innerHTML = `✅ Sukses! ${savedCount} data absensi berhasil disimpan.`;
         statusEl.className = 'status-box status-success';
-        if (typeof kirimKeGoogleSheet === 'function') {
-          kirimKeGoogleSheet(tanggal, 'MI Miftahul Ulum', recordsForSheet);
+        if (typeof kirimKeFirebase === 'function') {
+          kirimKeFirebase(tanggal, 'MI Miftahul Ulum', recordsForSheet);
         }
       }
       setTimeout(() => { statusEl.style.display = 'none'; }, 3500);
@@ -889,7 +908,7 @@
     function tampilkanRekap() {
       const container = $('tabelRekap');
       container.innerHTML = '<div style="padding:20px;text-align:center;color:#a0aec0;font-weight:600;">🔄 Menarik data terbaru dari Sheet...</div>';
-      tarikDataDariSheet('MI Miftahul Ulum').then(dataSheet => {
+      tarikDataDariFirebase('MI Miftahul Ulum').then(dataSheet => {
         dataAbsensi = gabungkanDataSheet(dataAbsensi, dataSheet);
         saveDataAbsen();
         renderRekapDariData();
@@ -1170,7 +1189,7 @@
       $('areaAksiSimpan').style.display = hasAnyJadwal ? 'flex' : 'none';
 
       if (!tanpaSync) {
-        tarikDataDariSheet('MTsD').then(dataSheet => {
+        tarikDataDariFirebase('MTsD').then(dataSheet => {
           const sebelumnya = JSON.stringify(dataAbsensi);
           dataAbsensi = gabungkanDataSheet(dataAbsensi, dataSheet);
           if (JSON.stringify(dataAbsensi) !== sebelumnya) {
@@ -1212,8 +1231,8 @@
         saveDataAbsen();
         statusEl.innerHTML = `✅ Sukses! ${savedCount} data absensi berhasil disimpan.`;
         statusEl.className = 'status-box status-success';
-        if (typeof kirimKeGoogleSheet === 'function') {
-          kirimKeGoogleSheet(tanggal, 'MTsD', recordsForSheet);
+        if (typeof kirimKeFirebase === 'function') {
+          kirimKeFirebase(tanggal, 'MTsD', recordsForSheet);
         }
       }
       setTimeout(() => { statusEl.style.display = 'none'; }, 3500);
@@ -1228,7 +1247,7 @@
     function tampilkanRekap() {
       const container = $('tabelRekap');
       container.innerHTML = '<div style="padding:20px;text-align:center;color:#a0aec0;font-weight:600;">🔄 Menarik data terbaru dari Sheet...</div>';
-      tarikDataDariSheet('MTsD').then(dataSheet => {
+      tarikDataDariFirebase('MTsD').then(dataSheet => {
         dataAbsensi = gabungkanDataSheet(dataAbsensi, dataSheet);
         saveDataAbsen();
         renderRekapDariData();
