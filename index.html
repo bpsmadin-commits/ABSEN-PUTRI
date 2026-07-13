@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jadwal & Absensi - MI & MTsD (Seragam)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #eef2f7; font-family: 'Inter', sans-serif; padding: 12px 10px; color: #4a5568; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header {
+      background: #eef2f7;
+      border-radius: 20px;
+      padding: 16px 20px;
+      margin-bottom: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 9px 9px 16px #d1d9e6, -9px -9px 16px #ffffff;
+    }
+    .header h1 { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 8px; color: #2d3748; }
+    .header .sub { font-size: 0.8rem; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .badge {
+      background: #eef2f7;
+      padding: 4px 14px;
+      border-radius: 20px;
+      box-shadow: inset 3px 3px 6px #d1d9e6, inset -3px -3px 6px #ffffff;
+      font-weight: 600;
+      color: #2d3748;
+    }
+    .tab-lembaga {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 18px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .tab-lembaga .btn {
+      background: #eef2f7;
+      border: none;
+      padding: 10px 28px;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      color: #4a5568;
+      box-shadow: 5px 5px 10px #d1d9e6, -5px -5px 10px #ffffff;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tab-lembaga .btn.active { color: #1a237e; box-shadow: inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff; }
+    .module-container { display: none; }
+    .module-container.active { display: block; }
+
+    .nm-card {
+      background: #eef2f7;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 6px 6px 12px #d1d9e6, -6px -6px 12px #ffffff;
+      margin-bottom: 20px;
+    }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { font-weight: 600; font-size: 13px; color: #718096; display: block; margin-bottom: 6px; }
+    input, select {
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      font-size: 15px;
+      width: 100%;
+      outline: none;
+      background: #eef2f7;
+      box-shadow: inset 3px 3px 6px #d1d9e6, inset -3px -3px 6px #ffffff;
+      color: #2d3748;
+      font-weight: 500;
+    }
+    .btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      background: #eef2f7;
+      box-shadow: 4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff;
+      color: #4a5568;
+      transition: 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:active { box-shadow: inset 3px 3px 6px #d1d9e6, inset -3px -3px 6px #ffffff; }
+    .btn-primary { color: #1a237e; }
+    .btn-accent { color: #2e7d32; }
+    .btn-danger { color: #e53e3e; }
+    .btn-block-simpan {
+      background: #1a237e;
+      color: white;
+      box-shadow: 4px 4px 10px rgba(26,35,126,0.2), -4px -4px 10px #ffffff;
+      border: none;
+      padding: 16px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+      transition: 0.2s;
+    }
+    .btn-block-simpan:active { box-shadow: inset 3px 3px 6px rgba(0,0,0,0.2); }
+    .status-box {
+      margin-top: 15px;
+      font-weight: 600;
+      text-align: center;
+      padding: 12px;
+      border-radius: 12px;
+      display: none;
+      font-size: 14px;
+    }
+    .status-success { display: block !important; background: #e8f5e9; color: #2e7d32; }
+    .status-error { display: block !important; background: #ffebee; color: #e53e3e; }
+    .arab-text { font-family: 'Amiri', serif; direction: rtl; text-align: right; }
+
+    .jadwal-container { display: flex; flex-direction: column; gap: 18px; margin-top: 10px; }
+    .guru-card {
+      background: #eef2f7;
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 6px 6px 12px #d1d9e6, -6px -6px 12px #ffffff;
+    }
+    .meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .jam-tag { font-size: 11px; font-weight: 700; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; }
+    .kelas-tag { font-size: 15px; font-weight: 700; color: #4a5568; }
+    .info-row { margin-bottom: 15px; }
+    .mapel-lbl { color: #a0aec0; font-size: 14px; margin-bottom: 2px; }
+    .guru-lbl { color: #1a237e; font-size: 22px; font-weight: 700; }
+    .btn-group-hia { display: flex; gap: 10px; }
+    .btn-hia {
+      flex: 1;
+      height: 46px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 15px;
+      background: #eef2f7;
+      box-shadow: 3px 3px 6px #d1d9e6, -3px -3px 6px #ffffff;
+      color: #718096;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .btn-hia.btn-h.active { color: #2e7d32; box-shadow: inset 3px 3px 6px #b8e2b9, inset -3px -3px 6px #ffffff; background: #e8f5e9; }
+    .btn-hia.btn-i.active { color: #dd6b20; box-shadow: inset 3px 3px 6px #fbe9a7, inset -3px -3px 6px #ffffff; background: #fffde7; }
+    .btn-hia.btn-a.active { color: #e53e3e; box-shadow: inset 3px 3px 6px #fca5a5, inset -3px -3px 6px #ffffff; background: #ffebee; }
+
+    /* ===== TAB HARI HORIZONTAL ===== */
+    .hari-tabs-container {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 6px;
+      background: #eef2f7;
+      border-radius: 16px;
+      box-shadow: inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff;
+      margin-bottom: 20px;
+      flex-wrap: nowrap;
+      -webkit-overflow-scrolling: touch;
+    }
+    .hari-tab-btn {
+      background: #eef2f7;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      color: #718096;
+      box-shadow: 4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff;
+      transition: 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hari-tab-btn.active {
+      color: #1a237e;
+      box-shadow: inset 3px 3px 6px #d1d9e6, inset -3px -3px 6px #ffffff;
+    }
+    .hari-tab-btn.hari-ini {
+      background: #e8f5e9;
+      color: #2e7d32;
+      font-weight: 800;
+    }
+    .hari-tab-btn.hari-libur-tab {
+      color: #a0aec0;
+      opacity: 0.7;
+    }
+    .hari-content-panel {
+      display: none;
+    }
+    .hari-content-panel.active {
+      display: block;
+    }
+    .hari-libur {
+      padding: 16px;
+      text-align: center;
+      color: #a0aec0;
+      font-weight: 600;
+    }
+
+    /* Rekap Tabel */
+    .table-container { overflow-x: auto; margin-top: 10px; padding: 5px; }
+    .table-container table { width: 100%; border-collapse: separate; border-spacing: 0 10px; min-width: 450px; }
+    .table-container th { padding: 10px 12px; text-align: left; font-size: 12px; color: #a0aec0; font-weight: 600; text-transform: uppercase; }
+    .table-container td { padding: 14px 12px; background: #eef2f7; font-size: 14px; color: #2d3748; }
+    .table-container td:first-child { border-radius: 12px 0 0 12px; box-shadow: 4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff; }
+    .table-container td:nth-child(2), .table-container td:nth-child(3), .table-container td:nth-child(4), .table-container td:nth-child(5) { box-shadow: 0 4px 8px #d1d9e6, 0 -4px 8px #ffffff; }
+    .table-container td:last-child { border-radius: 0 12px 12px 0; box-shadow: 4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff; }
+
+    /* Edit Jadwal */
+    .edit-card {
+      background: #eef2f7;
+      border-radius: 16px;
+      padding: 15px;
+      box-shadow: inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff;
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .edit-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .edit-input { padding: 10px; font-size: 14px; border-radius: 8px; box-shadow: 3px 3px 6px #d1d9e6, -3px -3px 6px #ffffff; border: none; background: #eef2f7; flex: 1; }
+    .btn-delete-row { background: #ffebee; color: #e53e3e; border: none; border-radius: 8px; font-weight: bold; width: 40px; cursor: pointer; box-shadow: 2px 2px 5px #d1d9e6, -2px -2px 5px #ffffff; }
+    .master-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
+
+    @media (max-width: 480px) {
+      .header h1 { font-size: 1rem; }
+      .guru-lbl { font-size: 18px; }
+      .hari-tab-btn { font-size: 11px; padding: 8px 12px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1><i class="fas fa-book-open"></i> Manajemen Jadwal & Absensi</h1>
+    <div class="sub"><span class="badge">Terintegrasi</span></div>
+  </div>
+
+  <!-- Tab Lembaga -->
+  <div class="tab-lembaga">
+    <button class="btn active" data-module="mi"><i class="fas fa-school"></i> MI Miftahul Ulum</button>
+    <button class="btn" data-module="mtsd"><i class="fas fa-mosque"></i> MTsD</button>
+  </div>
+
+  <!-- MODUL MI -->
+  <div id="module-mi" class="module-container active">
+    <div class="nm-card" style="box-shadow:9px 9px 16px #d1d9e6, -9px -9px 16px #ffffff; text-align:center; padding:12px; margin-bottom:16px;">
+      <h2 style="font-size:1.2rem; color:#2d3748;"><i class="fas fa-calendar-alt"></i> MI Miftahul Ulum</h2>
+    </div>
+
+    <!-- Tab Bar MI -->
+    <div class="tab-bar" style="display:flex; gap:8px; margin-bottom:20px; background:#eef2f7; padding:6px; border-radius:16px; box-shadow:inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff; overflow-x:auto;">
+      <button class="btn mi-tab-btn active" data-tab="absen"><i class="fas fa-pen"></i> Absen Harian</button>
+      <button class="btn mi-tab-btn" data-tab="rekap"><i class="fas fa-chart-bar"></i> Rekap Bulanan</button>
+      <button class="btn mi-tab-btn" data-tab="pengaturan"><i class="fas fa-cog"></i> Pengaturan</button>
+    </div>
+
+    <!-- Panel Absen MI -->
+    <div id="mi-panel-absen" class="panel" style="display:block;">
+      <div class="nm-card">
+        <div class="form-group">
+          <label>📅 Tanggal Operasional</label>
+          <input type="date" id="mi-tanggal">
+        </div>
+        <button class="btn btn-accent" id="mi-btnHariIni" style="width:100%;">📅 Pakai Tanggal Hari Ini</button>
+      </div>
+      <div id="mi-infoJadwal" style="font-size:13px; font-weight:600; color:#718096; text-align:center; margin-bottom:15px; padding:5px;">Pilih tanggal untuk melihat jadwal.</div>
+      <!-- Tabs Hari Horizontal -->
+      <div class="hari-tabs-container" id="mi-hariTabs"></div>
+      <!-- Panel Konten Hari -->
+      <div id="mi-hariContentPanels"></div>
+      <div class="master-actions" id="mi-areaAksiSimpan" style="display:none; margin-top:20px;">
+        <button class="btn-block-simpan" id="mi-btnSimpan">💾 Simpan Absensi</button>
+        <button class="btn btn-danger" id="mi-btnResetPilihan" style="margin-top:10px; box-shadow:4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff;">🔄 Reset Pilihan Hari Ini</button>
+      </div>
+      <div id="mi-status" class="status-box"></div>
+    </div>
+
+    <!-- Panel Rekap MI -->
+    <div id="mi-panel-rekap" class="panel" style="display:none;">
+      <div class="nm-card">
+        <div class="btn-row" style="margin-bottom:12px;">
+          <div class="form-group" style="flex:2; margin-bottom:0;">
+            <label>Bulan</label>
+            <select id="mi-bulanRekap">
+              <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
+              <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
+              <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
+              <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:1; margin-bottom:0;">
+            <label>Tahun</label>
+            <input type="number" id="mi-tahunRekap" value="2026">
+          </div>
+        </div>
+        <button class="btn btn-primary" id="mi-btnRekap" style="width:100%;">Tampilkan Rekap</button>
+      </div>
+      <div class="table-container" id="mi-tabelRekap"></div>
+      <div class="master-actions">
+        <button class="btn btn-accent" id="mi-btnExportExcel" style="display:none; width:100%;">📥 Export ke Excel (.xlsx)</button>
+        <button class="btn btn-danger" id="mi-btnClearAllDB" style="display:none; width:100%;">⚠️ Kosongkan Semua Database Absen</button>
+      </div>
+    </div>
+
+    <!-- Panel Pengaturan MI -->
+    <div id="mi-panel-pengaturan" class="panel" style="display:none;">
+      <div class="nm-card">
+        <div class="form-group">
+          <label>🛠️ Pilih Hari untuk Diedit</label>
+          <select id="mi-hariPengaturan">
+            <option value="Senin">Senin</option><option value="Selasa">Selasa</option>
+            <option value="Rabu">Rabu</option><option value="Kamis">Kamis</option>
+            <option value="Jumat">Jumat (Libur)</option><option value="Sabtu">Sabtu</option>
+            <option value="Ahad">Ahad</option>
+          </select>
+        </div>
+      </div>
+      <div id="mi-editJadwalContainer"></div>
+      <div class="master-actions">
+        <button class="btn btn-accent" id="mi-btnTambahBaris">➕ Tambah Jadwal Baru</button>
+        <button class="btn-block-simpan" id="mi-btnSimpanPengaturan">💾 Simpan Perubahan Jadwal</button>
+        <button class="btn btn-danger" id="mi-btnResetJadwalDefault" style="margin-top:10px; box-shadow:4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff;">⚠️ Kembalikan ke Jadwal Asli (Default)</button>
+      </div>
+      <div id="mi-statusPengaturan" class="status-box"></div>
+    </div>
+  </div>
+
+  <!-- MODUL MTsD -->
+  <div id="module-mtsd" class="module-container">
+    <div class="nm-card" style="box-shadow:9px 9px 16px #d1d9e6, -9px -9px 16px #ffffff; text-align:center; padding:12px; margin-bottom:16px;">
+      <h2 style="font-size:1.2rem; color:#2d3748;"><i class="fas fa-mosque"></i> MTsD</h2>
+    </div>
+
+    <div class="tab-bar" style="display:flex; gap:8px; margin-bottom:20px; background:#eef2f7; padding:6px; border-radius:16px; box-shadow:inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff; overflow-x:auto;">
+      <button class="btn mtsd-tab-btn active" data-tab="absen"><i class="fas fa-pen"></i> Absen Harian</button>
+      <button class="btn mtsd-tab-btn" data-tab="rekap"><i class="fas fa-chart-bar"></i> Rekap Bulanan</button>
+      <button class="btn mtsd-tab-btn" data-tab="pengaturan"><i class="fas fa-cog"></i> Pengaturan</button>
+    </div>
+
+    <!-- Panel Absen MTsD -->
+    <div id="mtsd-panel-absen" class="panel" style="display:block;">
+      <div class="nm-card">
+        <div class="form-group"><label>📅 Tanggal Operasional</label><input type="date" id="mtsd-tanggal"></div>
+        <button class="btn btn-accent" id="mtsd-btnHariIni" style="width:100%;">📅 Pakai Tanggal Hari Ini</button>
+      </div>
+      <div id="mtsd-infoJadwal" style="font-size:13px; font-weight:600; color:#718096; text-align:center; margin-bottom:15px; padding:5px;">Pilih tanggal untuk melihat jadwal.</div>
+      <!-- Tabs Hari Horizontal -->
+      <div class="hari-tabs-container" id="mtsd-hariTabs"></div>
+      <!-- Panel Konten Hari -->
+      <div id="mtsd-hariContentPanels"></div>
+      <div class="master-actions" id="mtsd-areaAksiSimpan" style="display:none; margin-top:20px;">
+        <button class="btn-block-simpan" id="mtsd-btnSimpan">💾 Simpan Absensi</button>
+        <button class="btn btn-danger" id="mtsd-btnResetPilihan" style="margin-top:10px; box-shadow:4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff;">🔄 Reset Pilihan Hari Ini</button>
+      </div>
+      <div id="mtsd-status" class="status-box"></div>
+    </div>
+
+    <!-- Panel Rekap MTsD -->
+    <div id="mtsd-panel-rekap" class="panel" style="display:none;">
+      <div class="nm-card">
+        <div class="btn-row" style="margin-bottom:12px;">
+          <div class="form-group" style="flex:2; margin-bottom:0;"><label>Bulan</label><select id="mtsd-bulanRekap"><option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option><option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option><option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option><option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option></select></div>
+          <div class="form-group" style="flex:1; margin-bottom:0;"><label>Tahun</label><input type="number" id="mtsd-tahunRekap" value="2026"></div>
+        </div>
+        <button class="btn btn-primary" id="mtsd-btnRekap" style="width:100%;">Tampilkan Rekap</button>
+      </div>
+      <div class="table-container" id="mtsd-tabelRekap"></div>
+      <div class="master-actions">
+        <button class="btn btn-accent" id="mtsd-btnExportExcel" style="display:none; width:100%;">📥 Export ke Excel (.xlsx)</button>
+        <button class="btn btn-danger" id="mtsd-btnClearAllDB" style="display:none; width:100%;">⚠️ Kosongkan Semua Database Absen</button>
+      </div>
+    </div>
+
+    <!-- Panel Pengaturan MTsD -->
+    <div id="mtsd-panel-pengaturan" class="panel" style="display:none;">
+      <div class="nm-card">
+        <div class="form-group"><label>🛠️ Pilih Hari untuk Diedit</label><select id="mtsd-hariPengaturan"><option value="Senin">Senin</option><option value="Selasa">Selasa</option><option value="Rabu">Rabu</option><option value="Kamis">Kamis</option><option value="Jumat">Jumat (Libur)</option><option value="Sabtu">Sabtu</option><option value="Ahad">Ahad</option></select></div>
+      </div>
+      <div id="mtsd-editJadwalContainer"></div>
+      <div class="master-actions">
+        <button class="btn btn-accent" id="mtsd-btnTambahBaris">➕ Tambah Jadwal Baru</button>
+        <button class="btn-block-simpan" id="mtsd-btnSimpanPengaturan">💾 Simpan Perubahan Jadwal</button>
+        <button class="btn btn-danger" id="mtsd-btnResetJadwalDefault" style="margin-top:10px; box-shadow:4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff;">⚠️ Kembalikan ke Jadwal Asli (Default)</button>
+      </div>
+      <div id="mtsd-statusPengaturan" class="status-box"></div>
+    </div>
+  </div>
+
+  <div style="text-align:center; font-size:0.8rem; color:#4a5568; margin-top:30px; border-top:2px dashed #b8c6db; padding-top:16px;">
+    <span style="background:#eef2f7; padding:6px 14px; border-radius:20px; box-shadow:4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff; display:inline-flex; align-items:center; gap:6px;">© 2026 – Terintegrasi & Seragam</span>
+  </div>
+</div>
+
+<script>
+  // === GANTI URL DI BAWAH INI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA ===
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxiybZBZtBEpXblvmqdwCcteBo7V-9sIpnoB97DMts8OaVG_5WiXxcmURItHMbmQuHI/exec';
+
+  function kirimKeGoogleSheet(tanggal, lembaga, records) {
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ tanggal: tanggal, lembaga: lembaga, records: records })
+    })
+    .then(response => response.json())
+    .then(data => console.log('Berhasil sync ke Sheet:', data))
+    .catch(error => console.error('Error sync ke Sheet:', error));
+  }
+
+  // Tarik data absensi dari Google Sheet (biar absen temen ikut kebaca di sini)
+  function tarikDataDariSheet(lembaga) {
+    return fetch(GOOGLE_SCRIPT_URL + '?lembaga=' + encodeURIComponent(lembaga))
+      .then(response => response.json())
+      .then(data => Array.isArray(data) ? data : [])
+      .catch(error => { console.error('Gagal tarik data Sheet:', error); return []; });
+  }
+
+  // Gabungkan data dari Sheet ke data lokal, hindari duplikat, data Sheet jadi acuan utama
+  function gabungkanDataSheet(dataLokal, dataSheet) {
+    const kunci = r => [r.tanggal, r.lembaga, r.kelas, r.jam, r.guru].join('|');
+    const map = {};
+    dataLokal.forEach(r => map[kunci(r)] = r);
+    dataSheet.forEach(r => map[kunci(r)] = r);
+    return Object.values(map);
+  }
+
+  function getLocalISOString() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  // ========================================================================
+  // DATA DEFAULT MI
+  // ========================================================================
+  const defaultDataMI = [
+    { hari: 'Ahad', kelas: 'IV J', jam: 'Jam 1', mapel: 'بداية الهداية', guru: 'الأستاذ إيندرا وحيودي' },
+    { hari: 'Ahad', kelas: 'IV J', jam: 'Jam 2', mapel: 'تنقيح القول', guru: 'الأستاذ بدر الدين' },
+    { hari: 'Senin', kelas: 'IV J', jam: 'Jam 1', mapel: 'مختصر جدا', guru: 'الأستاذ بدر الدين' },
+    { hari: 'Senin', kelas: 'IV J', jam: 'Jam 2', mapel: 'مبادئ الفقهية', guru: 'الأستاذ بدر الدين' },
+    { hari: 'Selasa', kelas: 'IV J', jam: 'Jam 1', mapel: 'التصريف', guru: 'الأستاذ بدر الدين' },
+    { hari: 'Selasa', kelas: 'IV J', jam: 'Jam 2', mapel: 'خلاصة نور اليقين', guru: 'الأستاذ بدر الدين' },
+    { hari: 'Rabu', kelas: 'IV J', jam: 'Jam 1', mapel: 'مختصر جدا', guru: 'الأستاذ بدر الدين' },
+    { hari: 'Rabu', kelas: 'IV J', jam: 'Jam 2', mapel: 'اخلاق للبنات', guru: 'الأستاذ بدر الدين' },
+    { hari: 'Kamis', kelas: 'IV J', jam: 'Jam 1', mapel: 'تمرين ( مختصر جدا )', guru: 'الأستاذ بدر الدين' },
+    { hari: 'Kamis', kelas: 'IV J', jam: 'Jam 2', mapel: 'جواهر الكلامية', guru: 'الأستاذ بدر الدين' },
+    { hari: 'Sabtu', kelas: 'IV J', jam: 'Jam 1', mapel: 'التصريف', guru: 'الأستاذ بدر الدين' },
+    { hari: 'Sabtu', kelas: 'IV J', jam: 'Jam 2', mapel: 'رياض البديعة', guru: 'الأستاذ بدر الدين' },
+    { hari: 'Ahad', kelas: 'IV K', jam: 'Jam 1', mapel: 'تنقيح القول', guru: 'الأستاذ مصباح المنير' },
+    { hari: 'Ahad', kelas: 'IV K', jam: 'Jam 2', mapel: 'بداية الهداية', guru: 'الأستاذ إيندرا وحيودي' },
+    { hari: 'Senin', kelas: 'IV K', jam: 'Jam 1', mapel: 'التصريف', guru: 'الأستاذ مصباح المنير' },
+    { hari: 'Senin', kelas: 'IV K', jam: 'Jam 2', mapel: 'مبادئ الفقهية', guru: 'الأستاذ مصباح المنير' },
+    { hari: 'Selasa', kelas: 'IV K', jam: 'Jam 1', mapel: 'مختصر جدا', guru: 'الأستاذ مصباح المنير' },
+    { hari: 'Selasa', kelas: 'IV K', jam: 'Jam 2', mapel: 'خلاصة نور اليقين', guru: 'الأستاذ مصباح المنير' },
+    { hari: 'Rabu', kelas: 'IV K', jam: 'Jam 1', mapel: 'مختصر جدا', guru: 'الأستاذ مصباح المنير' },
+    { hari: 'Rabu', kelas: 'IV K', jam: 'Jam 2', mapel: 'اخلاق للبنات', guru: 'الأستاذ مصباح المنير' },
+    { hari: 'Kamis', kelas: 'IV K', jam: 'Jam 1', mapel: 'تمرين ( مختصر جدا )', guru: 'الأستاذ مصباح المنير' },
+    { hari: 'Kamis', kelas: 'IV K', jam: 'Jam 2', mapel: 'جواهر الكلامية', guru: 'الأستاذ مصباح المنير' },
+    { hari: 'Sabtu', kelas: 'IV K', jam: 'Jam 1', mapel: 'التصريف', guru: 'الأستاذ مصباح المنير' },
+    { hari: 'Sabtu', kelas: 'IV K', jam: 'Jam 2', mapel: 'رياض البديعة', guru: 'الأستاذ مصباح المنير' },
+    { hari: 'Ahad', kelas: 'IV L', jam: 'Jam 1', mapel: 'مختصر جدا', guru: 'الأستاذ حاري يوديانطا' },
+    { hari: 'Ahad', kelas: 'IV L', jam: 'Jam 2', mapel: 'مبادئ الفقهية', guru: 'الأستاذ حاري يوديانطا' },
+    { hari: 'Senin', kelas: 'IV L', jam: 'Jam 1', mapel: 'التصريف', guru: 'الأستاذ حاري يوديانطا' },
+    { hari: 'Senin', kelas: 'IV L', jam: 'Jam 2', mapel: 'اخلاق للبنات', guru: 'الأستاذ حاري يوديانطا' },
+    { hari: 'Selasa', kelas: 'IV L', jam: 'Jam 1', mapel: 'خلاصة نور اليقين', guru: 'الأستاذ حاري يوديانطا' },
+    { hari: 'Selasa', kelas: 'IV L', jam: 'Jam 2', mapel: 'تنقيح القول', guru: 'الأستاذ حاري يوديانطا' },
+    { hari: 'Rabu', kelas: 'IV L', jam: 'Jam 1', mapel: 'مختصر جدا', guru: 'الأستاذ حاري يوديانطا' },
+    { hari: 'Rabu', kelas: 'IV L', jam: 'Jam 2', mapel: 'بداية الهداية', guru: 'الأستاذ إيندرا وحيودي' },
+    { hari: 'Kamis', kelas: 'IV L', jam: 'Jam 1', mapel: 'تمرين ( مختصر جدا )', guru: 'الأستاذ حاري يوديانطا' },
+    { hari: 'Kamis', kelas: 'IV L', jam: 'Jam 2', mapel: 'جواهر الكلامية', guru: 'الأستاذ حاري يوديانطا' },
+    { hari: 'Sabtu', kelas: 'IV L', jam: 'Jam 1', mapel: 'التصريف', guru: 'الأستاذ حاري يوديانطا' },
+    { hari: 'Sabtu', kelas: 'IV L', jam: 'Jam 2', mapel: 'رياض البديعة', guru: 'الأستاذ حاري يوديانطا' },
+    { hari: 'Ahad', kelas: 'IV M', jam: 'Jam 1', mapel: 'مختصر جدا', guru: 'الأستاذ محمد خليلي' },
+    { hari: 'Ahad', kelas: 'IV M', jam: 'Jam 2', mapel: 'مبادئ الفقهية', guru: 'الأستاذ محمد خليلي' },
+    { hari: 'Senin', kelas: 'IV M', jam: 'Jam 1', mapel: 'التصريف', guru: 'الأستاذ محمد خليلي' },
+    { hari: 'Senin', kelas: 'IV M', jam: 'Jam 2', mapel: 'بداية الهداية', guru: 'الأستاذ أحمد ريحان' },
+    { hari: 'Selasa', kelas: 'IV M', jam: 'Jam 1', mapel: 'تنقيح القول', guru: 'الأستاذ محمد خليلي' },
+    { hari: 'Selasa', kelas: 'IV M', jam: 'Jam 2', mapel: 'خلاصة نور اليقين', guru: 'الأستاذ محمد خليلي' },
+    { hari: 'Rabu', kelas: 'IV M', jam: 'Jam 1', mapel: 'مختصر جدا', guru: 'الأستاذ محمد خليلي' },
+    { hari: 'Rabu', kelas: 'IV M', jam: 'Jam 2', mapel: 'جواهر الكلامية', guru: 'الأستاذ محمد خليلي' },
+    { hari: 'Kamis', kelas: 'IV M', jam: 'Jam 1', mapel: 'تمرين ( مختصر جدا )', guru: 'الأستاذ محمد خليلي' },
+    { hari: 'Kamis', kelas: 'IV M', jam: 'Jam 2', mapel: 'اخلاق للبنات', guru: 'الأستاذ محمد خليلي' },
+    { hari: 'Sabtu', kelas: 'IV M', jam: 'Jam 1', mapel: 'التصريف', guru: 'الأستاذ محمد خليلي' },
+    { hari: 'Sabtu', kelas: 'IV M', jam: 'Jam 2', mapel: 'رياض البديعة', guru: 'الأستاذ محمد خليلي' },
+    { hari: 'Ahad', kelas: 'IV N', jam: 'Jam 1', mapel: 'مختصر جدا', guru: 'الأستاذ علي مكي' },
+    { hari: 'Ahad', kelas: 'IV N', jam: 'Jam 2', mapel: 'اخلاق للبنات', guru: 'الأستاذ علي مكي' },
+    { hari: 'Senin', kelas: 'IV N', jam: 'Jam 1', mapel: 'بداية الهداية', guru: 'الأستاذ خير الأمم' },
+    { hari: 'Senin', kelas: 'IV N', jam: 'Jam 2', mapel: 'مبادئ الفقهية', guru: 'الأستاذ علي مكي' },
+    { hari: 'Selasa', kelas: 'IV N', jam: 'Jam 1', mapel: 'التصريف', guru: 'الأستاذ علي مكي' },
+    { hari: 'Selasa', kelas: 'IV N', jam: 'Jam 2', mapel: 'تمرين ( مختصر جدا )', guru: 'الأستاذ علي مكي' },
+    { hari: 'Rabu', kelas: 'IV N', jam: 'Jam 1', mapel: 'تنقيح القول', guru: 'الأستاذ إيندرا وحيودي' },
+    { hari: 'Rabu', kelas: 'IV N', jam: 'Jam 2', mapel: 'خلاصة نور اليقين', guru: 'الأستاذ علي مكي' },
+    { hari: 'Kamis', kelas: 'IV N', jam: 'Jam 1', mapel: 'مختصر جدا', guru: 'الأستاذ علي مكي' },
+    { hari: 'Kamis', kelas: 'IV N', jam: 'Jam 2', mapel: 'جواهر الكلامية', guru: 'الأستاذ علي مكي' },
+    { hari: 'Sabtu', kelas: 'IV N', jam: 'Jam 1', mapel: 'التصريف', guru: 'الأستاذ علي مكي' },
+    { hari: 'Sabtu', kelas: 'IV N', jam: 'Jam 2', mapel: 'رياض البديعة', guru: 'الأستاذ علي مكي' },
+    { hari: 'Ahad', kelas: 'V G', jam: 'Jam 1', mapel: 'عقود للجين', guru: 'الأستاذ محمد شرطا' },
+    { hari: 'Ahad', kelas: 'V G', jam: 'Jam 2', mapel: 'الاربعين النواوية', guru: 'الأستاذ خير الأمم' },
+    { hari: 'Senin', kelas: 'V G', jam: 'Jam 1', mapel: 'العصفورية', guru: 'الأستاذ بخاري مسلم' },
+    { hari: 'Senin', kelas: 'V G', jam: 'Jam 2', mapel: 'الامثلة التصريفية', guru: 'الأستاذ خير الأمم' },
+    { hari: 'Selasa', kelas: 'V G', jam: 'Jam 1', mapel: 'هداية الاذكياء', guru: 'الأستاذ بهاء الدين' },
+    { hari: 'Selasa', kelas: 'V G', jam: 'Jam 2', mapel: 'قواعد الاعلال', guru: 'الأستاذ خير الأمم' },
+    { hari: 'Rabu', kelas: 'V G', jam: 'Jam 1', mapel: 'فتح القريب', guru: 'الأستاذ خير الأمم' },
+    { hari: 'Rabu', kelas: 'V G', jam: 'Jam 2', mapel: 'قطر الغيث', guru: 'الأستاذ خير الأمم' },
+    { hari: 'Kamis', kelas: 'V G', jam: 'Jam 1', mapel: 'فتح القريب', guru: 'الأستاذ خير الأمم' },
+    { hari: 'Kamis', kelas: 'V G', jam: 'Jam 2', mapel: 'مختصر جدا', guru: 'الأستاذ خير الأمم' },
+    { hari: 'Sabtu', kelas: 'V G', jam: 'Jam 1', mapel: 'مختصر جدا', guru: 'الأستاذ خير الأمم' },
+    { hari: 'Sabtu', kelas: 'V G', jam: 'Jam 2', mapel: 'نظم العوامل', guru: 'الأستاذ خير الأمم' },
+    { hari: 'Ahad', kelas: 'V H', jam: 'Jam 1', mapel: 'الاربعين النواوية', guru: 'الأستاذ أحمد ريحان' },
+    { hari: 'Ahad', kelas: 'V H', jam: 'Jam 2', mapel: 'عقود للجين', guru: 'الأستاذ محمد شرطا' },
+    { hari: 'Senin', kelas: 'V H', jam: 'Jam 1', mapel: 'الامثلة التصريفية', guru: 'الأستاذ أحمد ريحان' },
+    { hari: 'Senin', kelas: 'V H', jam: 'Jam 2', mapel: 'العصفورية', guru: 'الأستاذ بخاري مسلم' },
+    { hari: 'Selasa', kelas: 'V H', jam: 'Jam 1', mapel: 'قواعد الاعلال', guru: 'الأستاذ أحمد ريحان' },
+    { hari: 'Selasa', kelas: 'V H', jam: 'Jam 2', mapel: 'هداية الاذكياء', guru: 'الأستاذ بهاء الدين' },
+    { hari: 'Rabu', kelas: 'V H', jam: 'Jam 1', mapel: 'فتح القريب', guru: 'الأستاذ أحمد ريحان' },
+    { hari: 'Rabu', kelas: 'V H', jam: 'Jam 2', mapel: 'قطر الغيث', guru: 'الأستاذ أحمد ريحان' },
+    { hari: 'Kamis', kelas: 'V H', jam: 'Jam 1', mapel: 'فتح القريب', guru: 'الأستاذ أحمد ريحان' },
+    { hari: 'Kamis', kelas: 'V H', jam: 'Jam 2', mapel: 'مختصر جدا', guru: 'الأستاذ أحمد ريحان' },
+    { hari: 'Sabtu', kelas: 'V H', jam: 'Jam 1', mapel: 'مختصر جدا', guru: 'الأستاذ أحمد ريحان' },
+    { hari: 'Sabtu', kelas: 'V H', jam: 'Jam 2', mapel: 'نظم العوامل', guru: 'الأستاذ أحمد ريحان' },
+    { hari: 'Ahad', kelas: 'V I', jam: 'Jam 1', mapel: 'الامثلة التصريفية', guru: 'الأستاذ محمد شرطا' },
+    { hari: 'Ahad', kelas: 'V I', jam: 'Jam 2', mapel: 'العصفورية', guru: 'الأستاذ بخاري مسلم' },
+    { hari: 'Senin', kelas: 'V I', jam: 'Jam 1', mapel: 'فتح القريب', guru: 'الأستاذ محمد شرطا' },
+    { hari: 'Senin', kelas: 'V I', jam: 'Jam 2', mapel: 'مختصر جدا', guru: 'الأستاذ محمد شرطا' },
+    { hari: 'Selasa', kelas: 'V I', jam: 'Jam 1', mapel: 'الاربعين النواوية', guru: 'الأستاذ محمد شرطا' },
+    { hari: 'Selasa', kelas: 'V I', jam: 'Jam 2', mapel: 'عقود للجين', guru: 'الأستاذ محمد شرطا' },
+    { hari: 'Rabu', kelas: 'V I', jam: 'Jam 1', mapel: 'فتح القريب', guru: 'الأستاذ محمد شرطا' },
+    { hari: 'Rabu', kelas: 'V I', jam: 'Jam 2', mapel: 'قطر الغيث', guru: 'الأستاذ محمد شرطا' },
+    { hari: 'Kamis', kelas: 'V I', jam: 'Jam 1', mapel: 'قواعد الاعلال', guru: 'الأستاذ محمد شرطا' },
+    { hari: 'Kamis', kelas: 'V I', jam: 'Jam 2', mapel: 'هداية الاذكياء', guru: 'الأستاذ بهاء الدين' },
+    { hari: 'Sabtu', kelas: 'V I', jam: 'Jam 1', mapel: 'مختصر جدا', guru: 'الأستاذ محمد شرطا' },
+    { hari: 'Sabtu', kelas: 'V I', jam: 'Jam 2', mapel: 'نظم العوامل', guru: 'الأستاذ محمد شرطا' },
+    { hari: 'Ahad', kelas: 'V J', jam: 'Jam 1', mapel: 'العصفورية', guru: 'الأستاذ بخاري مسلم' },
+    { hari: 'Ahad', kelas: 'V J', jam: 'Jam 2', mapel: 'الامثلة التصريفية', guru: 'الأستاذ علي وفى' },
+    { hari: 'Senin', kelas: 'V J', jam: 'Jam 1', mapel: 'فتح القريب', guru: 'الأستاذ علي وفى' },
+    { hari: 'Senin', kelas: 'V J', jam: 'Jam 2', mapel: 'الاربعين النواوية', guru: 'الأستاذ علي وفى' },
+    { hari: 'Selasa', kelas: 'V J', jam: 'Jam 1', mapel: 'عقود للجين', guru: 'الأستاذ محمد شرطا' },
+    { hari: 'Selasa', kelas: 'V J', jam: 'Jam 2', mapel: 'مختصر جدا', guru: 'الأستاذ علي وفى' },
+    { hari: 'Rabu', kelas: 'V J', jam: 'Jam 1', mapel: 'قواعد الاعلال', guru: 'الأستاذ علي وفى' },
+    { hari: 'Rabu', kelas: 'V J', jam: 'Jam 2', mapel: 'قطر الغيث', guru: 'الأستاذ علي وفى' },
+    { hari: 'Kamis', kelas: 'V J', jam: 'Jam 1', mapel: 'مختصر جدا', guru: 'الأستاذ علي وفى' },
+    { hari: 'Kamis', kelas: 'V J', jam: 'Jam 2', mapel: 'فتح القريب', guru: 'الأستاذ علي وفى' },
+    { hari: 'Sabtu', kelas: 'V J', jam: 'Jam 1', mapel: 'هداية الاذكياء', guru: 'الأستاذ بهاء الدين' },
+    { hari: 'Sabtu', kelas: 'V J', jam: 'Jam 2', mapel: 'نظم العوامل', guru: 'الأستاذ علي وفى' },
+    { hari: 'Ahad', kelas: 'VI G', jam: 'Jam 1', mapel: 'شرح الورقات', guru: 'الأستاذ نور عارفين' },
+    { hari: 'Ahad', kelas: 'VI G', jam: 'Jam 2', mapel: 'نظم العريطى', guru: 'الأستاذ نور عارفين' },
+    { hari: 'Senin', kelas: 'VI G', jam: 'Jam 1', mapel: 'كفاية العوام', guru: 'الأستاذ نور عارفين' },
+    { hari: 'Senin', kelas: 'VI G', jam: 'Jam 2', mapel: 'فتح القريب', guru: 'الأستاذ نور عارفين' },
+    { hari: 'Selasa', kelas: 'VI G', jam: 'Jam 1', mapel: 'تسهيل نيل المعاني', guru: 'الأستاذ نور عارفين' },
+    { hari: 'Selasa', kelas: 'VI G', jam: 'Jam 2', mapel: 'تفسير يس', guru: 'الأستاذ نور عارفين' },
+    { hari: 'Rabu', kelas: 'VI G', jam: 'Jam 1', mapel: 'فتح القريب', guru: 'الأستاذ نور عارفين' },
+    { hari: 'Rabu', kelas: 'VI G', jam: 'Jam 2', mapel: 'قاعدة كيلاني عزي', guru: 'الأستاذ نور عارفين' },
+    { hari: 'Kamis', kelas: 'VI G', jam: 'Jam 1', mapel: 'عقود للجين', guru: 'الأستاذ محمد محيي' },
+    { hari: 'Kamis', kelas: 'VI G', jam: 'Jam 2', mapel: 'متن الزبد', guru: 'الأستاذ نور عارفين' },
+    { hari: 'Sabtu', kelas: 'VI G', jam: 'Jam 1', mapel: 'منح السنية', guru: 'الأستاذ نور حافي' },
+    { hari: 'Sabtu', kelas: 'VI G', jam: 'Jam 2', mapel: 'بلوغ المرام', guru: 'الأستاذ نور عارفين' },
+    { hari: 'Ahad', kelas: 'VI H', jam: 'Jam 1', mapel: 'نظم العريطى', guru: 'الأستاذ وحيودي' },
+    { hari: 'Ahad', kelas: 'VI H', jam: 'Jam 2', mapel: 'منح السنية', guru: 'الأستاذ نور حافي' },
+    { hari: 'Senin', kelas: 'VI H', jam: 'Jam 1', mapel: 'فتح القريب', guru: 'الأستاذ وحيودي' },
+    { hari: 'Senin', kelas: 'VI H', jam: 'Jam 2', mapel: 'بلوغ المرام', guru: 'الأستاذ وحيودي' },
+    { hari: 'Selasa', kelas: 'VI H', jam: 'Jam 1', mapel: 'شرح الورقات', guru: 'الأستاذ وحيودي' },
+    { hari: 'Selasa', kelas: 'VI H', jam: 'Jam 2', mapel: 'تفسير يس', guru: 'الأستاذ وحيودي' },
+    { hari: 'Rabu', kelas: 'VI H', jam: 'Jam 1', mapel: 'تسهيل نيل المعاني', guru: 'الأستاذ وحيودي' },
+    { hari: 'Rabu', kelas: 'VI H', jam: 'Jam 2', mapel: 'متن الزبد', guru: 'الأستاذ وحيودي' },
+    { hari: 'Kamis', kelas: 'VI H', jam: 'Jam 1', mapel: 'قاعدة كيلاني عزي', guru: 'الأستاذ وحيودي' },
+    { hari: 'Kamis', kelas: 'VI H', jam: 'Jam 2', mapel: 'عقود للجين', guru: 'الأستاذ محمد محيي' },
+    { hari: 'Sabtu', kelas: 'VI H', jam: 'Jam 1', mapel: 'كفاية العوام', guru: 'الأستاذ وحيودي' },
+    { hari: 'Sabtu', kelas: 'VI H', jam: 'Jam 2', mapel: 'فتح القريب', guru: 'الأستاذ وحيودي' },
+    { hari: 'Ahad', kelas: 'VI I', jam: 'Jam 1', mapel: 'منح السنية', guru: 'الأستاذ نور حافي' },
+    { hari: 'Ahad', kelas: 'VI I', jam: 'Jam 2', mapel: 'تسهيل نيل المعاني', guru: 'الأستاذ بسطامي مسلم' },
+    { hari: 'Senin', kelas: 'VI I', jam: 'Jam 1', mapel: 'قاعدة كيلاني عزي', guru: 'الأستاذ بسطامي مسلم' },
+    { hari: 'Senin', kelas: 'VI I', jam: 'Jam 2', mapel: 'بلوغ المرام', guru: 'الأستاذ بسطامي مسلم' },
+    { hari: 'Selasa', kelas: 'VI I', jam: 'Jam 1', mapel: 'شرح الورقات', guru: 'الأستاذ بسطامي مسلم' },
+    { hari: 'Selasa', kelas: 'VI I', jam: 'Jam 2', mapel: 'عقود للجين', guru: 'الأستاذ محمد حسين' },
+    { hari: 'Rabu', kelas: 'VI I', jam: 'Jam 1', mapel: 'نظم العريطى', guru: 'الأستاذ بسطامي مسلم' },
+    { hari: 'Rabu', kelas: 'VI I', jam: 'Jam 2', mapel: 'تفسير يس', guru: 'الأستاذ بسطامي مسلم' },
+    { hari: 'Kamis', kelas: 'VI I', jam: 'Jam 1', mapel: 'فتح القريب', guru: 'الأستاذ بسطامي مسلم' },
+    { hari: 'Kamis', kelas: 'VI I', jam: 'Jam 2', mapel: 'متن الزبد', guru: 'الأستاذ بسطامي مسلم' },
+    { hari: 'Sabtu', kelas: 'VI I', jam: 'Jam 1', mapel: 'كفاية العوام', guru: 'الأستاذ بسطامي مسلم' },
+    { hari: 'Sabtu', kelas: 'VI I', jam: 'Jam 2', mapel: 'فتح القريب', guru: 'الأستاذ بسطامي مسلم' },
+    { hari: 'Ahad', kelas: 'VI J', jam: 'Jam 1', mapel: 'تسهيل نيل المعاني', guru: 'الأستاذ عبد المجيب' },
+    { hari: 'Ahad', kelas: 'VI J', jam: 'Jam 2', mapel: 'متن الزبد', guru: 'الأستاذ عبد المجيب' },
+    { hari: 'Senin', kelas: 'VI J', jam: 'Jam 1', mapel: 'قاعدة كيلاني عزي', guru: 'الأستاذ عبد المجيب' },
+    { hari: 'Senin', kelas: 'VI J', jam: 'Jam 2', mapel: 'فتح القريب', guru: 'الأستاذ عبد المجيب' },
+    { hari: 'Selasa', kelas: 'VI J', jam: 'Jam 1', mapel: 'عقود للجين', guru: 'الأستاذ محمد حسين' },
+    { hari: 'Selasa', kelas: 'VI J', jam: 'Jam 2', mapel: 'بلوغ المرام', guru: 'الأستاذ عبد المجيب' },
+    { hari: 'Rabu', kelas: 'VI J', jam: 'Jam 1', mapel: 'فتح القريب', guru: 'الأستاذ عبد المجيب' },
+    { hari: 'Rabu', kelas: 'VI J', jam: 'Jam 2', mapel: 'نظم العريطى', guru: 'الأستاذ عبد المجيب' },
+    { hari: 'Kamis', kelas: 'VI J', jam: 'Jam 1', mapel: 'كفاية العوام', guru: 'الأستاذ عبد المجيب' },
+    { hari: 'Kamis', kelas: 'VI J', jam: 'Jam 2', mapel: 'تفسير يس', guru: 'الأستاذ عبد المجيب' },
+    { hari: 'Sabtu', kelas: 'VI J', jam: 'Jam 1', mapel: 'شرح الورقات', guru: 'الأستاذ عبد المجيب' },
+    { hari: 'Sabtu', kelas: 'VI J', jam: 'Jam 2', mapel: 'منح السنية', guru: 'الأستاذ نور حافي' }
+  ];
+
+  // ========================================================================
+  // DATA DEFAULT MTsD
+  // ========================================================================
+  const jadwalDefaultMTsD = {
+    'Senin': [
+      { kelas: 'الأول (د)', jam: 'Jam 1', mapel: 'بلوغ المرام', guru: 'الأستاذ محمد شرطا' },
+      { kelas: 'الأول (د)', jam: 'Jam 2', mapel: 'منحة المغيث', guru: 'الأستاذ محمد طيب' },
+      { kelas: 'الأول (هـ)', jam: 'Jam 1', mapel: 'بلوغ المرام', guru: 'الأستاذ محمد شرطا' },
+      { kelas: 'الأول (هـ)', jam: 'Jam 2', mapel: 'منحة المغيث', guru: 'الأستاذ محمد طيب' },
+      { kelas: 'الأول (ف)', jam: 'Jam 1', mapel: 'متن الزبد', guru: 'الأستاذ عبد الرحمن' },
+      { kelas: 'الأول (ف)', jam: 'Jam 2', mapel: 'شرح أم الراهين', guru: 'الأستاذ عبد الرحمن' },
+      { kelas: 'الثاني (د)', jam: 'Jam 1', mapel: 'تاريخ الخلفاء الراشدين', guru: 'الأستاذ حمدي مبروري' },
+      { kelas: 'الثاني (د)', jam: 'Jam 2', mapel: 'نظم المقصود', guru: 'الأستاذ محمد محيي' },
+      { kelas: 'الثاني (هـ)', jam: 'Jam 1', mapel: 'تاريخ الخلفاء الراشدين', guru: 'الأستاذ حمدي مبروري' },
+      { kelas: 'الثاني (هـ)', jam: 'Jam 2', mapel: 'نظم المقصود', guru: 'الأستاذ محمد محيي' },
+      { kelas: 'الثالث (ج)', jam: 'Jam 1', mapel: 'بلوغ المرام', guru: 'الأستاذ زين الدين' },
+      { kelas: 'الثالث (ج)', jam: 'Jam 2', mapel: 'الفرائد البهية', guru: 'الأستاذ زين الدين' }
+    ],
+    'Selasa': [
+      { kelas: 'الأول (د)', jam: 'Jam 1', mapel: 'فتح القريب', guru: 'الأستاذ سيف الرجال' },
+      { kelas: 'الأول (د)', jam: 'Jam 2', mapel: 'فتح القريب', guru: 'الأستاذ سيف الرجال' },
+      { kelas: 'الأول (هـ)', jam: 'Jam 1', mapel: 'فتح القريب', guru: 'الأستاذ أحمد فوزي' },
+      { kelas: 'الأول (هـ)', jam: 'Jam 2', mapel: 'فتح القريب', guru: 'الأستاذ أحمد فوزي' },
+      { kelas: 'الأول (ف)', jam: 'Jam 1', mapel: 'لطائف الإشارات', guru: 'الأستاذ محمد طيب' },
+      { kelas: 'الأول (ف)', jam: 'Jam 2', mapel: 'منحة المغيث', guru: 'الأستاذ محمد طيب' },
+      { kelas: 'الثاني (د)', jam: 'Jam 1', mapel: 'كفاية الأتقياء', guru: 'الأستاذ عبد الخالق' },
+      { kelas: 'الثاني (د)', jam: 'Jam 2', mapel: 'تفسير للجلالين', guru: 'الأستاذ زهري معمر' },
+      { kelas: 'الثاني (هـ)', jam: 'Jam 1', mapel: 'شرح أم الراهين', guru: 'الأستاذ إمام ترمذي' },
+      { kelas: 'الثاني (هـ)', jam: 'Jam 2', mapel: 'تفسير للجلالين', guru: 'الأستاذ زهري معمر' },
+      { kelas: 'الثالث (ج)', jam: 'Jam 1', mapel: 'شرح أم الراهين', guru: 'الأستاذ إمام ترمذي' },
+      { kelas: 'الثالث (ج)', jam: 'Jam 2', mapel: 'كفاية الأتقياء', guru: 'الأستاذ عبد الخالق' }
+    ],
+    'Rabu': [
+      { kelas: 'الأول (د)', jam: 'Jam 1', mapel: 'متممة الأجرومية', guru: 'الأستاذ سيف الرجال' },
+      { kelas: 'الأول (د)', jam: 'Jam 2', mapel: 'لطائف الإشارات', guru: 'الأستاذ محمد طيب' },
+      { kelas: 'الأول (هـ)', jam: 'Jam 1', mapel: 'متممة الأجرومية', guru: 'الأستاذ سيف الرجال' },
+      { kelas: 'الأول (هـ)', jam: 'Jam 2', mapel: 'لطائف الإشارات', guru: 'الأستاذ محمد طيب' },
+      { kelas: 'الأول (ف)', jam: 'Jam 1', mapel: 'متممة الأجرومية', guru: 'الأستاذ أحمد معيني' },
+      { kelas: 'الأول (ف)', jam: 'Jam 2', mapel: 'تفسير للجلالين', guru: 'الأستاذ أحمد معيني' },
+      { kelas: 'الثاني (د)', jam: 'Jam 1', mapel: 'فتح القريب', guru: 'الأستاذ أحمد فوزي' },
+      { kelas: 'الثاني (د)', jam: 'Jam 2', mapel: 'علم الفرائض', guru: 'الأستاذ محمد محيي' },
+      { kelas: 'الثاني (هـ)', jam: 'Jam 1', mapel: 'كفاية الأتقياء', guru: 'الأستاذ عبد الخالق' },
+      { kelas: 'الثاني (هـ)', jam: 'Jam 2', mapel: 'علم الفرائض', guru: 'الأستاذ محمد محيي' },
+      { kelas: 'الثالث (ج)', jam: 'Jam 1', mapel: 'ستين مسئلة', guru: 'الأستاذ عبد الخالق' },
+      { kelas: 'الثالث (ج)', jam: 'Jam 2', mapel: 'فتح القريب', guru: 'الأستاذ أحمد فوزي' }
+    ],
+    'Kamis': [
+      { kelas: 'الأول (د)', jam: 'Jam 1', mapel: 'رسالة أهل السنة', guru: 'الأستاذ مخلصين لقمان' },
+      { kelas: 'الأول (د)', jam: 'Jam 2', mapel: 'متن الزبد', guru: 'الأستاذ نور حافي' },
+      { kelas: 'الأول (هـ)', jam: 'Jam 1', mapel: 'رسالة أهل السنة', guru: 'الأستاذ الحاج صالح أمر الله' },
+      { kelas: 'الأول (هـ)', jam: 'Jam 2', mapel: 'متن الزبد', guru: 'الأستاذ نور حافي' },
+      { kelas: 'الأول (ف)', jam: 'Jam 1', mapel: 'فتح القريب', guru: 'الأستاذ عبد الرحمن' },
+      { kelas: 'الأول (ف)', jam: 'Jam 2', mapel: 'فتح القريب', guru: 'الأستاذ عبد الرحمن' },
+      { kelas: 'الثاني (د)', jam: 'Jam 1', mapel: 'بلوغ المرام', guru: 'الأستاذ بهاء الدين' },
+      { kelas: 'الثاني (د)', jam: 'Jam 2', mapel: 'الفرائد البهية', guru: 'الأستاذ زين الدين' },
+      { kelas: 'الثاني (هـ)', jam: 'Jam 1', mapel: 'فتح القريب', guru: 'الأستاذ أحمد فوزي' },
+      { kelas: 'الثاني (هـ)', jam: 'Jam 2', mapel: 'الفرائد البهية', guru: 'الأستاذ زين الدين' },
+      { kelas: 'الثالث (ج)', jam: 'Jam 1', mapel: 'فتح القريب', guru: 'الأستاذ أحمد فوزي' },
+      { kelas: 'الثالث (ج)', jam: 'Jam 2', mapel: 'متممة الأجرومية', guru: 'الأستاذ مخلصين لقمان' }
+    ],
+    'Jumat': [],
+    'Sabtu': [
+      { kelas: 'الأول (د)', jam: 'Jam 1', mapel: 'تاريخ الخلفاء الراشدين', guru: 'الأستاذ سيف الرجال' },
+      { kelas: 'الأول (د)', jam: 'Jam 2', mapel: 'تفسير للجلالين', guru: 'الأستاذ محمد طيب' },
+      { kelas: 'الأول (هـ)', jam: 'Jam 1', mapel: 'تاريخ الخلفاء الراشدين', guru: 'الأستاذ سيف الرجال' },
+      { kelas: 'الأول (هـ)', jam: 'Jam 2', mapel: 'تفسير للجلالين', guru: 'الأستاذ محمد طيب' },
+      { kelas: 'الأول (ف)', jam: 'Jam 1', mapel: 'تاريخ الخلفاء الراشدين', guru: 'الأستاذ مخلصين لقمان' },
+      { kelas: 'الأول (ف)', jam: 'Jam 2', mapel: 'رسالة أهل السنة', guru: 'الأستاذ مخلصين لقمان' },
+      { kelas: 'الثاني (د)', jam: 'Jam 1', mapel: 'شرح أم الراهين', guru: 'الأستاذ إمام ترمذي' },
+      { kelas: 'الثاني (د)', jam: 'Jam 2', mapel: 'فتح القريب', guru: 'الأستاذ أحمد فوزي' },
+      { kelas: 'الثاني (هـ)', jam: 'Jam 1', mapel: 'بلوغ المرام', guru: 'الأستاذ بهاء الدين' },
+      { kelas: 'الثاني (هـ)', jam: 'Jam 2', mapel: 'فتح القريب', guru: 'الأستاذ أحمد فوزي' },
+      { kelas: 'الثالث (ج)', jam: 'Jam 1', mapel: 'التبيان في علوم القران', guru: 'الأستاذ بدري منور' },
+      { kelas: 'الثالث (ج)', jam: 'Jam 2', mapel: 'تفسير للجلالين', guru: 'الأستاذ إمام ترمذي' }
+    ],
+    'Ahad': [
+      { kelas: 'الأول (د)', jam: 'Jam 1', mapel: 'كفاية الأتقياء', guru: 'الأستاذ عبد الخالق' },
+      { kelas: 'الأول (د)', jam: 'Jam 2', mapel: 'شرح أم الراهين', guru: 'الأستاذ حسين الجيلاني' },
+      { kelas: 'الأول (هـ)', jam: 'Jam 1', mapel: 'كفاية الأتقياء', guru: 'الأستاذ عبد الخالق' },
+      { kelas: 'الأول (هـ)', jam: 'Jam 2', mapel: 'شرح أم الراهين', guru: 'الأستاذ حسين الجيلاني' },
+      { kelas: 'الأول (ف)', jam: 'Jam 1', mapel: 'كفاية الأتقياء', guru: 'الأستاذ نور حسن' },
+      { kelas: 'الأول (ف)', jam: 'Jam 2', mapel: 'بلوغ المرام', guru: 'الأستاذ مخلصين لقمان' },
+      { kelas: 'الثاني (د)', jam: 'Jam 1', mapel: 'متممة الأجرومية', guru: 'الأستاذ محمد محيي' },
+      { kelas: 'الثاني (د)', jam: 'Jam 2', mapel: 'التبيان في علوم القران', guru: 'الأستاذ زين الدين' },
+      { kelas: 'الثاني (هـ)', jam: 'Jam 1', mapel: 'متممة الأجرومية', guru: 'الأستاذ محمد محيي' },
+      { kelas: 'الثاني (هـ)', jam: 'Jam 2', mapel: 'التبيان في علوم القران', guru: 'الأستاذ زين الدين' },
+      { kelas: 'الثالث (ج)', jam: 'Jam 1', mapel: 'تاريخ الخلفاء الراشدين', guru: 'الأستاذ مخلصين لقمان' },
+      { kelas: 'الثالث (ج)', jam: 'Jam 2', mapel: 'ايضاح المبهم', guru: 'الأستاذ نور حسن' }
+    ]
+  };
+
+  const LIST_HARI = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Ahad'];
+
+  // ========================================================================
+  // MODUL MI
+  // ========================================================================
+  function initModulMI() {
+    const P = 'mi-';
+    const $ = function(id) { return document.getElementById(P + id); };
+
+    let dataAbsensi = [];
+    let jadwalAktif = {};
+    let hariAktifDipilih = 'Senin';
+
+    function loadSemuaData() {
+      const savedAbsen = localStorage.getItem('mi_absenGuru');
+      dataAbsensi = savedAbsen ? JSON.parse(savedAbsen) : [];
+      const savedJadwal = localStorage.getItem('mi_jadwalCustom');
+      if (savedJadwal) {
+        jadwalAktif = JSON.parse(savedJadwal);
+      } else {
+        const grouped = {};
+        defaultDataMI.forEach(item => {
+          if (!grouped[item.hari]) grouped[item.hari] = [];
+          grouped[item.hari].push({ kelas: item.kelas, jam: item.jam, mapel: item.mapel, guru: item.guru });
+        });
+        jadwalAktif = grouped;
+      }
+    }
+
+    function saveDataAbsen() { localStorage.setItem('mi_absenGuru', JSON.stringify(dataAbsensi)); }
+    function saveJadwalCustom() { localStorage.setItem('mi_jadwalCustom', JSON.stringify(jadwalAktif)); }
+
+    function renderHariTabs(tanggal) {
+      const container = $('hariTabs');
+      if (!tanggal) { container.innerHTML = ''; return; }
+      const [y, m, d] = tanggal.split('-');
+      const tgl = new Date(y, m-1, d);
+      const hariIni = LIST_HARI[tgl.getDay() === 0 ? 6 : tgl.getDay() - 1];
+      
+      let html = '';
+      LIST_HARI.forEach((hari) => {
+        const items = jadwalAktif[hari] || [];
+        const isToday = hari === hariIni;
+        const isLibur = items.length === 0;
+        let classes = 'hari-tab-btn';
+        if (isToday) classes += ' hari-ini';
+        if (isLibur) classes += ' hari-libur-tab';
+        if (hariAktifDipilih === hari) classes += ' active';
+        html += `<button class="${classes}" data-hari="${hari}">${hari} <span style="font-size:11px;opacity:0.8;">(${items.length})</span> ${isToday ? '🔆' : ''}</button>`;
+      });
+      container.innerHTML = html;
+
+      container.querySelectorAll('.hari-tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          hariAktifDipilih = this.dataset.hari;
+          container.querySelectorAll('.hari-tab-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          renderKontenHariDipilih(tanggal);
+        });
+      });
+    }
+
+    function renderKontenHariDipilih(tanggal) {
+      const panelContainer = $('hariContentPanels');
+      const existing = dataAbsensi.filter(a => a.tanggal === tanggal);
+      const hari = hariAktifDipilih;
+      const items = jadwalAktif[hari] || [];
+      
+      let html = '';
+      if (items.length === 0) {
+        html = `<div class="hari-content-panel active" data-hari="${hari}"><div class="hari-libur">📌 Libur / Tidak ada jadwal</div></div>`;
+      } else {
+        let cardHtml = `<div class="hari-content-panel active" data-hari="${hari}">`;
+        items.forEach(item => {
+          const match = existing.find(e => e.kelas === item.kelas && e.jam === item.jam && e.guru === item.guru);
+          const activeStatus = match ? match.status : '';
+          cardHtml += `
+          <div class="guru-card" style="margin-bottom:12px;">
+            <div class="meta-row">
+              <div class="jam-tag">${item.jam}</div>
+              <div class="kelas-tag arab-text">${item.kelas}</div>
+            </div>
+            <div class="info-row">
+              <div class="mapel-lbl arab-text">${item.mapel}</div>
+              <div class="guru-lbl arab-text">${item.guru}</div>
+            </div>
+            <div class="btn-group-hia">
+              <button class="btn-hia btn-h ${activeStatus==='H'?'active':''}" data-status="H" data-kelas="${item.kelas}" data-jam="${item.jam}" data-mapel="${item.mapel}" data-guru="${item.guru}">H</button>
+              <button class="btn-hia btn-i ${activeStatus==='I'?'active':''}" data-status="I" data-kelas="${item.kelas}" data-jam="${item.jam}" data-mapel="${item.mapel}" data-guru="${item.guru}">I</button>
+              <button class="btn-hia btn-a ${activeStatus==='A'?'active':''}" data-status="A" data-kelas="${item.kelas}" data-jam="${item.jam}" data-mapel="${item.mapel}" data-guru="${item.guru}">A</button>
+            </div>
+          </div>`;
+        });
+        cardHtml += `</div>`;
+        html = cardHtml;
+      }
+      panelContainer.innerHTML = html;
+
+      panelContainer.querySelectorAll('.btn-hia').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const parent = this.closest('.btn-group-hia');
+          if (this.classList.contains('active')) {
+            this.classList.remove('active');
+          } else {
+            parent.querySelectorAll('.btn-hia').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+          }
+        });
+      });
+    }
+
+    function renderSemuaHari(tanggal, tanpaSync) {
+      const info = $('infoJadwal');
+      if (!tanggal) {
+        info.innerHTML = '⚠️ Pilih tanggal operasional terlebih dahulu.';
+        $('hariTabs').innerHTML = '';
+        $('hariContentPanels').innerHTML = '';
+        return;
+      }
+
+      const [y, m, d] = tanggal.split('-');
+      const tgl = new Date(y, m-1, d);
+      const hariIni = LIST_HARI[tgl.getDay() === 0 ? 6 : tgl.getDay() - 1];
+      info.innerHTML = `🗓️ Jadwal untuk <strong>${tanggal}</strong> — Hari ini: <strong>${hariIni}</strong>`;
+      
+      hariAktifDipilih = hariIni;
+      renderHariTabs(tanggal);
+      renderKontenHariDipilih(tanggal);
+
+      const hasAnyJadwal = LIST_HARI.some(h => (jadwalAktif[h] || []).length > 0);
+      $('areaAksiSimpan').style.display = hasAnyJadwal ? 'flex' : 'none';
+
+      if (!tanpaSync) {
+        tarikDataDariSheet('MI Miftahul Ulum').then(dataSheet => {
+          const sebelumnya = JSON.stringify(dataAbsensi);
+          dataAbsensi = gabungkanDataSheet(dataAbsensi, dataSheet);
+          if (JSON.stringify(dataAbsensi) !== sebelumnya) {
+            saveDataAbsen();
+            renderKontenHariDipilih(tanggal);
+          }
+        });
+      }
+    }
+
+    function simpanAbsensi() {
+      const tanggal = $('tanggal').value;
+      if (!tanggal) return;
+      dataAbsensi = dataAbsensi.filter(a => a.tanggal !== tanggal);
+      const cards = document.querySelectorAll('#mi-hariContentPanels .guru-card');
+      let savedCount = 0;
+      const recordsForSheet = [];
+      
+      cards.forEach(card => {
+        const activeBtn = card.querySelector('.btn-group-hia .active');
+        if (activeBtn) {
+          const record = {
+            tanggal, lembaga: 'MI Miftahul Ulum',
+            kelas: activeBtn.dataset.kelas, jam: activeBtn.dataset.jam,
+            mapel: activeBtn.dataset.mapel, guru: activeBtn.dataset.guru,
+            status: activeBtn.dataset.status
+          };
+          dataAbsensi.push(record);
+          recordsForSheet.push(record);
+          savedCount++;
+        }
+      });
+      
+      const statusEl = $('status');
+      if (savedCount === 0) {
+        statusEl.innerHTML = '⚠️ Gagal menyimpan, tidak ada status H/I/A yang dipilih.';
+        statusEl.className = 'status-box status-error';
+      } else {
+        saveDataAbsen();
+        statusEl.innerHTML = `✅ Sukses! ${savedCount} data absensi berhasil disimpan.`;
+        statusEl.className = 'status-box status-success';
+        if (typeof kirimKeGoogleSheet === 'function') {
+          kirimKeGoogleSheet(tanggal, 'MI Miftahul Ulum', recordsForSheet);
+        }
+      }
+      setTimeout(() => { statusEl.style.display = 'none'; }, 3500);
+    }
+
+    function resetPilihanHariIni() {
+      if (confirm("Hapus semua tanda pilihan H/I/A untuk tanggal ini?")) {
+        document.querySelectorAll('#mi-hariContentPanels .btn-hia').forEach(b => b.classList.remove('active'));
+      }
+    }
+
+    function tampilkanRekap() {
+      const container = $('tabelRekap');
+      container.innerHTML = '<div style="padding:20px;text-align:center;color:#a0aec0;font-weight:600;">🔄 Menarik data terbaru dari Sheet...</div>';
+      tarikDataDariSheet('MI Miftahul Ulum').then(dataSheet => {
+        dataAbsensi = gabungkanDataSheet(dataAbsensi, dataSheet);
+        saveDataAbsen();
+        renderRekapDariData();
+      });
+    }
+
+    function renderRekapDariData() {
+      const bulan = parseInt($('bulanRekap').value);
+      const tahun = parseInt($('tahunRekap').value);
+      const filtered = dataAbsensi.filter(item => {
+        const [y, m] = item.tanggal.split('-');
+        return parseInt(m) === bulan && parseInt(y) === tahun;
+      });
+      const rekap = {};
+      filtered.forEach(item => {
+        if (!rekap[item.guru]) rekap[item.guru] = { h:0, i:0, a:0 };
+        if (item.status === 'H') rekap[item.guru].h++;
+        else if (item.status === 'I') rekap[item.guru].i++;
+        else if (item.status === 'A') rekap[item.guru].a++;
+      });
+      const container = $('tabelRekap');
+      const exportBtn = $('btnExportExcel');
+      const clearBtn = $('btnClearAllDB');
+      const listNamaGuru = Object.keys(rekap).sort();
+      if (listNamaGuru.length === 0) {
+        container.innerHTML = '<div style="padding:30px;text-align:center;color:#a0aec0;font-weight:600;">Belum ada data rekap pada bulan ini.</div>';
+        exportBtn.style.display = 'none'; clearBtn.style.display = 'block'; return;
+      }
+      let html = `<table><thead><tr><th>Nama Guru</th><th style="text-align:center;">H</th><th style="text-align:center;">I</th><th style="text-align:center;">A</th><th style="text-align:center;">Total</th></tr></thead><tbody>`;
+      listNamaGuru.forEach(guru => {
+        const data = rekap[guru]; const totalJam = data.h + data.i + data.a;
+        html += `<tr><td><strong class="arab-text" style="font-size:15px;color:#2d3748;">${guru}</strong></td><td style="color:#2e7d32;font-weight:700;text-align:center;">${data.h}</td><td style="color:#dd6b20;font-weight:700;text-align:center;">${data.i}</td><td style="color:#e53e3e;font-weight:700;text-align:center;">${data.a}</td><td style="font-weight:700;text-align:center;color:#1a237e;">${totalJam}</td></tr>`;
+      });
+      html += '</tbody></table>';
+      container.innerHTML = html;
+      exportBtn.style.display = 'block'; clearBtn.style.display = 'block';
+    }
+
+    function exportKeExcel() {
+      const bSel = $('bulanRekap');
+      const nBulan = bSel.options[bSel.selectedIndex].text;
+      const tahun = $('tahunRekap').value;
+      const table = document.querySelector("#mi-tabelRekap table");
+      if (!table) return;
+      const wb = XLSX.utils.table_to_book(table, { sheet: "Rekap" });
+      XLSX.writeFile(wb, `Rekap_Absensi_MI_${nBulan}_${tahun}.xlsx`);
+    }
+
+    function clearAllDatabase() {
+      if (confirm("🚨 PERINGATAN!\nHapus SELURUH data absensi MI?")) {
+        localStorage.removeItem('mi_absenGuru');
+        dataAbsensi = []; tampilkanRekap(); renderSemuaHari($('tanggal').value);
+        alert("Database absensi MI dikosongkan total.");
+      }
+    }
+
+    function renderFormPengaturan() {
+      const hari = $('hariPengaturan').value;
+      const container = $('editJadwalContainer');
+      const items = jadwalAktif[hari] || [];
+      container.innerHTML = '';
+      if (items.length === 0) {
+        container.innerHTML = '<div style="text-align:center;color:#718096;padding:20px;">Tidak ada jadwal di hari ini. Klik "Tambah Jadwal Baru" di bawah.</div>';
+        return;
+      }
+      items.forEach(item => tambahkanBarisForm(item.kelas, item.jam, item.mapel, item.guru));
+    }
+
+    function tambahkanBarisForm(kelas='', jam='', mapel='', guru='') {
+      const container = $('editJadwalContainer');
+      const row = document.createElement('div');
+      row.className = 'edit-card item-jadwal-row';
+      row.innerHTML = `
+        <div class="edit-row">
+          <input type="text" class="edit-input inp-jam" placeholder="Jam (ex: Jam 1)" value="${jam}" style="flex:1;">
+          <input type="text" class="edit-input inp-kelas arab-text" placeholder="Kelas" value="${kelas}" style="flex:2;">
+          <button class="btn-delete-row" onclick="this.parentElement.parentElement.remove()">X</button>
+        </div>
+        <div class="edit-row"><input type="text" class="edit-input inp-mapel arab-text" placeholder="Mata Pelajaran" value="${mapel}" style="flex:1;"></div>
+        <div class="edit-row"><input type="text" class="edit-input inp-guru arab-text" placeholder="Nama Guru" value="${guru}" style="flex:1;color:#1a237e;font-weight:600;"></div>`;
+      container.appendChild(row);
+    }
+
+    function simpanPerubahanJadwal() {
+      const hari = $('hariPengaturan').value;
+      const barisList = document.querySelectorAll('#mi-editJadwalContainer .item-jadwal-row');
+      const jadwalBaru = [];
+      barisList.forEach(baris => {
+        const jam = baris.querySelector('.inp-jam').value.trim();
+        const kelas = baris.querySelector('.inp-kelas').value.trim();
+        const mapel = baris.querySelector('.inp-mapel').value.trim();
+        const guru = baris.querySelector('.inp-guru').value.trim();
+        if (jam && kelas && mapel && guru) jadwalBaru.push({ kelas, jam, mapel, guru });
+      });
+      jadwalAktif[hari] = jadwalBaru;
+      saveJadwalCustom();
+      const status = $('statusPengaturan');
+      status.innerHTML = `✅ Jadwal hari ${hari} berhasil diperbarui!`;
+      status.className = 'status-box status-success';
+      setTimeout(() => { status.style.display = 'none'; }, 3000);
+      renderSemuaHari($('tanggal').value);
+    }
+
+    function kembalikanJadwalDefault() {
+      if (confirm("⚠️ Yakin ingin mereset jadwal MI ke pengaturan pabrik?")) {
+        localStorage.removeItem('mi_jadwalCustom');
+        const grouped = {};
+        defaultDataMI.forEach(item => {
+          if (!grouped[item.hari]) grouped[item.hari] = [];
+          grouped[item.hari].push({ kelas: item.kelas, jam: item.jam, mapel: item.mapel, guru: item.guru });
+        });
+        jadwalAktif = grouped;
+        saveJadwalCustom();
+        renderFormPengaturan();
+        renderSemuaHari($('tanggal').value);
+        alert("Jadwal MI berhasil dikembalikan ke versi asli.");
+      }
+    }
+
+    loadSemuaData();
+    const todayStr = getLocalISOString();
+    $('tanggal').value = todayStr;
+    const d = new Date();
+    $('tahunRekap').value = d.getFullYear();
+    $('bulanRekap').value = d.getMonth() + 1;
+
+    document.querySelectorAll('.mi-tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.mi-tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const tabName = this.dataset.tab;
+        document.querySelectorAll('#module-mi .panel').forEach(p => p.style.display = 'none');
+        const panel = document.getElementById(P + 'panel-' + tabName);
+        if (panel) panel.style.display = 'block';
+        if (tabName === 'rekap') tampilkanRekap();
+        if (tabName === 'pengaturan') renderFormPengaturan();
+      });
+    });
+
+    $('tanggal').addEventListener('change', () => renderSemuaHari($('tanggal').value));
+    $('btnHariIni').addEventListener('click', () => {
+      const tgl = getLocalISOString();
+      $('tanggal').value = tgl;
+      renderSemuaHari(tgl);
+    });
+    $('btnSimpan').addEventListener('click', simpanAbsensi);
+    $('btnResetPilihan').addEventListener('click', resetPilihanHariIni);
+    $('btnRekap').addEventListener('click', tampilkanRekap);
+    $('btnExportExcel').addEventListener('click', exportKeExcel);
+    $('btnClearAllDB').addEventListener('click', clearAllDatabase);
+    $('hariPengaturan').addEventListener('change', renderFormPengaturan);
+    $('btnTambahBaris').addEventListener('click', () => tambahkanBarisForm());
+    $('btnSimpanPengaturan').addEventListener('click', simpanPerubahanJadwal);
+    $('btnResetJadwalDefault').addEventListener('click', kembalikanJadwalDefault);
+
+    renderSemuaHari(todayStr);
+  }
+
+  // ========================================================================
+  // MODUL MTsD
+  // ========================================================================
+  function initModulMTsD() {
+    const P = 'mtsd-';
+    const $ = function(id) { return document.getElementById(P + id); };
+
+    let dataAbsensi = [];
+    let jadwalAktif = {};
+    let hariAktifDipilih = 'Senin';
+
+    function loadSemuaData() {
+      const savedAbsen = localStorage.getItem('mtsd_absenGuru');
+      dataAbsensi = savedAbsen ? JSON.parse(savedAbsen) : [];
+      const savedJadwal = localStorage.getItem('mtsd_jadwalCustom');
+      jadwalAktif = savedJadwal ? JSON.parse(savedJadwal) : JSON.parse(JSON.stringify(jadwalDefaultMTsD));
+    }
+
+    function saveDataAbsen() { localStorage.setItem('mtsd_absenGuru', JSON.stringify(dataAbsensi)); }
+    function saveJadwalCustom() { localStorage.setItem('mtsd_jadwalCustom', JSON.stringify(jadwalAktif)); }
+
+    function renderHariTabs(tanggal) {
+      const container = $('hariTabs');
+      if (!tanggal) { container.innerHTML = ''; return; }
+      const [y, m, d] = tanggal.split('-');
+      const tgl = new Date(y, m-1, d);
+      const hariIni = LIST_HARI[tgl.getDay() === 0 ? 6 : tgl.getDay() - 1];
+      
+      let html = '';
+      LIST_HARI.forEach((hari) => {
+        const items = jadwalAktif[hari] || [];
+        const isToday = hari === hariIni;
+        const isLibur = items.length === 0;
+        let classes = 'hari-tab-btn';
+        if (isToday) classes += ' hari-ini';
+        if (isLibur) classes += ' hari-libur-tab';
+        if (hariAktifDipilih === hari) classes += ' active';
+        html += `<button class="${classes}" data-hari="${hari}">${hari} <span style="font-size:11px;opacity:0.8;">(${items.length})</span> ${isToday ? '🔆' : ''}</button>`;
+      });
+      container.innerHTML = html;
+
+      container.querySelectorAll('.hari-tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          hariAktifDipilih = this.dataset.hari;
+          container.querySelectorAll('.hari-tab-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          renderKontenHariDipilih(tanggal);
+        });
+      });
+    }
+
+    function renderKontenHariDipilih(tanggal) {
+      const panelContainer = $('hariContentPanels');
+      const existing = dataAbsensi.filter(a => a.tanggal === tanggal);
+      const hari = hariAktifDipilih;
+      const items = jadwalAktif[hari] || [];
+      
+      let html = '';
+      if (items.length === 0) {
+        html = `<div class="hari-content-panel active" data-hari="${hari}"><div class="hari-libur">📌 Libur / Tidak ada jadwal</div></div>`;
+      } else {
+        let cardHtml = `<div class="hari-content-panel active" data-hari="${hari}">`;
+        items.forEach(item => {
+          const match = existing.find(e => e.kelas === item.kelas && e.jam === item.jam && e.guru === item.guru);
+          const activeStatus = match ? match.status : '';
+          cardHtml += `
+          <div class="guru-card" style="margin-bottom:12px;">
+            <div class="meta-row">
+              <div class="jam-tag">${item.jam}</div>
+              <div class="kelas-tag arab-text">${item.kelas}</div>
+            </div>
+            <div class="info-row">
+              <div class="mapel-lbl arab-text">${item.mapel}</div>
+              <div class="guru-lbl arab-text">${item.guru}</div>
+            </div>
+            <div class="btn-group-hia">
+              <button class="btn-hia btn-h ${activeStatus==='H'?'active':''}" data-status="H" data-kelas="${item.kelas}" data-jam="${item.jam}" data-mapel="${item.mapel}" data-guru="${item.guru}">H</button>
+              <button class="btn-hia btn-i ${activeStatus==='I'?'active':''}" data-status="I" data-kelas="${item.kelas}" data-jam="${item.jam}" data-mapel="${item.mapel}" data-guru="${item.guru}">I</button>
+              <button class="btn-hia btn-a ${activeStatus==='A'?'active':''}" data-status="A" data-kelas="${item.kelas}" data-jam="${item.jam}" data-mapel="${item.mapel}" data-guru="${item.guru}">A</button>
+            </div>
+          </div>`;
+        });
+        cardHtml += `</div>`;
+        html = cardHtml;
+      }
+      panelContainer.innerHTML = html;
+
+      panelContainer.querySelectorAll('.btn-hia').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const parent = this.closest('.btn-group-hia');
+          if (this.classList.contains('active')) {
+            this.classList.remove('active');
+          } else {
+            parent.querySelectorAll('.btn-hia').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+          }
+        });
+      });
+    }
+
+    function renderSemuaHari(tanggal, tanpaSync) {
+      const info = $('infoJadwal');
+      if (!tanggal) {
+        info.innerHTML = '⚠️ Pilih tanggal operasional terlebih dahulu.';
+        $('hariTabs').innerHTML = '';
+        $('hariContentPanels').innerHTML = '';
+        return;
+      }
+
+      const [y, m, d] = tanggal.split('-');
+      const tgl = new Date(y, m-1, d);
+      const hariIni = LIST_HARI[tgl.getDay() === 0 ? 6 : tgl.getDay() - 1];
+      info.innerHTML = `🗓️ Jadwal untuk <strong>${tanggal}</strong> — Hari ini: <strong>${hariIni}</strong>`;
+      
+      hariAktifDipilih = hariIni;
+      renderHariTabs(tanggal);
+      renderKontenHariDipilih(tanggal);
+
+      const hasAnyJadwal = LIST_HARI.some(h => (jadwalAktif[h] || []).length > 0);
+      $('areaAksiSimpan').style.display = hasAnyJadwal ? 'flex' : 'none';
+
+      if (!tanpaSync) {
+        tarikDataDariSheet('MTsD').then(dataSheet => {
+          const sebelumnya = JSON.stringify(dataAbsensi);
+          dataAbsensi = gabungkanDataSheet(dataAbsensi, dataSheet);
+          if (JSON.stringify(dataAbsensi) !== sebelumnya) {
+            saveDataAbsen();
+            renderKontenHariDipilih(tanggal);
+          }
+        });
+      }
+    }
+
+    function simpanAbsensi() {
+      const tanggal = $('tanggal').value;
+      if (!tanggal) return;
+      dataAbsensi = dataAbsensi.filter(a => a.tanggal !== tanggal);
+      const cards = document.querySelectorAll('#mtsd-hariContentPanels .guru-card');
+      let savedCount = 0;
+      const recordsForSheet = [];
+      
+      cards.forEach(card => {
+        const activeBtn = card.querySelector('.btn-group-hia .active');
+        if (activeBtn) {
+          const record = {
+            tanggal, lembaga: 'MTsD',
+            kelas: activeBtn.dataset.kelas, jam: activeBtn.dataset.jam,
+            mapel: activeBtn.dataset.mapel, guru: activeBtn.dataset.guru,
+            status: activeBtn.dataset.status
+          };
+          dataAbsensi.push(record);
+          recordsForSheet.push(record);
+          savedCount++;
+        }
+      });
+      
+      const statusEl = $('status');
+      if (savedCount === 0) {
+        statusEl.innerHTML = '⚠️ Gagal menyimpan, tidak ada status H/I/A yang dipilih.';
+        statusEl.className = 'status-box status-error';
+      } else {
+        saveDataAbsen();
+        statusEl.innerHTML = `✅ Sukses! ${savedCount} data absensi berhasil disimpan.`;
+        statusEl.className = 'status-box status-success';
+        if (typeof kirimKeGoogleSheet === 'function') {
+          kirimKeGoogleSheet(tanggal, 'MTsD', recordsForSheet);
+        }
+      }
+      setTimeout(() => { statusEl.style.display = 'none'; }, 3500);
+    }
+
+    function resetPilihanHariIni() {
+      if (confirm("Hapus semua tanda pilihan H/I/A untuk tanggal ini?")) {
+        document.querySelectorAll('#mtsd-hariContentPanels .btn-hia').forEach(b => b.classList.remove('active'));
+      }
+    }
+
+    function tampilkanRekap() {
+      const container = $('tabelRekap');
+      container.innerHTML = '<div style="padding:20px;text-align:center;color:#a0aec0;font-weight:600;">🔄 Menarik data terbaru dari Sheet...</div>';
+      tarikDataDariSheet('MTsD').then(dataSheet => {
+        dataAbsensi = gabungkanDataSheet(dataAbsensi, dataSheet);
+        saveDataAbsen();
+        renderRekapDariData();
+      });
+    }
+
+    function renderRekapDariData() {
+      const bulan = parseInt($('bulanRekap').value);
+      const tahun = parseInt($('tahunRekap').value);
+      const filtered = dataAbsensi.filter(item => {
+        const [y, m] = item.tanggal.split('-');
+        return parseInt(m) === bulan && parseInt(y) === tahun;
+      });
+      const rekap = {};
+      filtered.forEach(item => {
+        if (!rekap[item.guru]) rekap[item.guru] = { h:0, i:0, a:0 };
+        if (item.status === 'H') rekap[item.guru].h++;
+        else if (item.status === 'I') rekap[item.guru].i++;
+        else if (item.status === 'A') rekap[item.guru].a++;
+      });
+      const container = $('tabelRekap');
+      const exportBtn = $('btnExportExcel');
+      const clearBtn = $('btnClearAllDB');
+      const listNamaGuru = Object.keys(rekap).sort();
+      if (listNamaGuru.length === 0) {
+        container.innerHTML = '<div style="padding:30px;text-align:center;color:#a0aec0;font-weight:600;">Belum ada data rekap pada bulan ini.</div>';
+        exportBtn.style.display = 'none'; clearBtn.style.display = 'block'; return;
+      }
+      let html = `<table><thead><tr><th>Nama Guru</th><th style="text-align:center;">H</th><th style="text-align:center;">I</th><th style="text-align:center;">A</th><th style="text-align:center;">Total</th></tr></thead><tbody>`;
+      listNamaGuru.forEach(guru => {
+        const data = rekap[guru]; const totalJam = data.h + data.i + data.a;
+        html += `<tr><td><strong class="arab-text" style="font-size:15px;color:#2d3748;">${guru}</strong></td><td style="color:#2e7d32;font-weight:700;text-align:center;">${data.h}</td><td style="color:#dd6b20;font-weight:700;text-align:center;">${data.i}</td><td style="color:#e53e3e;font-weight:700;text-align:center;">${data.a}</td><td style="font-weight:700;text-align:center;color:#1a237e;">${totalJam}</td></tr>`;
+      });
+      html += '</tbody></table>';
+      container.innerHTML = html;
+      exportBtn.style.display = 'block'; clearBtn.style.display = 'block';
+    }
+
+    function exportKeExcel() {
+      const bSel = $('bulanRekap');
+      const nBulan = bSel.options[bSel.selectedIndex].text;
+      const tahun = $('tahunRekap').value;
+      const table = document.querySelector("#mtsd-tabelRekap table");
+      if (!table) return;
+      const wb = XLSX.utils.table_to_book(table, { sheet: "Rekap" });
+      XLSX.writeFile(wb, `Rekap_Absensi_MTsD_${nBulan}_${tahun}.xlsx`);
+    }
+
+    function clearAllDatabase() {
+      if (confirm("🚨 PERINGATAN!\nHapus SELURUH data absensi MTsD?")) {
+        localStorage.removeItem('mtsd_absenGuru');
+        dataAbsensi = []; tampilkanRekap(); renderSemuaHari($('tanggal').value);
+        alert("Database absensi MTsD dikosongkan total.");
+      }
+    }
+
+    function renderFormPengaturan() {
+      const hari = $('hariPengaturan').value;
+      const container = $('editJadwalContainer');
+      const items = jadwalAktif[hari] || [];
+      container.innerHTML = '';
+      if (items.length === 0) {
+        container.innerHTML = '<div style="text-align:center;color:#718096;padding:20px;">Tidak ada jadwal di hari ini. Klik "Tambah Jadwal Baru" di bawah.</div>';
+        return;
+      }
+      items.forEach(item => tambahkanBarisForm(item.kelas, item.jam, item.mapel, item.guru));
+    }
+
+    function tambahkanBarisForm(kelas='', jam='', mapel='', guru='') {
+      const container = $('editJadwalContainer');
+      const row = document.createElement('div');
+      row.className = 'edit-card item-jadwal-row';
+      row.innerHTML = `
+        <div class="edit-row">
+          <input type="text" class="edit-input inp-jam" placeholder="Jam (ex: Jam 1)" value="${jam}" style="flex:1;">
+          <input type="text" class="edit-input inp-kelas arab-text" placeholder="Kelas" value="${kelas}" style="flex:2;">
+          <button class="btn-delete-row" onclick="this.parentElement.parentElement.remove()">X</button>
+        </div>
+        <div class="edit-row"><input type="text" class="edit-input inp-mapel arab-text" placeholder="Mata Pelajaran" value="${mapel}" style="flex:1;"></div>
+        <div class="edit-row"><input type="text" class="edit-input inp-guru arab-text" placeholder="Nama Guru" value="${guru}" style="flex:1;color:#1a237e;font-weight:600;"></div>`;
+      container.appendChild(row);
+    }
+
+    function simpanPerubahanJadwal() {
+      const hari = $('hariPengaturan').value;
+      const barisList = document.querySelectorAll('#mtsd-editJadwalContainer .item-jadwal-row');
+      const jadwalBaru = [];
+      barisList.forEach(baris => {
+        const jam = baris.querySelector('.inp-jam').value.trim();
+        const kelas = baris.querySelector('.inp-kelas').value.trim();
+        const mapel = baris.querySelector('.inp-mapel').value.trim();
+        const guru = baris.querySelector('.inp-guru').value.trim();
+        if (jam && kelas && mapel && guru) jadwalBaru.push({ kelas, jam, mapel, guru });
+      });
+      jadwalAktif[hari] = jadwalBaru;
+      saveJadwalCustom();
+      const status = $('statusPengaturan');
+      status.innerHTML = `✅ Jadwal hari ${hari} berhasil diperbarui!`;
+      status.className = 'status-box status-success';
+      setTimeout(() => { status.style.display = 'none'; }, 3000);
+      renderSemuaHari($('tanggal').value);
+    }
+
+    function kembalikanJadwalDefault() {
+      if (confirm("⚠️ Yakin ingin mereset jadwal MTsD ke pengaturan pabrik?")) {
+        localStorage.removeItem('mtsd_jadwalCustom');
+        jadwalAktif = JSON.parse(JSON.stringify(jadwalDefaultMTsD));
+        saveJadwalCustom();
+        renderFormPengaturan();
+        renderSemuaHari($('tanggal').value);
+        alert("Jadwal MTsD berhasil dikembalikan ke versi asli.");
+      }
+    }
+
+    loadSemuaData();
+    const todayStr = getLocalISOString();
+    $('tanggal').value = todayStr;
+    const d = new Date();
+    $('tahunRekap').value = d.getFullYear();
+    $('bulanRekap').value = d.getMonth() + 1;
+
+    document.querySelectorAll('.mtsd-tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.mtsd-tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const tabName = this.dataset.tab;
+        document.querySelectorAll('#module-mtsd .panel').forEach(p => p.style.display = 'none');
+        const panel = document.getElementById(P + 'panel-' + tabName);
+        if (panel) panel.style.display = 'block';
+        if (tabName === 'rekap') tampilkanRekap();
+        if (tabName === 'pengaturan') renderFormPengaturan();
+      });
+    });
+
+    $('tanggal').addEventListener('change', () => renderSemuaHari($('tanggal').value));
+    $('btnHariIni').addEventListener('click', () => {
+      const tgl = getLocalISOString();
+      $('tanggal').value = tgl;
+      renderSemuaHari(tgl);
+    });
+    $('btnSimpan').addEventListener('click', simpanAbsensi);
+    $('btnResetPilihan').addEventListener('click', resetPilihanHariIni);
+    $('btnRekap').addEventListener('click', tampilkanRekap);
+    $('btnExportExcel').addEventListener('click', exportKeExcel);
+    $('btnClearAllDB').addEventListener('click', clearAllDatabase);
+    $('hariPengaturan').addEventListener('change', renderFormPengaturan);
+    $('btnTambahBaris').addEventListener('click', () => tambahkanBarisForm());
+    $('btnSimpanPengaturan').addEventListener('click', simpanPerubahanJadwal);
+    $('btnResetJadwalDefault').addEventListener('click', kembalikanJadwalDefault);
+
+    renderSemuaHari(todayStr);
+  }
+
+  // ========================================================================
+  // SWITCHER LEMBAGA
+  // ========================================================================
+  document.querySelectorAll('.tab-lembaga .btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-lembaga .btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      const mod = this.dataset.module;
+      document.querySelectorAll('.module-container').forEach(el => el.classList.remove('active'));
+      document.getElementById('module-' + mod).classList.add('active');
+    });
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM siap, menginisialisasi modul...');
+    initModulMI();
+    initModulMTsD();
+    console.log('Inisialisasi selesai.');
+  });
+</script>
+</body>
+</html>
