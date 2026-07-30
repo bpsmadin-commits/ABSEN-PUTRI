@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jadwal & Absensi - MI & MTsD (Seragam)</title>
+  <title>Jadwal & Absensi - MID & MTsD (Dark Mode)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
@@ -11,30 +11,106 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #eef2f7; font-family: 'Inter', sans-serif; padding: 12px 10px; color: #4a5568; }
+    :root {
+      --bg-body: #f0f3fb;
+      --bg-card: #f0f3fb;
+      --text-main: #334155;
+      --text-sub: #64748b;
+      --text-header: #312e81;
+      --shadow-out: 6px 6px 12px #d3dbf0, -6px -6px 12px #ffffff;
+      --shadow-header: 8px 8px 16px #d3dbf0, -8px -8px 16px #ffffff;
+      --shadow-in: inset 3px 3px 6px #d3dbf0, inset -3px -3px 6px #ffffff;
+      --border-card: rgba(255, 255, 255, 0.8);
+      --badge-bg: #e0e7ff;
+      --badge-text: #4338ca;
+      --badge-shadow: inset 2px 2px 4px #c7d2fe, inset -2px -2px 4px #ffffff;
+      --sticky-bg: rgba(240, 243, 251, 0.92);
+      --danger-bg: #fef2f2;
+      --danger-border: #fca5a5;
+      --danger-text: #991b1b;
+      --input-color: #1e293b;
+    }
+
+    body.dark-mode {
+      --bg-body: #0f172a;
+      --bg-card: #1e293b;
+      --text-main: #f1f5f9;
+      --text-sub: #94a3b8;
+      --text-header: #c7d2fe;
+      --shadow-out: 6px 6px 14px #0a0f1d, -6px -6px 14px #283548;
+      --shadow-header: 8px 8px 16px #0a0f1d, -8px -8px 16px #283548;
+      --shadow-in: inset 3px 3px 6px #0a0f1d, inset -3px -3px 6px #283548;
+      --border-card: rgba(255, 255, 255, 0.05);
+      --badge-bg: #312e81;
+      --badge-text: #e0e7ff;
+      --badge-shadow: inset 2px 2px 4px #1e1b4b, inset -2px -2px 4px #3730a3;
+      --sticky-bg: rgba(30, 41, 59, 0.92);
+      --danger-bg: #2c1518;
+      --danger-border: #991b1b;
+      --danger-text: #fca5a5;
+      --input-color: #f8fafc;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease; }
+    body { 
+      background: var(--bg-body); 
+      font-family: 'Inter', sans-serif; 
+      padding: 12px 10px 80px 10px; 
+      color: var(--text-main); 
+    }
     .container { max-width: 1200px; margin: 0 auto; }
+    
+    /* Header Utama */
     .header {
-      background: #eef2f7;
+      background: var(--bg-card);
       border-radius: 20px;
-      padding: 16px 20px;
+      padding: 18px 20px;
       margin-bottom: 18px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 9px 9px 16px #d1d9e6, -9px -9px 16px #ffffff;
+      box-shadow: var(--shadow-header);
+      border-left: 5px solid #6366f1;
+      gap: 12px;
     }
-    .header h1 { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 8px; color: #2d3748; }
+    .header h1 { 
+      font-size: 1.3rem; 
+      font-weight: 700; 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      color: var(--text-header); 
+    }
+    .header h1 i { color: #6366f1; }
     .header .sub { font-size: 0.8rem; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
     .badge {
-      background: #eef2f7;
-      padding: 4px 14px;
+      background: var(--badge-bg);
+      padding: 6px 14px;
       border-radius: 20px;
-      box-shadow: inset 3px 3px 6px #d1d9e6, inset -3px -3px 6px #ffffff;
-      font-weight: 600;
-      color: #2d3748;
+      font-weight: 700;
+      color: var(--badge-text);
+      box-shadow: var(--badge-shadow);
     }
+
+    /* Toggle Dark Mode Button */
+    .btn-dark-toggle {
+      background: var(--bg-card);
+      border: none;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      box-shadow: var(--shadow-out);
+      cursor: pointer;
+      color: #6366f1;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-dark-toggle:active { box-shadow: var(--shadow-in); }
+
+    /* Tab Lembaga (MID / MTsD) */
     .tab-lembaga {
       display: flex;
       gap: 12px;
@@ -43,33 +119,39 @@
       flex-wrap: wrap;
     }
     .tab-lembaga .btn {
-      background: #eef2f7;
+      background: var(--bg-card);
       border: none;
       padding: 10px 28px;
       border-radius: 40px;
       font-weight: 700;
       font-size: 0.9rem;
       cursor: pointer;
-      color: #4a5568;
-      box-shadow: 5px 5px 10px #d1d9e6, -5px -5px 10px #ffffff;
+      color: var(--text-sub);
+      box-shadow: var(--shadow-out);
       transition: 0.2s;
       display: inline-flex;
       align-items: center;
       gap: 8px;
     }
-    .tab-lembaga .btn.active { color: #1a237e; box-shadow: inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff; }
+    .tab-lembaga .btn.active { 
+      color: #818cf8; 
+      background: var(--bg-card); 
+      box-shadow: var(--shadow-in); 
+    }
+
     .module-container { display: none; }
     .module-container.active { display: block; }
 
     .nm-card {
-      background: #eef2f7;
+      background: var(--bg-card);
       padding: 20px;
       border-radius: 20px;
-      box-shadow: 6px 6px 12px #d1d9e6, -6px -6px 12px #ffffff;
+      box-shadow: var(--shadow-out);
       margin-bottom: 20px;
+      border: 1px solid var(--border-card);
     }
     .form-group { margin-bottom: 15px; }
-    .form-group label { font-weight: 600; font-size: 13px; color: #718096; display: block; margin-bottom: 6px; }
+    .form-group label { font-weight: 600; font-size: 13px; color: var(--text-sub); display: block; margin-bottom: 6px; }
     input, select {
       padding: 14px;
       border-radius: 12px;
@@ -77,9 +159,9 @@
       font-size: 15px;
       width: 100%;
       outline: none;
-      background: #eef2f7;
-      box-shadow: inset 3px 3px 6px #d1d9e6, inset -3px -3px 6px #ffffff;
-      color: #2d3748;
+      background: var(--bg-card);
+      box-shadow: var(--shadow-in);
+      color: var(--input-color);
       font-weight: 500;
     }
     .btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -90,22 +172,25 @@
       font-weight: 700;
       font-size: 14px;
       cursor: pointer;
-      background: #eef2f7;
-      box-shadow: 4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff;
-      color: #4a5568;
+      background: var(--bg-card);
+      box-shadow: var(--shadow-out);
+      color: var(--text-sub);
       transition: 0.15s;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
     }
-    .btn:active { box-shadow: inset 3px 3px 6px #d1d9e6, inset -3px -3px 6px #ffffff; }
-    .btn-primary { color: #1a237e; }
-    .btn-accent { color: #2e7d32; }
-    .btn-danger { color: #e53e3e; }
+    .btn:active { box-shadow: var(--shadow-in); }
+    .btn-primary { color: #818cf8; }
+    .btn-accent { color: #10b981; }
+    .btn-danger { color: #f87171; }
+
+    /* Tombol Simpan Utama (Gradasi Biru-Ungu) */
     .btn-block-simpan {
-      background: #1a237e;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
       color: white;
-      box-shadow: 4px 4px 10px rgba(26,35,126,0.2), -4px -4px 10px #ffffff;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
       border: none;
       padding: 16px;
       border-radius: 14px;
@@ -114,8 +199,76 @@
       cursor: pointer;
       width: 100%;
       transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
-    .btn-block-simpan:active { box-shadow: inset 3px 3px 6px rgba(0,0,0,0.2); }
+    .btn-block-simpan:active { transform: scale(0.98); opacity: 0.9; }
+
+    /* Navigasi Tanggal Cepat */
+    .date-picker-row { display: flex; align-items: center; gap: 8px; }
+    .date-nav-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      border: none;
+      background: var(--bg-card);
+      box-shadow: var(--shadow-out);
+      font-weight: bold;
+      cursor: pointer;
+      color: #818cf8;
+      font-size: 16px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .date-nav-btn:active { box-shadow: var(--shadow-in); }
+
+    /* Sticky Bottom Bar untuk Simpan */
+    .sticky-save-bar {
+      position: sticky;
+      bottom: 10px;
+      z-index: 99;
+      background: var(--sticky-bg);
+      backdrop-filter: blur(8px);
+      padding: 12px;
+      border-radius: 18px;
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.2), var(--shadow-out);
+      border: 1px solid var(--border-card);
+      margin-top: 15px;
+    }
+
+    /* Danger Zone */
+    .danger-zone {
+      margin-top: 30px;
+      padding: 18px;
+      border: 2px dashed var(--danger-border);
+      border-radius: 18px;
+      background: var(--danger-bg);
+    }
+
+    /* Keterangan Warna (Legend) */
+    .legend-box {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-sub);
+      margin-bottom: 14px;
+      background: var(--bg-card);
+      padding: 8px;
+      border-radius: 12px;
+      box-shadow: var(--shadow-in);
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .dot-h { background: #10b981; }
+    .dot-i { background: #f59e0b; }
+    .dot-a { background: #ef4444; }
+
     .status-box {
       margin-top: 15px;
       font-weight: 600;
@@ -125,23 +278,24 @@
       display: none;
       font-size: 14px;
     }
-    .status-success { display: block !important; background: #e8f5e9; color: #2e7d32; }
-    .status-error { display: block !important; background: #ffebee; color: #e53e3e; }
+    .status-success { display: block !important; background: #10b98122; color: #34d399; border: 1px solid #10b981; }
+    .status-error { display: block !important; background: #ef444422; color: #f87171; border: 1px solid #ef4444; }
     .arab-text { font-family: 'Amiri', serif; direction: rtl; text-align: right; }
 
     .jadwal-container { display: flex; flex-direction: column; gap: 18px; margin-top: 10px; }
     .guru-card {
-      background: #eef2f7;
+      background: var(--bg-card);
       border-radius: 20px;
       padding: 18px;
-      box-shadow: 6px 6px 12px #d1d9e6, -6px -6px 12px #ffffff;
+      box-shadow: var(--shadow-out);
+      border: 1px solid var(--border-card);
     }
     .meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .jam-tag { font-size: 11px; font-weight: 700; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; }
-    .kelas-tag { font-size: 15px; font-weight: 700; color: #4a5568; }
+    .jam-tag { font-size: 11px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kelas-tag { font-size: 15px; font-weight: 700; color: var(--text-main); }
     .info-row { margin-bottom: 15px; }
-    .mapel-lbl { color: #a0aec0; font-size: 14px; margin-bottom: 2px; }
-    .guru-lbl { color: #1a237e; font-size: 22px; font-weight: 700; }
+    .mapel-lbl { color: var(--text-sub); font-size: 14px; margin-bottom: 2px; }
+    .guru-lbl { color: #818cf8; font-size: 22px; font-weight: 700; }
     .btn-group-hia { display: flex; gap: 10px; }
     .btn-hia {
       flex: 1;
@@ -150,57 +304,50 @@
       border-radius: 10px;
       font-weight: 800;
       font-size: 15px;
-      background: #eef2f7;
-      box-shadow: 3px 3px 6px #d1d9e6, -3px -3px 6px #ffffff;
-      color: #718096;
+      background: var(--bg-card);
+      box-shadow: var(--shadow-out);
+      color: var(--text-sub);
       cursor: pointer;
       transition: 0.15s;
     }
-    /* H - HADIR - Hijau Ngejreng */
     .btn-hia.btn-h.active { 
       color: #ffffff; 
-      background: #00c853; 
-      box-shadow: 0 0 18px rgba(0,200,83,0.5), 0 4px 8px rgba(0,0,0,0.15); 
-      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      background: #10b981; 
+      box-shadow: 0 0 16px rgba(16,185,129,0.5); 
     }
-    /* I - IZIN - Oranye Ngejreng */
     .btn-hia.btn-i.active { 
       color: #ffffff; 
-      background: #ff6d00; 
-      box-shadow: 0 0 18px rgba(255,109,0,0.5), 0 4px 8px rgba(0,0,0,0.15); 
-      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      background: #f59e0b; 
+      box-shadow: 0 0 16px rgba(245,158,11,0.5); 
     }
-    /* A - ALPA - Merah Ngejreng */
     .btn-hia.btn-a.active { 
       color: #ffffff; 
-      background: #d50000; 
-      box-shadow: 0 0 18px rgba(213,0,0,0.5), 0 4px 8px rgba(0,0,0,0.15); 
-      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      background: #ef4444; 
+      box-shadow: 0 0 16px rgba(239,68,68,0.5); 
     }
 
-    /* ===== TAB HARI HORIZONTAL ===== */
     .hari-tabs-container {
       display: flex;
       gap: 8px;
       overflow-x: auto;
       padding: 6px;
-      background: #eef2f7;
+      background: var(--bg-card);
       border-radius: 16px;
-      box-shadow: inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff;
+      box-shadow: var(--shadow-in);
       margin-bottom: 20px;
       flex-wrap: nowrap;
       -webkit-overflow-scrolling: touch;
     }
     .hari-tab-btn {
-      background: #eef2f7;
+      background: var(--bg-card);
       border: none;
       padding: 10px 16px;
       border-radius: 30px;
       font-weight: 700;
       font-size: 13px;
       cursor: pointer;
-      color: #718096;
-      box-shadow: 4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff;
+      color: var(--text-sub);
+      box-shadow: var(--shadow-out);
       transition: 0.2s;
       white-space: nowrap;
       flex-shrink: 0;
@@ -209,54 +356,54 @@
       gap: 6px;
     }
     .hari-tab-btn.active {
-      color: #1a237e;
-      box-shadow: inset 3px 3px 6px #d1d9e6, inset -3px -3px 6px #ffffff;
+      color: #818cf8;
+      background: var(--bg-card);
+      box-shadow: var(--shadow-in);
     }
     .hari-tab-btn.hari-ini {
-      background: #e8f5e9;
-      color: #2e7d32;
+      background: #10b98122;
+      color: #34d399;
       font-weight: 800;
     }
     .hari-tab-btn.hari-libur-tab {
-      color: #a0aec0;
-      opacity: 0.7;
+      color: var(--text-sub);
+      opacity: 0.6;
     }
-    .hari-content-panel {
-      display: none;
-    }
-    .hari-content-panel.active {
-      display: block;
-    }
+    .hari-content-panel { display: none; }
+    .hari-content-panel.active { display: block; }
     .hari-libur {
-      padding: 16px;
+      padding: 24px;
       text-align: center;
-      color: #a0aec0;
+      color: var(--text-sub);
       font-weight: 600;
+      background: var(--bg-card);
+      border-radius: 16px;
+      box-shadow: var(--shadow-in);
     }
 
     /* Rekap Tabel */
     .table-container { overflow-x: auto; margin-top: 10px; padding: 5px; }
     .table-container table { width: 100%; border-collapse: separate; border-spacing: 0 10px; min-width: 450px; }
-    .table-container th { padding: 10px 12px; text-align: left; font-size: 12px; color: #a0aec0; font-weight: 600; text-transform: uppercase; }
-    .table-container td { padding: 14px 12px; background: #eef2f7; font-size: 14px; color: #2d3748; }
-    .table-container td:first-child { border-radius: 12px 0 0 12px; box-shadow: 4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff; }
-    .table-container td:nth-child(2), .table-container td:nth-child(3), .table-container td:nth-child(4), .table-container td:nth-child(5) { box-shadow: 0 4px 8px #d1d9e6, 0 -4px 8px #ffffff; }
-    .table-container td:last-child { border-radius: 0 12px 12px 0; box-shadow: 4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff; }
+    .table-container th { padding: 10px 12px; text-align: left; font-size: 12px; color: #818cf8; font-weight: 700; text-transform: uppercase; }
+    .table-container td { padding: 14px 12px; background: var(--bg-card); font-size: 14px; color: var(--text-main); }
+    .table-container td:first-child { border-radius: 12px 0 0 12px; box-shadow: var(--shadow-out); }
+    .table-container td:nth-child(2), .table-container td:nth-child(3), .table-container td:nth-child(4), .table-container td:nth-child(5) { box-shadow: var(--shadow-out); }
+    .table-container td:last-child { border-radius: 0 12px 12px 0; box-shadow: var(--shadow-out); }
 
     /* Edit Jadwal */
     .edit-card {
-      background: #eef2f7;
+      background: var(--bg-card);
       border-radius: 16px;
       padding: 15px;
-      box-shadow: inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff;
+      box-shadow: var(--shadow-in);
       margin-bottom: 15px;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
     .edit-row { display: flex; gap: 10px; flex-wrap: wrap; }
-    .edit-input { padding: 10px; font-size: 14px; border-radius: 8px; box-shadow: 3px 3px 6px #d1d9e6, -3px -3px 6px #ffffff; border: none; background: #eef2f7; flex: 1; }
-    .btn-delete-row { background: #ffebee; color: #e53e3e; border: none; border-radius: 8px; font-weight: bold; width: 40px; cursor: pointer; box-shadow: 2px 2px 5px #d1d9e6, -2px -2px 5px #ffffff; }
+    .edit-input { padding: 10px; font-size: 14px; border-radius: 8px; box-shadow: var(--shadow-out); border: none; background: var(--bg-card); flex: 1; }
+    .btn-delete-row { background: var(--danger-bg); color: #f87171; border: none; border-radius: 8px; font-weight: bold; width: 40px; cursor: pointer; box-shadow: var(--shadow-out); }
     .master-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
 
     @media (max-width: 480px) {
@@ -270,56 +417,78 @@
 <div class="container">
   <div class="header">
     <h1><i class="fas fa-book-open"></i> Manajemen Jadwal & Absensi</h1>
-    <div class="sub"><span class="badge">Terintegrasi</span></div>
+    <div class="sub">
+      <span class="badge">Terintegrasi</span>
+      <button class="btn-dark-toggle" id="btnThemeToggle" title="Ganti Mode Gelap/Terang"><i class="fas fa-moon"></i></button>
+    </div>
   </div>
 
   <!-- Tab Lembaga -->
   <div class="tab-lembaga">
-    <button class="btn active" data-module="mi"><i class="fas fa-school"></i> MI Miftahul Ulum</button>
+    <button class="btn active" data-module="mid"><i class="fas fa-school"></i> MID</button>
     <button class="btn" data-module="mtsd"><i class="fas fa-mosque"></i> MTsD</button>
   </div>
 
-  <!-- MODUL MI -->
-  <div id="module-mi" class="module-container active">
-    <div class="nm-card" style="box-shadow:9px 9px 16px #d1d9e6, -9px -9px 16px #ffffff; text-align:center; padding:12px; margin-bottom:16px;">
-      <h2 style="font-size:1.2rem; color:#2d3748;"><i class="fas fa-calendar-alt"></i> MI Miftahul Ulum</h2>
+  <!-- MODUL MID -->
+  <div id="module-mid" class="module-container active">
+    <div class="nm-card" style="text-align:center; padding:12px; margin-bottom:16px;">
+      <h2 style="font-size:1.2rem; color:var(--text-header);"><i class="fas fa-calendar-alt"></i> MID</h2>
     </div>
 
-    <!-- Tab Bar MI -->
-    <div class="tab-bar" style="display:flex; gap:8px; margin-bottom:20px; background:#eef2f7; padding:6px; border-radius:16px; box-shadow:inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff; overflow-x:auto;">
-      <button class="btn mi-tab-btn active" data-tab="absen"><i class="fas fa-pen"></i> Absen Harian</button>
-      <button class="btn mi-tab-btn" data-tab="rekap"><i class="fas fa-chart-bar"></i> Rekap Bulanan</button>
-      <button class="btn mi-tab-btn" data-tab="pengaturan"><i class="fas fa-cog"></i> Pengaturan</button>
+    <!-- Tab Bar MID -->
+    <div class="tab-bar" style="display:flex; gap:8px; margin-bottom:20px; background:var(--bg-card); padding:6px; border-radius:16px; box-shadow:var(--shadow-in); overflow-x:auto;">
+      <button class="btn mid-tab-btn active" data-tab="absen"><i class="fas fa-pen"></i> Absen Harian</button>
+      <button class="btn mid-tab-btn" data-tab="rekap"><i class="fas fa-chart-bar"></i> Rekap Bulanan</button>
+      <button class="btn mid-tab-btn" data-tab="pengaturan"><i class="fas fa-cog"></i> Pengaturan</button>
     </div>
 
-    <!-- Panel Absen MI -->
-    <div id="mi-panel-absen" class="panel" style="display:block;">
+    <!-- Panel Absen MID -->
+    <div id="mid-panel-absen" class="panel" style="display:block;">
       <div class="nm-card">
         <div class="form-group">
           <label>📅 Tanggal Operasional</label>
-          <input type="date" id="mi-tanggal">
+          <div class="date-picker-row">
+            <button class="date-nav-btn" id="mid-btnPrevDate"><i class="fas fa-chevron-left"></i></button>
+            <input type="date" id="mid-tanggal" style="flex:1;">
+            <button class="date-nav-btn" id="mid-btnNextDate"><i class="fas fa-chevron-right"></i></button>
+          </div>
         </div>
-        <button class="btn btn-accent" id="mi-btnHariIni" style="width:100%;">📅 Pakai Tanggal Hari Ini</button>
+        <button class="btn btn-accent" id="mid-btnHariIni" style="width:100%;">📅 Pakai Tanggal Hari Ini</button>
       </div>
-      <div id="mi-infoJadwal" style="font-size:13px; font-weight:600; color:#718096; text-align:center; margin-bottom:15px; padding:5px;">Pilih tanggal untuk melihat jadwal.</div>
+
+      <div id="mid-infoJadwal" style="font-size:13px; font-weight:600; color:var(--text-sub); text-align:center; margin-bottom:12px; padding:5px;">Pilih tanggal untuk melihat jadwal.</div>
+      
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+        <button class="btn btn-accent" id="mid-btnHadirSemua" style="font-size:12px; padding:8px 14px;"><i class="fas fa-check-double"></i> Tandai Semua Hadir (H)</button>
+      </div>
+
+      <div class="legend-box">
+        <span class="legend-item"><span class="dot dot-h"></span> H: Hadir</span>
+        <span class="legend-item"><span class="dot dot-i"></span> I: Izin</span>
+        <span class="legend-item"><span class="dot dot-a"></span> A: Alpa</span>
+      </div>
+
       <!-- Tabs Hari Horizontal -->
-      <div class="hari-tabs-container" id="mi-hariTabs"></div>
+      <div class="hari-tabs-container" id="mid-hariTabs"></div>
       <!-- Panel Konten Hari -->
-      <div id="mi-hariContentPanels"></div>
-      <div class="master-actions" id="mi-areaAksiSimpan" style="display:none; margin-top:20px;">
-        <button class="btn-block-simpan" id="mi-btnSimpan">💾 Simpan Absensi</button>
-        <button class="btn btn-danger" id="mi-btnResetPilihan" style="margin-top:10px; box-shadow:4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff;">🔄 Reset Pilihan Hari Ini</button>
+      <div id="mid-hariContentPanels"></div>
+
+      <!-- Sticky Save Bar -->
+      <div class="sticky-save-bar" id="mid-areaAksiSimpan" style="display:none;">
+        <button class="btn-block-simpan" id="mid-btnSimpan"><i class="fas fa-save"></i> Simpan Absensi</button>
+        <button class="btn btn-danger" id="mid-btnResetPilihan" style="margin-top:8px; width:100%; box-shadow:none; background:transparent;">🔄 Reset Pilihan Hari Ini</button>
       </div>
-      <div id="mi-status" class="status-box"></div>
+
+      <div id="mid-status" class="status-box"></div>
     </div>
 
-    <!-- Panel Rekap MI -->
-    <div id="mi-panel-rekap" class="panel" style="display:none;">
+    <!-- Panel Rekap MID -->
+    <div id="mid-panel-rekap" class="panel" style="display:none;">
       <div class="nm-card">
         <div class="btn-row" style="margin-bottom:12px;">
           <div class="form-group" style="flex:2; margin-bottom:0;">
             <label>Bulan</label>
-            <select id="mi-bulanRekap">
+            <select id="mid-bulanRekap">
               <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
               <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
               <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
@@ -328,24 +497,29 @@
           </div>
           <div class="form-group" style="flex:1; margin-bottom:0;">
             <label>Tahun</label>
-            <input type="number" id="mi-tahunRekap" value="2026">
+            <input type="number" id="mid-tahunRekap" value="2026">
           </div>
         </div>
-        <button class="btn btn-primary" id="mi-btnRekap" style="width:100%;">Tampilkan Rekap</button>
+        <button class="btn btn-primary" id="mid-btnRekap" style="width:100%;">Tampilkan Rekap</button>
       </div>
-      <div class="table-container" id="mi-tabelRekap"></div>
+
+      <div class="form-group" id="mid-groupSearchGuru" style="display:none; margin-top:10px;">
+        <label>🔍 Cari Nama Guru</label>
+        <input type="text" id="mid-searchGuru" placeholder="Ketik nama guru untuk memfilter...">
+      </div>
+
+      <div class="table-container" id="mid-tabelRekap"></div>
       <div class="master-actions">
-        <button class="btn btn-accent" id="mi-btnExportExcel" style="display:none; width:100%;">📥 Export ke Excel (.xlsx)</button>
-        <button class="btn btn-danger" id="mi-btnClearAllDB" style="display:none; width:100%;">⚠️ Kosongkan Semua Database Absen</button>
+        <button class="btn btn-accent" id="mid-btnExportExcel" style="display:none; width:100%;">📥 Export ke Excel (.xlsx)</button>
       </div>
     </div>
 
-    <!-- Panel Pengaturan MI -->
-    <div id="mi-panel-pengaturan" class="panel" style="display:none;">
+    <!-- Panel Pengaturan MID -->
+    <div id="mid-panel-pengaturan" class="panel" style="display:none;">
       <div class="nm-card">
         <div class="form-group">
           <label>🛠️ Pilih Hari untuk Diedit</label>
-          <select id="mi-hariPengaturan">
+          <select id="mid-hariPengaturan">
             <option value="Senin">Senin</option><option value="Selasa">Selasa</option>
             <option value="Rabu">Rabu</option><option value="Kamis">Kamis</option>
             <option value="Jumat">Jumat (Libur)</option><option value="Sabtu">Sabtu</option>
@@ -353,23 +527,31 @@
           </select>
         </div>
       </div>
-      <div id="mi-editJadwalContainer"></div>
+      <div id="mid-editJadwalContainer"></div>
       <div class="master-actions">
-        <button class="btn btn-accent" id="mi-btnTambahBaris">➕ Tambah Jadwal Baru</button>
-        <button class="btn-block-simpan" id="mi-btnSimpanPengaturan">💾 Simpan Perubahan Jadwal</button>
-        <button class="btn btn-danger" id="mi-btnResetJadwalDefault" style="margin-top:10px; box-shadow:4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff;">⚠️ Kembalikan ke Jadwal Asli (Default)</button>
+        <button class="btn btn-accent" id="mid-btnTambahBaris">➕ Tambah Jadwal Baru</button>
+        <button class="btn-block-simpan" id="mid-btnSimpanPengaturan">💾 Simpan Perubahan Jadwal</button>
+        <button class="btn btn-danger" id="mid-btnResetJadwalDefault" style="margin-top:10px;">⚠️ Kembalikan ke Jadwal Asli (Default)</button>
       </div>
-      <div id="mi-statusPengaturan" class="status-box"></div>
+
+      <!-- Zona Bahaya MID -->
+      <div class="danger-zone">
+        <h4 style="color: var(--danger-text); font-size: 0.9rem; margin-bottom: 6px;"><i class="fas fa-exclamation-triangle"></i> Zona Bahaya (Danger Zone)</h4>
+        <p style="font-size: 0.75rem; color: var(--danger-text); opacity:0.8; margin-bottom: 12px;">Tindakan ini permanen. Auto-backup otomatis terunduh sebelum penghapusan.</p>
+        <button class="btn btn-danger" id="mid-btnClearAllDB" style="width:100%; border:1px solid var(--danger-border);">🔥 Kosongkan Database Absen MID</button>
+      </div>
+
+      <div id="mid-statusPengaturan" class="status-box"></div>
     </div>
   </div>
 
   <!-- MODUL MTsD -->
   <div id="module-mtsd" class="module-container">
-    <div class="nm-card" style="box-shadow:9px 9px 16px #d1d9e6, -9px -9px 16px #ffffff; text-align:center; padding:12px; margin-bottom:16px;">
-      <h2 style="font-size:1.2rem; color:#2d3748;"><i class="fas fa-mosque"></i> MTsD</h2>
+    <div class="nm-card" style="text-align:center; padding:12px; margin-bottom:16px;">
+      <h2 style="font-size:1.2rem; color:var(--text-header);"><i class="fas fa-mosque"></i> MTsD</h2>
     </div>
 
-    <div class="tab-bar" style="display:flex; gap:8px; margin-bottom:20px; background:#eef2f7; padding:6px; border-radius:16px; box-shadow:inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff; overflow-x:auto;">
+    <div class="tab-bar" style="display:flex; gap:8px; margin-bottom:20px; background:var(--bg-card); padding:6px; border-radius:16px; box-shadow:var(--shadow-in); overflow-x:auto;">
       <button class="btn mtsd-tab-btn active" data-tab="absen"><i class="fas fa-pen"></i> Absen Harian</button>
       <button class="btn mtsd-tab-btn" data-tab="rekap"><i class="fas fa-chart-bar"></i> Rekap Bulanan</button>
       <button class="btn mtsd-tab-btn" data-tab="pengaturan"><i class="fas fa-cog"></i> Pengaturan</button>
@@ -378,18 +560,40 @@
     <!-- Panel Absen MTsD -->
     <div id="mtsd-panel-absen" class="panel" style="display:block;">
       <div class="nm-card">
-        <div class="form-group"><label>📅 Tanggal Operasional</label><input type="date" id="mtsd-tanggal"></div>
+        <div class="form-group">
+          <label>📅 Tanggal Operasional</label>
+          <div class="date-picker-row">
+            <button class="date-nav-btn" id="mtsd-btnPrevDate"><i class="fas fa-chevron-left"></i></button>
+            <input type="date" id="mtsd-tanggal" style="flex:1;">
+            <button class="date-nav-btn" id="mtsd-btnNextDate"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
         <button class="btn btn-accent" id="mtsd-btnHariIni" style="width:100%;">📅 Pakai Tanggal Hari Ini</button>
       </div>
-      <div id="mtsd-infoJadwal" style="font-size:13px; font-weight:600; color:#718096; text-align:center; margin-bottom:15px; padding:5px;">Pilih tanggal untuk melihat jadwal.</div>
+
+      <div id="mtsd-infoJadwal" style="font-size:13px; font-weight:600; color:var(--text-sub); text-align:center; margin-bottom:12px; padding:5px;">Pilih tanggal untuk melihat jadwal.</div>
+      
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+        <button class="btn btn-accent" id="mtsd-btnHadirSemua" style="font-size:12px; padding:8px 14px;"><i class="fas fa-check-double"></i> Tandai Semua Hadir (H)</button>
+      </div>
+
+      <div class="legend-box">
+        <span class="legend-item"><span class="dot dot-h"></span> H: Hadir</span>
+        <span class="legend-item"><span class="dot dot-i"></span> I: Izin</span>
+        <span class="legend-item"><span class="dot dot-a"></span> A: Alpa</span>
+      </div>
+
       <!-- Tabs Hari Horizontal -->
       <div class="hari-tabs-container" id="mtsd-hariTabs"></div>
       <!-- Panel Konten Hari -->
       <div id="mtsd-hariContentPanels"></div>
-      <div class="master-actions" id="mtsd-areaAksiSimpan" style="display:none; margin-top:20px;">
-        <button class="btn-block-simpan" id="mtsd-btnSimpan">💾 Simpan Absensi</button>
-        <button class="btn btn-danger" id="mtsd-btnResetPilihan" style="margin-top:10px; box-shadow:4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff;">🔄 Reset Pilihan Hari Ini</button>
+
+      <!-- Sticky Save Bar -->
+      <div class="sticky-save-bar" id="mtsd-areaAksiSimpan" style="display:none;">
+        <button class="btn-block-simpan" id="mtsd-btnSimpan"><i class="fas fa-save"></i> Simpan Absensi</button>
+        <button class="btn btn-danger" id="mtsd-btnResetPilihan" style="margin-top:8px; width:100%; box-shadow:none; background:transparent;">🔄 Reset Pilihan Hari Ini</button>
       </div>
+
       <div id="mtsd-status" class="status-box"></div>
     </div>
 
@@ -402,10 +606,15 @@
         </div>
         <button class="btn btn-primary" id="mtsd-btnRekap" style="width:100%;">Tampilkan Rekap</button>
       </div>
+
+      <div class="form-group" id="mtsd-groupSearchGuru" style="display:none; margin-top:10px;">
+        <label>🔍 Cari Nama Guru</label>
+        <input type="text" id="mtsd-searchGuru" placeholder="Ketik nama guru untuk memfilter...">
+      </div>
+
       <div class="table-container" id="mtsd-tabelRekap"></div>
       <div class="master-actions">
         <button class="btn btn-accent" id="mtsd-btnExportExcel" style="display:none; width:100%;">📥 Export ke Excel (.xlsx)</button>
-        <button class="btn btn-danger" id="mtsd-btnClearAllDB" style="display:none; width:100%;">⚠️ Kosongkan Semua Database Absen</button>
       </div>
     </div>
 
@@ -418,19 +627,43 @@
       <div class="master-actions">
         <button class="btn btn-accent" id="mtsd-btnTambahBaris">➕ Tambah Jadwal Baru</button>
         <button class="btn-block-simpan" id="mtsd-btnSimpanPengaturan">💾 Simpan Perubahan Jadwal</button>
-        <button class="btn btn-danger" id="mtsd-btnResetJadwalDefault" style="margin-top:10px; box-shadow:4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff;">⚠️ Kembalikan ke Jadwal Asli (Default)</button>
+        <button class="btn btn-danger" id="mtsd-btnResetJadwalDefault" style="margin-top:10px;">⚠️ Kembalikan ke Jadwal Asli (Default)</button>
       </div>
+
+      <!-- Zona Bahaya MTsD -->
+      <div class="danger-zone">
+        <h4 style="color: var(--danger-text); font-size: 0.9rem; margin-bottom: 6px;"><i class="fas fa-exclamation-triangle"></i> Zona Bahaya (Danger Zone)</h4>
+        <p style="font-size: 0.75rem; color: var(--danger-text); opacity:0.8; margin-bottom: 12px;">Tindakan ini permanen. Auto-backup otomatis terunduh sebelum penghapusan.</p>
+        <button class="btn btn-danger" id="mtsd-btnClearAllDB" style="width:100%; border:1px solid var(--danger-border);">🔥 Kosongkan Database Absen MTsD</button>
+      </div>
+
       <div id="mtsd-statusPengaturan" class="status-box"></div>
     </div>
   </div>
 
-  <div style="text-align:center; font-size:0.8rem; color:#4a5568; margin-top:30px; border-top:2px dashed #b8c6db; padding-top:16px;">
-    <span style="background:#eef2f7; padding:6px 14px; border-radius:20px; box-shadow:4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff; display:inline-flex; align-items:center; gap:6px;">© 2026 – Terintegrasi & Seragam</span>
+  <div style="text-align:center; font-size:0.8rem; color:var(--text-sub); margin-top:30px; border-top:2px dashed #818cf855; padding-top:16px;">
+    <span style="background:var(--bg-card); padding:6px 14px; border-radius:20px; box-shadow:var(--shadow-out); display:inline-flex; align-items:center; gap:6px;">© 2026 – Terintegrasi & Seragam Pro</span>
   </div>
 </div>
 
 <script>
-  // === ISI CONFIG FIREBASE LO DI SINI (dari Firebase Console > Project Settings > Web App) ===
+  // TEMA DARK MODE HANDLER
+  const btnTheme = document.getElementById('btnThemeToggle');
+  const savedTheme = localStorage.getItem('app_theme');
+
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+    btnTheme.innerHTML = '<i class="fas fa-sun" style="color:#f59e0b;"></i>';
+  }
+
+  btnTheme.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    localStorage.setItem('app_theme', isDark ? 'dark' : 'light');
+    btnTheme.innerHTML = isDark ? '<i class="fas fa-sun" style="color:#f59e0b;"></i>' : '<i class="fas fa-moon"></i>';
+  });
+
+  // CONFIG FIREBASE
   const firebaseConfig = {
     apiKey: "AIzaSyCnLPbLi5a0REFooVcRdIeJGPi0OyvPb24",
     databaseURL: "https://absenputri-5d8a1-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -443,7 +676,6 @@
     return String(s).trim().replace(/[.#$\[\]\/]/g, '_');
   }
 
-  // Simpan absensi ke Firebase (key deterministik = otomatis anti-double, timpa kalau sama)
   function kirimKeFirebase(tanggal, lembaga, records) {
     const lembagaKey = slugKey(lembaga);
     records.forEach(rec => {
@@ -453,7 +685,6 @@
     });
   }
 
-  // Tarik semua data absensi lembaga tertentu dari Firebase
   function tarikDataDariFirebase(lembaga) {
     const lembagaKey = slugKey(lembaga);
     return db.ref('absensi/' + lembagaKey).once('value')
@@ -468,7 +699,6 @@
       .catch(err => { console.error('Gagal tarik data Firebase:', err); return []; });
   }
 
-  // Gabungkan data dari Firebase ke data lokal (Firebase jadi acuan utama, key sudah unik jadi gak akan double)
   function gabungkanDataSheet(dataLokal, dataSheet) {
     const kunci = r => [r.tanggal, r.lembaga, r.kelas, r.jam, r.guru].join('|');
     const map = {};
@@ -477,15 +707,12 @@
     return Object.values(map);
   }
 
-  function getLocalISOString() {
-    const d = new Date();
+  function getLocalISOString(dateObj) {
+    const d = dateObj ? new Date(dateObj) : new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
 
-  // ========================================================================
-  // DATA DEFAULT MI
-  // ========================================================================
-  const defaultDataMI = [
+  const defaultDataMID = [
     { hari: 'Ahad', kelas: 'IV J', jam: 'Jam 1', mapel: 'بداية الهداية', guru: 'الأستاذ إيندرا وحيودي' },
     { hari: 'Ahad', kelas: 'IV J', jam: 'Jam 2', mapel: 'تنقيح القول', guru: 'الأستاذ بدر الدين' },
     { hari: 'Senin', kelas: 'IV J', jam: 'Jam 1', mapel: 'مختصر جدا', guru: 'الأستاذ بدر الدين' },
@@ -644,9 +871,6 @@
     { hari: 'Sabtu', kelas: 'VI J', jam: 'Jam 2', mapel: 'منح السنية', guru: 'الأستاذ نور حافي' }
   ];
 
-  // ========================================================================
-  // DATA DEFAULT MTsD
-  // ========================================================================
   const jadwalDefaultMTsD = {
     'Senin': [
       { kelas: 'الأول (د)', jam: 'Jam 1', mapel: 'بلوغ المرام', guru: 'الأستاذ محمد شرطا' },
@@ -737,26 +961,25 @@
 
   const LIST_HARI = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Ahad'];
 
-  // ========================================================================
-  // MODUL MI
-  // ========================================================================
-  function initModulMI() {
-    const P = 'mi-';
+  // MODUL MID
+  function initModulMID() {
+    const P = 'mid-';
     const $ = function(id) { return document.getElementById(P + id); };
 
     let dataAbsensi = [];
     let jadwalAktif = {};
     let hariAktifDipilih = 'Senin';
+    let isDirty = false;
 
     function loadSemuaData() {
-      const savedAbsen = localStorage.getItem('mi_absenGuru');
+      const savedAbsen = localStorage.getItem('mid_absenGuru') || localStorage.getItem('mi_absenGuru');
       dataAbsensi = savedAbsen ? JSON.parse(savedAbsen) : [];
-      const savedJadwal = localStorage.getItem('mi_jadwalCustom');
+      const savedJadwal = localStorage.getItem('mid_jadwalCustom') || localStorage.getItem('mi_jadwalCustom');
       if (savedJadwal) {
         jadwalAktif = JSON.parse(savedJadwal);
       } else {
         const grouped = {};
-        defaultDataMI.forEach(item => {
+        defaultDataMID.forEach(item => {
           if (!grouped[item.hari]) grouped[item.hari] = [];
           grouped[item.hari].push({ kelas: item.kelas, jam: item.jam, mapel: item.mapel, guru: item.guru });
         });
@@ -764,8 +987,20 @@
       }
     }
 
-    function saveDataAbsen() { localStorage.setItem('mi_absenGuru', JSON.stringify(dataAbsensi)); }
-    function saveJadwalCustom() { localStorage.setItem('mi_jadwalCustom', JSON.stringify(jadwalAktif)); }
+    function saveDataAbsen() { localStorage.setItem('mid_absenGuru', JSON.stringify(dataAbsensi)); }
+    function saveJadwalCustom() { localStorage.setItem('mid_jadwalCustom', JSON.stringify(jadwalAktif)); }
+
+    function shiftDate(offsetDays) {
+      if (isDirty && !confirm("Ada perubahan absensi yang belum disimpan. Yakin mau pindah tanggal?")) return;
+      const cur = $('tanggal').value;
+      if (!cur) return;
+      const d = new Date(cur);
+      d.setDate(d.getDate() + offsetDays);
+      const newStr = getLocalISOString(d);
+      $('tanggal').value = newStr;
+      isDirty = false;
+      renderSemuaHari(newStr);
+    }
 
     function renderHariTabs(tanggal) {
       const container = $('hariTabs');
@@ -789,7 +1024,9 @@
 
       container.querySelectorAll('.hari-tab-btn').forEach(btn => {
         btn.addEventListener('click', function() {
+          if (isDirty && !confirm("Ada pilihan yang belum disimpan! Yakin ingin pindah hari?")) return;
           hariAktifDipilih = this.dataset.hari;
+          isDirty = false;
           container.querySelectorAll('.hari-tab-btn').forEach(b => b.classList.remove('active'));
           this.classList.add('active');
           renderKontenHariDipilih(tanggal);
@@ -835,6 +1072,7 @@
 
       panelContainer.querySelectorAll('.btn-hia').forEach(btn => {
         btn.addEventListener('click', function() {
+          isDirty = true;
           const parent = this.closest('.btn-group-hia');
           if (this.classList.contains('active')) {
             this.classList.remove('active');
@@ -865,10 +1103,10 @@
       renderKontenHariDipilih(tanggal);
 
       const hasAnyJadwal = LIST_HARI.some(h => (jadwalAktif[h] || []).length > 0);
-      $('areaAksiSimpan').style.display = hasAnyJadwal ? 'flex' : 'none';
+      $('areaAksiSimpan').style.display = hasAnyJadwal ? 'block' : 'none';
 
       if (!tanpaSync) {
-        tarikDataDariFirebase('MI Miftahul Ulum').then(dataSheet => {
+        tarikDataDariFirebase('MID').then(dataSheet => {
           const sebelumnya = JSON.stringify(dataAbsensi);
           dataAbsensi = gabungkanDataSheet(dataAbsensi, dataSheet);
           if (JSON.stringify(dataAbsensi) !== sebelumnya) {
@@ -883,7 +1121,7 @@
       const tanggal = $('tanggal').value;
       if (!tanggal) return;
       dataAbsensi = dataAbsensi.filter(a => a.tanggal !== tanggal);
-      const cards = document.querySelectorAll('#mi-hariContentPanels .guru-card');
+      const cards = document.querySelectorAll('#mid-hariContentPanels .guru-card');
       let savedCount = 0;
       const recordsForSheet = [];
       
@@ -891,7 +1129,7 @@
         const activeBtn = card.querySelector('.btn-group-hia .active');
         if (activeBtn) {
           const record = {
-            tanggal, lembaga: 'MI Miftahul Ulum',
+            tanggal, lembaga: 'MID',
             kelas: activeBtn.dataset.kelas, jam: activeBtn.dataset.jam,
             mapel: activeBtn.dataset.mapel, guru: activeBtn.dataset.guru,
             status: activeBtn.dataset.status
@@ -908,25 +1146,39 @@
         statusEl.className = 'status-box status-error';
       } else {
         saveDataAbsen();
+        isDirty = false;
         statusEl.innerHTML = `✅ Sukses! ${savedCount} data absensi berhasil disimpan.`;
         statusEl.className = 'status-box status-success';
         if (typeof kirimKeFirebase === 'function') {
-          kirimKeFirebase(tanggal, 'MI Miftahul Ulum', recordsForSheet);
+          kirimKeFirebase(tanggal, 'MID', recordsForSheet);
         }
       }
       setTimeout(() => { statusEl.style.display = 'none'; }, 3500);
     }
 
+    function tandaiSemuaHadir() {
+      const cards = document.querySelectorAll('#mid-hariContentPanels .guru-card');
+      if (cards.length === 0) return;
+      cards.forEach(card => {
+        const btnH = card.querySelector('.btn-hia.btn-h');
+        const parent = card.querySelector('.btn-group-hia');
+        parent.querySelectorAll('.btn-hia').forEach(b => b.classList.remove('active'));
+        if (btnH) btnH.classList.add('active');
+      });
+      isDirty = true;
+    }
+
     function resetPilihanHariIni() {
       if (confirm("Hapus semua tanda pilihan H/I/A untuk tanggal ini?")) {
-        document.querySelectorAll('#mi-hariContentPanels .btn-hia').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('#mid-hariContentPanels .btn-hia').forEach(b => b.classList.remove('active'));
+        isDirty = true;
       }
     }
 
     function tampilkanRekap() {
       const container = $('tabelRekap');
-      container.innerHTML = '<div style="padding:20px;text-align:center;color:#a0aec0;font-weight:600;">🔄 Menarik data terbaru dari Sheet...</div>';
-      tarikDataDariFirebase('MI Miftahul Ulum').then(dataSheet => {
+      container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-sub);font-weight:600;">🔄 Menarik data terbaru...</div>';
+      tarikDataDariFirebase('MID').then(dataSheet => {
         dataAbsensi = gabungkanDataSheet(dataAbsensi, dataSheet);
         saveDataAbsen();
         renderRekapDariData();
@@ -949,37 +1201,71 @@
       });
       const container = $('tabelRekap');
       const exportBtn = $('btnExportExcel');
-      const clearBtn = $('btnClearAllDB');
+      const searchGroup = $('groupSearchGuru');
       const listNamaGuru = Object.keys(rekap).sort();
       if (listNamaGuru.length === 0) {
-        container.innerHTML = '<div style="padding:30px;text-align:center;color:#a0aec0;font-weight:600;">Belum ada data rekap pada bulan ini.</div>';
-        exportBtn.style.display = 'none'; clearBtn.style.display = 'block'; return;
+        container.innerHTML = '<div style="padding:30px;text-align:center;color:var(--text-sub);font-weight:600;">Belum ada data rekap pada bulan ini.</div>';
+        exportBtn.style.display = 'none'; searchGroup.style.display = 'none'; return;
       }
-      let html = `<table><thead><tr><th>Nama Guru</th><th style="text-align:center;">H</th><th style="text-align:center;">I</th><th style="text-align:center;">A</th><th style="text-align:center;">Total</th></tr></thead><tbody>`;
+      searchGroup.style.display = 'block';
+      let html = `<table id="mid-table-data"><thead><tr><th>Nama Guru</th><th style="text-align:center;">H</th><th style="text-align:center;">I</th><th style="text-align:center;">A</th><th style="text-align:center;">Total</th></tr></thead><tbody>`;
       listNamaGuru.forEach(guru => {
         const data = rekap[guru]; const totalJam = data.h + data.i + data.a;
-        html += `<tr><td><strong class="arab-text" style="font-size:15px;color:#2d3748;">${guru}</strong></td><td style="color:#2e7d32;font-weight:700;text-align:center;">${data.h}</td><td style="color:#dd6b20;font-weight:700;text-align:center;">${data.i}</td><td style="color:#e53e3e;font-weight:700;text-align:center;">${data.a}</td><td style="font-weight:700;text-align:center;color:#1a237e;">${totalJam}</td></tr>`;
+        html += `<tr><td><strong class="arab-text" style="font-size:15px;color:var(--text-main);">${guru}</strong></td><td style="color:#10b981;font-weight:700;text-align:center;">${data.h}</td><td style="color:#f59e0b;font-weight:700;text-align:center;">${data.i}</td><td style="color:#ef4444;font-weight:700;text-align:center;">${data.a}</td><td style="font-weight:700;text-align:center;color:#818cf8;">${totalJam}</td></tr>`;
       });
       html += '</tbody></table>';
       container.innerHTML = html;
-      exportBtn.style.display = 'block'; clearBtn.style.display = 'block';
+      exportBtn.style.display = 'block';
+    }
+
+    function filterRekapGuru() {
+      const query = $('searchGuru').value.toLowerCase();
+      const rows = document.querySelectorAll('#mid-table-data tbody tr');
+      rows.forEach(r => {
+        const text = r.textContent.toLowerCase();
+        r.style.display = text.includes(query) ? '' : 'none';
+      });
     }
 
     function exportKeExcel() {
       const bSel = $('bulanRekap');
       const nBulan = bSel.options[bSel.selectedIndex].text;
       const tahun = $('tahunRekap').value;
-      const table = document.querySelector("#mi-tabelRekap table");
+      const table = document.querySelector("#mid-tabelRekap table");
       if (!table) return;
       const wb = XLSX.utils.table_to_book(table, { sheet: "Rekap" });
-      XLSX.writeFile(wb, `Rekap_Absensi_MI_${nBulan}_${tahun}.xlsx`);
+      XLSX.writeFile(wb, `Rekap_Absensi_MID_${nBulan}_${tahun}.xlsx`);
     }
 
     function clearAllDatabase() {
-      if (confirm("🚨 PERINGATAN!\nHapus SELURUH data absensi MI?")) {
-        localStorage.removeItem('mi_absenGuru');
-        dataAbsensi = []; tampilkanRekap(); renderSemuaHari($('tanggal').value);
-        alert("Database absensi MI dikosongkan total.");
+      if (dataAbsensi.length === 0) {
+        alert("Database absensi MID saat ini sudah kosong.");
+        return;
+      }
+      const kataKunci = "HAPUS MID";
+      const konfirmasi = prompt(
+        `🚨 PERINGATAN BAHAYA!\n\n` +
+        `Anda akan menghapus SELURUH (${dataAbsensi.length}) data absensi MID secara permanen.\n\n` +
+        `Ketik '${kataKunci}' di bawah ini untuk mengonfirmasi:`
+      );
+
+      if (konfirmasi === kataKunci) {
+        try {
+          const dataBackup = JSON.stringify(dataAbsensi, null, 2);
+          const blob = new Blob([dataBackup], { type: 'application/json' });
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = `Backup_Absensi_MID_Sebelum_Hapus_${getLocalISOString()}.json`;
+          link.click();
+        } catch (err) { console.error("Auto backup error:", err); }
+
+        localStorage.removeItem('mid_absenGuru');
+        dataAbsensi = [];
+        tampilkanRekap();
+        renderSemuaHari($('tanggal').value);
+        alert("✅ Database absensi MID telah dikosongkan. Salinan cadangan (backup JSON) otomatis diunduh.");
+      } else if (konfirmasi !== null) {
+        alert("❌ Teks konfirmasi salah. Penghapusan dibatalkan.");
       }
     }
 
@@ -989,7 +1275,7 @@
       const items = jadwalAktif[hari] || [];
       container.innerHTML = '';
       if (items.length === 0) {
-        container.innerHTML = '<div style="text-align:center;color:#718096;padding:20px;">Tidak ada jadwal di hari ini. Klik "Tambah Jadwal Baru" di bawah.</div>';
+        container.innerHTML = '<div style="text-align:center;color:var(--text-sub);padding:20px;">Tidak ada jadwal di hari ini. Klik "Tambah Jadwal Baru" di bawah.</div>';
         return;
       }
       items.forEach(item => tambahkanBarisForm(item.kelas, item.jam, item.mapel, item.guru));
@@ -1006,13 +1292,13 @@
           <button class="btn-delete-row" onclick="this.parentElement.parentElement.remove()">X</button>
         </div>
         <div class="edit-row"><input type="text" class="edit-input inp-mapel arab-text" placeholder="Mata Pelajaran" value="${mapel}" style="flex:1;"></div>
-        <div class="edit-row"><input type="text" class="edit-input inp-guru arab-text" placeholder="Nama Guru" value="${guru}" style="flex:1;color:#1a237e;font-weight:600;"></div>`;
+        <div class="edit-row"><input type="text" class="edit-input inp-guru arab-text" placeholder="Nama Guru" value="${guru}" style="flex:1;color:#818cf8;font-weight:600;"></div>`;
       container.appendChild(row);
     }
 
     function simpanPerubahanJadwal() {
       const hari = $('hariPengaturan').value;
-      const barisList = document.querySelectorAll('#mi-editJadwalContainer .item-jadwal-row');
+      const barisList = document.querySelectorAll('#mid-editJadwalContainer .item-jadwal-row');
       const jadwalBaru = [];
       barisList.forEach(baris => {
         const jam = baris.querySelector('.inp-jam').value.trim();
@@ -1031,10 +1317,10 @@
     }
 
     function kembalikanJadwalDefault() {
-      if (confirm("⚠️ Yakin ingin mereset jadwal MI ke pengaturan pabrik?")) {
-        localStorage.removeItem('mi_jadwalCustom');
+      if (confirm("⚠️ Yakin ingin mereset jadwal MID ke pengaturan pabrik?")) {
+        localStorage.removeItem('mid_jadwalCustom');
         const grouped = {};
-        defaultDataMI.forEach(item => {
+        defaultDataMID.forEach(item => {
           if (!grouped[item.hari]) grouped[item.hari] = [];
           grouped[item.hari].push({ kelas: item.kelas, jam: item.jam, mapel: item.mapel, guru: item.guru });
         });
@@ -1042,7 +1328,7 @@
         saveJadwalCustom();
         renderFormPengaturan();
         renderSemuaHari($('tanggal').value);
-        alert("Jadwal MI berhasil dikembalikan ke versi asli.");
+        alert("Jadwal MID berhasil dikembalikan ke versi asli.");
       }
     }
 
@@ -1053,12 +1339,13 @@
     $('tahunRekap').value = d.getFullYear();
     $('bulanRekap').value = d.getMonth() + 1;
 
-    document.querySelectorAll('.mi-tab-btn').forEach(btn => {
+    document.querySelectorAll('.mid-tab-btn').forEach(btn => {
       btn.addEventListener('click', function() {
-        document.querySelectorAll('.mi-tab-btn').forEach(b => b.classList.remove('active'));
+        if (isDirty && !confirm("Ada pilihan yang belum disimpan! Yakin ingin pindah menu?")) return;
+        document.querySelectorAll('.mid-tab-btn').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
         const tabName = this.dataset.tab;
-        document.querySelectorAll('#module-mi .panel').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('#module-mid .panel').forEach(p => p.style.display = 'none');
         const panel = document.getElementById(P + 'panel-' + tabName);
         if (panel) panel.style.display = 'block';
         if (tabName === 'rekap') tampilkanRekap();
@@ -1066,15 +1353,21 @@
       });
     });
 
-    $('tanggal').addEventListener('change', () => renderSemuaHari($('tanggal').value));
+    $('tanggal').addEventListener('change', () => { isDirty = false; renderSemuaHari($('tanggal').value); });
+    $('btnPrevDate').addEventListener('click', () => shiftDate(-1));
+    $('btnNextDate').addEventListener('click', () => shiftDate(1));
     $('btnHariIni').addEventListener('click', () => {
+      if (isDirty && !confirm("Ada perubahan yang belum disimpan! Yakin mau reset ke hari ini?")) return;
       const tgl = getLocalISOString();
       $('tanggal').value = tgl;
+      isDirty = false;
       renderSemuaHari(tgl);
     });
+    $('btnHadirSemua').addEventListener('click', tandaiSemuaHadir);
     $('btnSimpan').addEventListener('click', simpanAbsensi);
     $('btnResetPilihan').addEventListener('click', resetPilihanHariIni);
     $('btnRekap').addEventListener('click', tampilkanRekap);
+    $('searchGuru').addEventListener('input', filterRekapGuru);
     $('btnExportExcel').addEventListener('click', exportKeExcel);
     $('btnClearAllDB').addEventListener('click', clearAllDatabase);
     $('hariPengaturan').addEventListener('change', renderFormPengaturan);
@@ -1085,9 +1378,7 @@
     renderSemuaHari(todayStr);
   }
 
-  // ========================================================================
   // MODUL MTsD
-  // ========================================================================
   function initModulMTsD() {
     const P = 'mtsd-';
     const $ = function(id) { return document.getElementById(P + id); };
@@ -1095,6 +1386,7 @@
     let dataAbsensi = [];
     let jadwalAktif = {};
     let hariAktifDipilih = 'Senin';
+    let isDirty = false;
 
     function loadSemuaData() {
       const savedAbsen = localStorage.getItem('mtsd_absenGuru');
@@ -1105,6 +1397,18 @@
 
     function saveDataAbsen() { localStorage.setItem('mtsd_absenGuru', JSON.stringify(dataAbsensi)); }
     function saveJadwalCustom() { localStorage.setItem('mtsd_jadwalCustom', JSON.stringify(jadwalAktif)); }
+
+    function shiftDate(offsetDays) {
+      if (isDirty && !confirm("Ada perubahan absensi yang belum disimpan. Yakin mau pindah tanggal?")) return;
+      const cur = $('tanggal').value;
+      if (!cur) return;
+      const d = new Date(cur);
+      d.setDate(d.getDate() + offsetDays);
+      const newStr = getLocalISOString(d);
+      $('tanggal').value = newStr;
+      isDirty = false;
+      renderSemuaHari(newStr);
+    }
 
     function renderHariTabs(tanggal) {
       const container = $('hariTabs');
@@ -1128,7 +1432,9 @@
 
       container.querySelectorAll('.hari-tab-btn').forEach(btn => {
         btn.addEventListener('click', function() {
+          if (isDirty && !confirm("Ada pilihan yang belum disimpan! Yakin ingin pindah hari?")) return;
           hariAktifDipilih = this.dataset.hari;
+          isDirty = false;
           container.querySelectorAll('.hari-tab-btn').forEach(b => b.classList.remove('active'));
           this.classList.add('active');
           renderKontenHariDipilih(tanggal);
@@ -1174,6 +1480,7 @@
 
       panelContainer.querySelectorAll('.btn-hia').forEach(btn => {
         btn.addEventListener('click', function() {
+          isDirty = true;
           const parent = this.closest('.btn-group-hia');
           if (this.classList.contains('active')) {
             this.classList.remove('active');
@@ -1204,7 +1511,7 @@
       renderKontenHariDipilih(tanggal);
 
       const hasAnyJadwal = LIST_HARI.some(h => (jadwalAktif[h] || []).length > 0);
-      $('areaAksiSimpan').style.display = hasAnyJadwal ? 'flex' : 'none';
+      $('areaAksiSimpan').style.display = hasAnyJadwal ? 'block' : 'none';
 
       if (!tanpaSync) {
         tarikDataDariFirebase('MTsD').then(dataSheet => {
@@ -1247,6 +1554,7 @@
         statusEl.className = 'status-box status-error';
       } else {
         saveDataAbsen();
+        isDirty = false;
         statusEl.innerHTML = `✅ Sukses! ${savedCount} data absensi berhasil disimpan.`;
         statusEl.className = 'status-box status-success';
         if (typeof kirimKeFirebase === 'function') {
@@ -1256,15 +1564,28 @@
       setTimeout(() => { statusEl.style.display = 'none'; }, 3500);
     }
 
+    function tandaiSemuaHadir() {
+      const cards = document.querySelectorAll('#mtsd-hariContentPanels .guru-card');
+      if (cards.length === 0) return;
+      cards.forEach(card => {
+        const btnH = card.querySelector('.btn-hia.btn-h');
+        const parent = card.querySelector('.btn-group-hia');
+        parent.querySelectorAll('.btn-hia').forEach(b => b.classList.remove('active'));
+        if (btnH) btnH.classList.add('active');
+      });
+      isDirty = true;
+    }
+
     function resetPilihanHariIni() {
       if (confirm("Hapus semua tanda pilihan H/I/A untuk tanggal ini?")) {
         document.querySelectorAll('#mtsd-hariContentPanels .btn-hia').forEach(b => b.classList.remove('active'));
+        isDirty = true;
       }
     }
 
     function tampilkanRekap() {
       const container = $('tabelRekap');
-      container.innerHTML = '<div style="padding:20px;text-align:center;color:#a0aec0;font-weight:600;">🔄 Menarik data terbaru dari Sheet...</div>';
+      container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-sub);font-weight:600;">🔄 Menarik data terbaru...</div>';
       tarikDataDariFirebase('MTsD').then(dataSheet => {
         dataAbsensi = gabungkanDataSheet(dataAbsensi, dataSheet);
         saveDataAbsen();
@@ -1288,20 +1609,30 @@
       });
       const container = $('tabelRekap');
       const exportBtn = $('btnExportExcel');
-      const clearBtn = $('btnClearAllDB');
+      const searchGroup = $('groupSearchGuru');
       const listNamaGuru = Object.keys(rekap).sort();
       if (listNamaGuru.length === 0) {
-        container.innerHTML = '<div style="padding:30px;text-align:center;color:#a0aec0;font-weight:600;">Belum ada data rekap pada bulan ini.</div>';
-        exportBtn.style.display = 'none'; clearBtn.style.display = 'block'; return;
+        container.innerHTML = '<div style="padding:30px;text-align:center;color:var(--text-sub);font-weight:600;">Belum ada data rekap pada bulan ini.</div>';
+        exportBtn.style.display = 'none'; searchGroup.style.display = 'none'; return;
       }
-      let html = `<table><thead><tr><th>Nama Guru</th><th style="text-align:center;">H</th><th style="text-align:center;">I</th><th style="text-align:center;">A</th><th style="text-align:center;">Total</th></tr></thead><tbody>`;
+      searchGroup.style.display = 'block';
+      let html = `<table id="mtsd-table-data"><thead><tr><th>Nama Guru</th><th style="text-align:center;">H</th><th style="text-align:center;">I</th><th style="text-align:center;">A</th><th style="text-align:center;">Total</th></tr></thead><tbody>`;
       listNamaGuru.forEach(guru => {
         const data = rekap[guru]; const totalJam = data.h + data.i + data.a;
-        html += `<tr><td><strong class="arab-text" style="font-size:15px;color:#2d3748;">${guru}</strong></td><td style="color:#2e7d32;font-weight:700;text-align:center;">${data.h}</td><td style="color:#dd6b20;font-weight:700;text-align:center;">${data.i}</td><td style="color:#e53e3e;font-weight:700;text-align:center;">${data.a}</td><td style="font-weight:700;text-align:center;color:#1a237e;">${totalJam}</td></tr>`;
+        html += `<tr><td><strong class="arab-text" style="font-size:15px;color:var(--text-main);">${guru}</strong></td><td style="color:#10b981;font-weight:700;text-align:center;">${data.h}</td><td style="color:#f59e0b;font-weight:700;text-align:center;">${data.i}</td><td style="color:#ef4444;font-weight:700;text-align:center;">${data.a}</td><td style="font-weight:700;text-align:center;color:#818cf8;">${totalJam}</td></tr>`;
       });
       html += '</tbody></table>';
       container.innerHTML = html;
-      exportBtn.style.display = 'block'; clearBtn.style.display = 'block';
+      exportBtn.style.display = 'block';
+    }
+
+    function filterRekapGuru() {
+      const query = $('searchGuru').value.toLowerCase();
+      const rows = document.querySelectorAll('#mtsd-table-data tbody tr');
+      rows.forEach(r => {
+        const text = r.textContent.toLowerCase();
+        r.style.display = text.includes(query) ? '' : 'none';
+      });
     }
 
     function exportKeExcel() {
@@ -1315,10 +1646,34 @@
     }
 
     function clearAllDatabase() {
-      if (confirm("🚨 PERINGATAN!\nHapus SELURUH data absensi MTsD?")) {
+      if (dataAbsensi.length === 0) {
+        alert("Database absensi MTsD saat ini sudah kosong.");
+        return;
+      }
+      const kataKunci = "HAPUS MTSD";
+      const konfirmasi = prompt(
+        `🚨 PERINGATAN BAHAYA!\n\n` +
+        `Anda akan menghapus SELURUH (${dataAbsensi.length}) data absensi MTsD secara permanen.\n\n` +
+        `Ketik '${kataKunci}' di bawah ini untuk mengonfirmasi:`
+      );
+
+      if (konfirmasi === kataKunci) {
+        try {
+          const dataBackup = JSON.stringify(dataAbsensi, null, 2);
+          const blob = new Blob([dataBackup], { type: 'application/json' });
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = `Backup_Absensi_MTsD_Sebelum_Hapus_${getLocalISOString()}.json`;
+          link.click();
+        } catch (err) { console.error("Auto backup error:", err); }
+
         localStorage.removeItem('mtsd_absenGuru');
-        dataAbsensi = []; tampilkanRekap(); renderSemuaHari($('tanggal').value);
-        alert("Database absensi MTsD dikosongkan total.");
+        dataAbsensi = [];
+        tampilkanRekap();
+        renderSemuaHari($('tanggal').value);
+        alert("✅ Database absensi MTsD telah dikosongkan. Salinan cadangan (backup JSON) otomatis diunduh.");
+      } else if (konfirmasi !== null) {
+        alert("❌ Teks konfirmasi salah. Penghapusan dibatalkan.");
       }
     }
 
@@ -1328,7 +1683,7 @@
       const items = jadwalAktif[hari] || [];
       container.innerHTML = '';
       if (items.length === 0) {
-        container.innerHTML = '<div style="text-align:center;color:#718096;padding:20px;">Tidak ada jadwal di hari ini. Klik "Tambah Jadwal Baru" di bawah.</div>';
+        container.innerHTML = '<div style="text-align:center;color:var(--text-sub);padding:20px;">Tidak ada jadwal di hari ini. Klik "Tambah Jadwal Baru" di bawah.</div>';
         return;
       }
       items.forEach(item => tambahkanBarisForm(item.kelas, item.jam, item.mapel, item.guru));
@@ -1345,7 +1700,7 @@
           <button class="btn-delete-row" onclick="this.parentElement.parentElement.remove()">X</button>
         </div>
         <div class="edit-row"><input type="text" class="edit-input inp-mapel arab-text" placeholder="Mata Pelajaran" value="${mapel}" style="flex:1;"></div>
-        <div class="edit-row"><input type="text" class="edit-input inp-guru arab-text" placeholder="Nama Guru" value="${guru}" style="flex:1;color:#1a237e;font-weight:600;"></div>`;
+        <div class="edit-row"><input type="text" class="edit-input inp-guru arab-text" placeholder="Nama Guru" value="${guru}" style="flex:1;color:#818cf8;font-weight:600;"></div>`;
       container.appendChild(row);
     }
 
@@ -1389,6 +1744,7 @@
 
     document.querySelectorAll('.mtsd-tab-btn').forEach(btn => {
       btn.addEventListener('click', function() {
+        if (isDirty && !confirm("Ada pilihan yang belum disimpan! Yakin ingin pindah menu?")) return;
         document.querySelectorAll('.mtsd-tab-btn').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
         const tabName = this.dataset.tab;
@@ -1400,15 +1756,21 @@
       });
     });
 
-    $('tanggal').addEventListener('change', () => renderSemuaHari($('tanggal').value));
+    $('tanggal').addEventListener('change', () => { isDirty = false; renderSemuaHari($('tanggal').value); });
+    $('btnPrevDate').addEventListener('click', () => shiftDate(-1));
+    $('btnNextDate').addEventListener('click', () => shiftDate(1));
     $('btnHariIni').addEventListener('click', () => {
+      if (isDirty && !confirm("Ada perubahan yang belum disimpan! Yakin mau reset ke hari ini?")) return;
       const tgl = getLocalISOString();
       $('tanggal').value = tgl;
+      isDirty = false;
       renderSemuaHari(tgl);
     });
+    $('btnHadirSemua').addEventListener('click', tandaiSemuaHadir);
     $('btnSimpan').addEventListener('click', simpanAbsensi);
     $('btnResetPilihan').addEventListener('click', resetPilihanHariIni);
     $('btnRekap').addEventListener('click', tampilkanRekap);
+    $('searchGuru').addEventListener('input', filterRekapGuru);
     $('btnExportExcel').addEventListener('click', exportKeExcel);
     $('btnClearAllDB').addEventListener('click', clearAllDatabase);
     $('hariPengaturan').addEventListener('change', renderFormPengaturan);
@@ -1419,9 +1781,7 @@
     renderSemuaHari(todayStr);
   }
 
-  // ========================================================================
   // SWITCHER LEMBAGA
-  // ========================================================================
   document.querySelectorAll('.tab-lembaga .btn').forEach(btn => {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.tab-lembaga .btn').forEach(b => b.classList.remove('active'));
@@ -1433,10 +1793,8 @@
   });
 
   document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM siap, menginisialisasi modul...');
-    initModulMI();
+    initModulMID();
     initModulMTsD();
-    console.log('Inisialisasi selesai.');
   });
 </script>
 </body>
