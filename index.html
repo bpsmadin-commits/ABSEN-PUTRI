@@ -4,57 +4,68 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jadwal & Absensi - MID & MTsD (Dark Mode)</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <style>
     :root {
-      --bg-body: #eef1f6;
-      --bg-card: #ffffff;
-      --bg-card-soft: #f8fafc;
-      --text-main: #334155;
-      --text-sub: #64748b;
-      --text-header: #4338ca;
-      --border-card: #e2e8f0;
-      --border-strong: #cbd5e1;
-      --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 1px rgba(15, 23, 42, 0.04);
-      --badge-bg: #e0e7ff;
-      --badge-text: #4338ca;
-      --sticky-bg: rgba(255, 255, 255, 0.96);
-      --danger-bg: #fef2f2;
-      --danger-border: #fca5a5;
-      --danger-text: #991b1b;
-      --input-color: #1e293b;
-      --input-bg: #f8fafc;
+      --bg-body: #EFE7D3;
+      --bg-card: #F8F2E2;
+      --bg-card-soft: #EBE1C7;
+      --text-main: #2A2115;
+      --text-sub: #6B5A2E;
+      --text-header: #1E3B34;
+      --border-card: #DCD1AE;
+      --border-strong: #C4B692;
+      --shadow-card: 0 1px 2px rgba(42, 33, 21, 0.08), 0 1px 1px rgba(42, 33, 21, 0.05);
+      --badge-bg: #E9D08A55;
+      --badge-text: #6B5A2E;
+      --sticky-bg: rgba(248, 242, 226, 0.96);
+      --danger-bg: #fbeae7;
+      --danger-border: #d98a7a;
+      --danger-text: #9a3a2b;
+      --input-color: #2A2115;
+      --input-bg: #F8F2E2;
+      --brass: #C9A227;
+      --brass-strong: #A9821E;
+      --hadir: #4C9A73;
+      --izin: #DB9A3F;
+      --alpa: #C1493B;
     }
 
     body.dark-mode {
-      --bg-body: #0f172a;
-      --bg-card: #1e293b;
-      --bg-card-soft: #253449;
-      --text-main: #f1f5f9;
-      --text-sub: #94a3b8;
-      --text-header: #c7d2fe;
-      --border-card: #334155;
-      --border-strong: #475569;
-      --badge-bg: #312e81;
-      --badge-text: #e0e7ff;
-      --sticky-bg: rgba(30, 41, 59, 0.96);
-      --danger-bg: #2c1518;
-      --danger-border: #991b1b;
-      --danger-text: #fca5a5;
-      --input-color: #f8fafc;
-      --input-bg: #0f172a;
+      --bg-body: #152C27;
+      --bg-card: #1E3B34;
+      --bg-card-soft: #24443C;
+      --text-main: #F3ECD9;
+      --text-sub: #A9B8AC;
+      --text-header: #E4C765;
+      --border-card: rgba(201, 162, 39, 0.18);
+      --border-strong: rgba(201, 162, 39, 0.32);
+      --badge-bg: rgba(201, 162, 39, 0.16);
+      --badge-text: #E4C765;
+      --sticky-bg: rgba(21, 44, 39, 0.96);
+      --danger-bg: #2c1a17;
+      --danger-border: #8a3a2b;
+      --danger-text: #e8998a;
+      --input-color: #F3ECD9;
+      --input-bg: #152C27;
+      --brass: #C9A227;
+      --brass-strong: #E4C765;
+      --hadir: #4C9A73;
+      --izin: #DB9A3F;
+      --alpa: #C1493B;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: var(--bg-body);
-      font-family: 'Inter', sans-serif;
+      font-family: 'Manrope', sans-serif;
       padding: 12px 10px 90px 10px;
       color: var(--text-main);
       transition: background-color .18s ease, color .18s ease;
@@ -80,19 +91,21 @@
       align-items: center;
       box-shadow: var(--shadow-card);
       border: 1px solid var(--border-card);
-      border-left: 4px solid #6366f1;
+      border-left: 4px solid var(--brass);
       gap: 12px;
     }
     .header .sub { margin-left: auto; }
     .header h1 {
-      font-size: 1.3rem;
+      font-family: 'Fraunces', serif;
+      font-size: 1.4rem;
       font-weight: 700;
       display: flex;
       align-items: center;
       gap: 10px;
       color: var(--text-header);
+      letter-spacing: .01em;
     }
-    .header h1 i { color: #6366f1; }
+    .header h1 i { color: var(--brass); }
     .header .sub { font-size: 0.8rem; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
     .badge {
       background: var(--badge-bg);
@@ -111,7 +124,7 @@
       border-radius: 50%;
       box-shadow: var(--shadow-card);
       cursor: pointer;
-      color: #6366f1;
+      color: var(--brass);
       font-size: 1.1rem;
       display: flex;
       align-items: center;
@@ -149,8 +162,8 @@
     }
     .sidebar-link-flat i { color: var(--text-sub); font-size: 1.05rem; }
     .sidebar-link-flat:active { background: var(--bg-card-soft); }
-    .sidebar-link-flat.active { color: #6366f1; background: var(--badge-bg); }
-    .sidebar-link-flat.active i { color: #6366f1; }
+    .sidebar-link-flat.active { color: var(--brass-strong); background: var(--badge-bg); }
+    .sidebar-link-flat.active i { color: var(--brass-strong); }
 
     /* Tab Lembaga (MID / MTsD) - dipakai ulang di dalam Setting */
     .tab-lembaga {
@@ -175,9 +188,9 @@
       gap: 8px;
     }
     .tab-lembaga .btn.active {
-      color: #4f46e5;
+      color: var(--brass-strong);
       background: var(--badge-bg);
-      border-color: #6366f1;
+      border-color: var(--brass);
     }
 
     .module-container { display: none; }
@@ -204,7 +217,7 @@
       color: var(--input-color);
       font-weight: 500;
     }
-    input:focus, select:focus { border-color: #6366f1; }
+    input:focus, select:focus { border-color: var(--brass); }
     .btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
     .btn {
       padding: 12px 18px;
@@ -220,20 +233,22 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
+      font-family: 'Manrope', sans-serif;
     }
     .btn:active { background: var(--bg-card-soft); }
-    .btn-primary { color: #4f46e5; }
-    .btn-accent { color: #059669; }
-    .btn-danger { color: #dc2626; }
+    .btn-primary { color: var(--brass-strong); }
+    .btn-accent { color: var(--hadir); }
+    .btn-danger { color: var(--alpa); }
 
-    /* Tombol Simpan Utama (Gradasi Biru-Ungu) */
+    /* Tombol Simpan Utama — cap prada emas */
     .btn-block-simpan {
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-      color: white;
-      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+      background: var(--brass);
+      color: #1c2a1e;
+      box-shadow: 0 4px 14px rgba(201, 162, 39, 0.35);
       border: none;
       padding: 16px;
       border-radius: 14px;
+      font-family: 'Fraunces', serif;
       font-weight: 700;
       font-size: 16px;
       cursor: pointer;
@@ -242,6 +257,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      letter-spacing: .02em;
     }
     .btn-block-simpan:active { transform: scale(0.98); opacity: 0.9; }
 
@@ -256,7 +272,7 @@
       box-shadow: var(--shadow-card);
       font-weight: bold;
       cursor: pointer;
-      color: #4f46e5;
+      color: var(--brass-strong);
       font-size: 16px;
       flex-shrink: 0;
       display: flex;
@@ -296,71 +312,88 @@
       display: none;
       font-size: 14px;
     }
-    .status-success { display: block !important; background: #10b98122; color: #34d399; border: 1px solid #10b981; }
-    .status-error { display: block !important; background: #ef444422; color: #f87171; border: 1px solid #ef4444; }
+    .status-success { display: block !important; background: #4C9A7322; color: var(--hadir); border: 1px solid var(--hadir); }
+    .status-error { display: block !important; background: #C1493B22; color: var(--alpa); border: 1px solid var(--alpa); }
     .arab-text { font-family: 'Amiri', serif; direction: rtl; text-align: right; }
 
-    .jadwal-container { display: flex; flex-direction: column; gap: 18px; margin-top: 10px; }
+    /* Kartu jadwal — kartu indeks manuskrip */
+    .jadwal-container { display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
     .guru-card {
-      background: var(--bg-card);
-      border-radius: 16px;
+      background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card-soft) 100%);
+      border-radius: 14px;
       padding: 18px;
       box-shadow: var(--shadow-card);
       border: 1px solid var(--border-card);
+      border-left: 3px solid var(--brass);
     }
     .meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .jam-tag { font-size: 11px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+    .jam-tag { font-size: 11px; font-weight: 800; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.08em; }
     .kelas-tag { font-size: 15px; font-weight: 700; color: var(--text-main); }
     .info-row { margin-bottom: 15px; }
     .mapel-lbl { color: var(--text-sub); font-size: 14px; margin-bottom: 2px; }
-    .guru-lbl { color: #4f46e5; font-size: 22px; font-weight: 700; }
+    .guru-lbl { color: var(--text-header); font-size: 22px; font-weight: 700; font-family: 'Amiri', serif; }
     .btn-group-hia { display: flex; gap: 10px; }
     .btn-hia {
       flex: 1;
       height: 46px;
-      border: 1px solid var(--border-card);
-      border-radius: 10px;
-      font-weight: 800;
-      font-size: 15px;
-      background: var(--bg-card);
+      border: 2px solid var(--border-strong);
+      border-radius: 40px;
+      font-family: 'Fraunces', serif;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: .03em;
+      background: transparent;
       color: var(--text-sub);
       cursor: pointer;
+      opacity: .8;
+      transition: transform .12s ease, background-color .12s ease, color .12s ease, opacity .12s ease;
     }
+    .btn-hia:active { transform: scale(0.97); }
+    .btn-hia.btn-h { border-color: var(--hadir); color: var(--hadir); }
+    .btn-hia.btn-i { border-color: var(--izin); color: var(--izin); }
+    .btn-hia.btn-a { border-color: var(--alpa); color: var(--alpa); }
     .btn-hia.btn-h.active {
       color: #ffffff;
-      background: #10b981;
-      border-color: #10b981;
+      background: var(--hadir);
+      border-color: var(--hadir);
+      opacity: 1;
+      transform: scale(1.03);
     }
     .btn-hia.btn-i.active {
-      color: #ffffff;
-      background: #f59e0b;
-      border-color: #f59e0b;
+      color: #2a1d05;
+      background: var(--izin);
+      border-color: var(--izin);
+      opacity: 1;
+      transform: scale(1.03);
     }
     .btn-hia.btn-a.active {
       color: #ffffff;
-      background: #ef4444;
-      border-color: #ef4444;
+      background: var(--alpa);
+      border-color: var(--alpa);
+      opacity: 1;
+      transform: scale(1.03);
     }
 
+    /* Tab hari — kayak sekat halaman buku */
     .hari-tabs-container {
       display: flex;
-      gap: 8px;
+      gap: 2px;
       overflow-x: auto;
-      padding: 6px;
-      background: var(--bg-card-soft);
-      border-radius: 14px;
-      border: 1px solid var(--border-card);
+      padding: 6px 6px 0;
+      background: transparent;
+      border-bottom: 1px solid var(--border-strong);
       margin-bottom: 20px;
       flex-wrap: nowrap;
       -webkit-overflow-scrolling: touch;
     }
     .hari-tab-btn {
-      background: var(--bg-card);
+      background: var(--bg-card-soft);
       border: 1px solid var(--border-card);
-      padding: 10px 16px;
-      border-radius: 30px;
+      border-bottom: none;
+      padding: 9px 15px 11px;
+      border-radius: 10px 10px 0 0;
       font-weight: 700;
-      font-size: 13px;
+      font-size: 12.5px;
       cursor: pointer;
       color: var(--text-sub);
       white-space: nowrap;
@@ -368,15 +401,19 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      transform: translateY(3px);
+      transition: transform .12s ease;
     }
     .hari-tab-btn.active {
-      color: #4f46e5;
-      background: var(--badge-bg);
-      border-color: #6366f1;
+      color: var(--text-header);
+      background: var(--bg-card);
+      border-color: var(--border-strong);
+      box-shadow: 0 -2px 0 var(--brass) inset;
+      transform: translateY(0);
     }
     .hari-tab-btn.hari-ini {
-      background: #10b98122;
-      color: #34d399;
+      background: #4C9A7322;
+      color: var(--hadir);
       font-weight: 800;
     }
     .hari-tab-btn.hari-libur-tab {
@@ -395,10 +432,10 @@
       border: 1px dashed var(--border-strong);
     }
 
-    /* Rekap Tabel */
+    /* Rekap Tabel — nuansa buku catatan */
     .table-container { overflow-x: auto; margin-top: 10px; padding: 5px; }
     .table-container table { width: 100%; border-collapse: separate; border-spacing: 0 10px; min-width: 450px; }
-    .table-container th { padding: 10px 12px; text-align: left; font-size: 12px; color: #4f46e5; font-weight: 700; text-transform: uppercase; }
+    .table-container th { padding: 10px 12px; text-align: left; font-size: 11px; color: var(--brass-strong); font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
     .table-container td { padding: 14px 12px; background: var(--bg-card); font-size: 14px; color: var(--text-main); border-top: 1px solid var(--border-card); border-bottom: 1px solid var(--border-card); }
     .table-container td:first-child { border-radius: 12px 0 0 12px; border-left: 1px solid var(--border-card); }
     .table-container td:last-child { border-radius: 0 12px 12px 0; border-right: 1px solid var(--border-card); }
@@ -417,7 +454,7 @@
     }
     .edit-row { display: flex; gap: 10px; flex-wrap: wrap; }
     .edit-input { padding: 10px; font-size: 14px; border-radius: 8px; border: 1px solid var(--border-card); background: var(--input-bg); color: var(--input-color); flex: 1; }
-    .btn-delete-row { background: var(--danger-bg); color: #f87171; border: 1px solid var(--danger-border); border-radius: 8px; font-weight: bold; width: 40px; cursor: pointer; }
+    .btn-delete-row { background: var(--danger-bg); color: var(--alpa); border: 1px solid var(--danger-border); border-radius: 8px; font-weight: bold; width: 40px; cursor: pointer; }
     .master-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
 
     .sync-indicator {
@@ -427,13 +464,13 @@
       gap: 6px;
       font-size: 11px;
       font-weight: 600;
-      color: #6366f1;
+      color: var(--brass-strong);
       text-align: center;
       margin-bottom: 10px;
     }
 
     @media (max-width: 480px) {
-      .header h1 { font-size: 1rem; }
+      .header h1 { font-size: 1.1rem; }
       .guru-lbl { font-size: 18px; }
       .hari-tab-btn { font-size: 11px; padding: 8px 12px; }
     }
@@ -630,6 +667,14 @@
           <button class="btn btn-danger" id="mid-btnResetJadwalDefault" style="margin-top:10px;">⚠️ Kembalikan ke Jadwal Asli (Default)</button>
         </div>
 
+        <!-- Diagnostik path Firebase -->
+        <div class="nm-card" style="border-left:3px solid var(--brass);">
+          <h4 style="font-size:0.9rem; margin-bottom:6px; color:var(--text-header);"><i class="fas fa-magnifying-glass"></i> Diagnostik Data Absensi</h4>
+          <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:12px;">Cek semua kemungkinan nama path lama di Firebase (mi, MI, Mi, mid, MID, dll) biar ketahuan data bulan lama kesimpen di key yang mana.</p>
+          <button class="btn btn-primary" id="mid-btnDiagnostikFirebase" style="width:100%;">🔍 Cek Semua Path Absensi</button>
+          <div id="mid-hasilDiagnostik" style="margin-top:12px; font-size:12.5px; white-space:pre-wrap; font-family:monospace; color:var(--text-main); display:none; background:var(--bg-card-soft); padding:12px; border-radius:10px; border:1px solid var(--border-card);"></div>
+        </div>
+
         <!-- Zona Bahaya MID -->
         <div class="danger-zone">
           <h4 style="color: var(--danger-text); font-size: 0.9rem; margin-bottom: 6px;"><i class="fas fa-exclamation-triangle"></i> Zona Bahaya</h4>
@@ -666,7 +711,7 @@
     </div>
   </div>
 
-  <div style="text-align:center; font-size:0.8rem; color:var(--text-sub); margin-top:30px; border-top:2px dashed #818cf855; padding-top:16px;">
+  <div style="text-align:center; font-size:0.8rem; color:var(--text-sub); margin-top:30px; border-top:2px dashed #C9A22755; padding-top:16px;">
     <span style="background:var(--bg-card); padding:6px 14px; border-radius:20px; box-shadow:var(--shadow-out); display:inline-flex; align-items:center; gap:6px;">© 2026</span>
   </div>
 </div>
@@ -678,14 +723,14 @@
 
   if (savedTheme === 'dark') {
     document.body.classList.add('dark-mode');
-    btnTheme.innerHTML = '<i class="fas fa-sun" style="color:#f59e0b;"></i>';
+    btnTheme.innerHTML = '<i class="fas fa-sun" style="color:#DB9A3F;"></i>';
   }
 
   btnTheme.addEventListener('click', () => {
     document.body.classList.toggle('dark-mode');
     const isDark = document.body.classList.contains('dark-mode');
     localStorage.setItem('app_theme', isDark ? 'dark' : 'light');
-    btnTheme.innerHTML = isDark ? '<i class="fas fa-sun" style="color:#f59e0b;"></i>' : '<i class="fas fa-moon"></i>';
+    btnTheme.innerHTML = isDark ? '<i class="fas fa-sun" style="color:#DB9A3F;"></i>' : '<i class="fas fa-moon"></i>';
   });
 
   // CONFIG FIREBASE
@@ -696,6 +741,18 @@
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
+
+  // Login anonim otomatis (gak ada UI, gak keliatan user) — dipakai biar rules Firebase
+  // bisa dikunci "harus login" tanpa perlu bikin sistem login beneran di app ini.
+  window.authSiapDb = new Promise((resolve) => {
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) { resolve(); return; }
+      firebase.auth().signInAnonymously().catch(err => {
+        console.error('Gagal login anonim ke Firebase:', err);
+        alert('Gagal konek ke database (auth). Cek koneksi internet lalu reload halaman.');
+      });
+    });
+  });
 
   function slugKey(s) {
     return String(s).trim().replace(/[.#$\[\]\/]/g, '_');
@@ -708,10 +765,10 @@
       return;
     }
     const isDark = document.body.classList.contains('dark-mode') || document.documentElement.classList.contains('dark-mode');
-    const bgCard = isDark ? '#1e293b' : '#ffffff';
-    const textMain = isDark ? '#f1f5f9' : '#334155';
-    const textSub = isDark ? '#94a3b8' : '#64748b';
-    const border = isDark ? '#334155' : '#e2e8f0';
+    const bgCard = isDark ? '#1E3B34' : '#F8F2E2';
+    const textMain = isDark ? '#F3ECD9' : '#2A2115';
+    const textSub = isDark ? '#A9B8AC' : '#6B5A2E';
+    const border = isDark ? 'rgba(201,162,39,0.25)' : '#DCD1AE';
 
     const wrapper = document.createElement('div');
     wrapper.style.cssText = `position:fixed; left:-9999px; top:0; width:640px; padding:28px; background:${bgCard}; font-family:-apple-system,'Segoe UI',sans-serif;`;
@@ -730,7 +787,7 @@
       cell.style.border = `1px solid ${border}`;
     });
     clonedTable.querySelectorAll('th').forEach(cell => {
-      cell.style.background = isDark ? '#253449' : '#f8fafc';
+      cell.style.background = isDark ? '#24443C' : '#EBE1C7';
       cell.style.color = textMain;
     });
     // buang baris yang lagi disembunyikan oleh filter pencarian guru
@@ -1319,8 +1376,14 @@
     function tampilkanRekap() {
       const container = $('tabelRekap');
       container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-sub);font-weight:600;">🔄 Menarik data terbaru...</div>';
-      tarikDataDariFirebase('MID').then(dataSheet => {
-        dataAbsensi = gabungkanDataSheet(dataAbsensi, dataSheet);
+      // Tarik dari path 'MID' (nama baru) DAN 'MI Miftahul Ulum' (nama lama sebelum rename, dipakai s/d Juli)
+      // biar rekap bulan-bulan lama gak hilang gara-gara ganti nama lembaga.
+      Promise.all([
+        tarikDataDariFirebase('MID'),
+        tarikDataDariFirebase('MI Miftahul Ulum')
+      ]).then(([dataSheetMID, dataSheetMI]) => {
+        dataAbsensi = gabungkanDataSheet(dataAbsensi, dataSheetMID);
+        dataAbsensi = gabungkanDataSheet(dataAbsensi, dataSheetMI);
         saveDataAbsen();
         renderRekapDariData();
       });
@@ -1353,7 +1416,7 @@
       let html = `<table id="mid-table-data"><thead><tr><th>Nama Guru</th><th style="text-align:center;">H</th><th style="text-align:center;">I</th><th style="text-align:center;">A</th><th style="text-align:center;">Total</th></tr></thead><tbody>`;
       listNamaGuru.forEach(guru => {
         const data = rekap[guru]; const totalJam = data.h + data.i + data.a;
-        html += `<tr><td><strong class="arab-text" style="font-size:15px;color:var(--text-main);">${guru}</strong></td><td style="color:#10b981;font-weight:700;text-align:center;">${data.h}</td><td style="color:#f59e0b;font-weight:700;text-align:center;">${data.i}</td><td style="color:#ef4444;font-weight:700;text-align:center;">${data.a}</td><td style="font-weight:700;text-align:center;color:#818cf8;">${totalJam}</td></tr>`;
+        html += `<tr><td><strong class="arab-text" style="font-size:15px;color:var(--text-main);">${guru}</strong></td><td style="color:#4C9A73;font-weight:700;text-align:center;">${data.h}</td><td style="color:#DB9A3F;font-weight:700;text-align:center;">${data.i}</td><td style="color:#C1493B;font-weight:700;text-align:center;">${data.a}</td><td style="font-weight:700;text-align:center;color:#C9A227;">${totalJam}</td></tr>`;
       });
       html += '</tbody></table>';
       container.innerHTML = html;
@@ -1444,7 +1507,7 @@
           <button class="btn-delete-row" onclick="this.parentElement.parentElement.remove()">X</button>
         </div>
         <div class="edit-row"><input type="text" class="edit-input inp-mapel arab-text" placeholder="Mata Pelajaran" value="${mapel}" style="flex:1;"></div>
-        <div class="edit-row"><input type="text" class="edit-input inp-guru arab-text" placeholder="Nama Guru" value="${guru}" style="flex:1;color:#818cf8;font-weight:600;"></div>`;
+        <div class="edit-row"><input type="text" class="edit-input inp-guru arab-text" placeholder="Nama Guru" value="${guru}" style="flex:1;color:#C9A227;font-weight:600;"></div>`;
       container.appendChild(row);
     }
 
@@ -1517,6 +1580,35 @@
     $('btnExportExcel').addEventListener('click', exportKeExcel);
     if ($('btnExportPNG')) $('btnExportPNG').addEventListener('click', exportKePNG);
     $('btnClearAllDB').addEventListener('click', clearAllDatabase);
+    $('btnDiagnostikFirebase').addEventListener('click', function() {
+      const hasil = $('hasilDiagnostik');
+      hasil.style.display = 'block';
+      hasil.textContent = '🔄 Mengecek ke Firebase...';
+      const kandidat = ['MID', 'MI Miftahul Ulum', 'MI', 'mid', 'mi'];
+      Promise.all(kandidat.map(nama =>
+        db.ref('absensi/' + slugKey(nama)).once('value').then(snap => {
+          const val = snap.val();
+          if (!val) return { nama, jumlahTanggal: 0, tanggal: [] };
+          const daftarTanggal = Object.keys(val).sort();
+          return { nama, jumlahTanggal: daftarTanggal.length, tanggal: daftarTanggal };
+        })
+      )).then(hasilSemua => {
+        let teks = '';
+        hasilSemua.forEach(r => {
+          if (r.jumlahTanggal === 0) {
+            teks += `❌ absensi/${slugKey(r.nama)}  →  kosong
+`;
+          } else {
+            const contoh = r.tanggal.slice(0, 3).join(', ') + (r.tanggal.length > 3 ? ', ...' : '');
+            teks += `✅ absensi/${slugKey(r.nama)}  →  ${r.jumlahTanggal} tanggal (${contoh})
+`;
+          }
+        });
+        hasil.textContent = teks;
+      }).catch(err => {
+        hasil.textContent = '⚠️ Gagal cek: ' + err.message;
+      });
+    });
     $('hariPengaturan').addEventListener('change', renderFormPengaturan);
     $('btnTambahBaris').addEventListener('click', () => tambahkanBarisForm());
     $('btnSimpanPengaturan').addEventListener('click', simpanPerubahanJadwal);
@@ -1782,7 +1874,7 @@
       let html = `<table id="mtsd-table-data"><thead><tr><th>Nama Guru</th><th style="text-align:center;">H</th><th style="text-align:center;">I</th><th style="text-align:center;">A</th><th style="text-align:center;">Total</th></tr></thead><tbody>`;
       listNamaGuru.forEach(guru => {
         const data = rekap[guru]; const totalJam = data.h + data.i + data.a;
-        html += `<tr><td><strong class="arab-text" style="font-size:15px;color:var(--text-main);">${guru}</strong></td><td style="color:#10b981;font-weight:700;text-align:center;">${data.h}</td><td style="color:#f59e0b;font-weight:700;text-align:center;">${data.i}</td><td style="color:#ef4444;font-weight:700;text-align:center;">${data.a}</td><td style="font-weight:700;text-align:center;color:#818cf8;">${totalJam}</td></tr>`;
+        html += `<tr><td><strong class="arab-text" style="font-size:15px;color:var(--text-main);">${guru}</strong></td><td style="color:#4C9A73;font-weight:700;text-align:center;">${data.h}</td><td style="color:#DB9A3F;font-weight:700;text-align:center;">${data.i}</td><td style="color:#C1493B;font-weight:700;text-align:center;">${data.a}</td><td style="font-weight:700;text-align:center;color:#C9A227;">${totalJam}</td></tr>`;
       });
       html += '</tbody></table>';
       container.innerHTML = html;
@@ -1873,7 +1965,7 @@
           <button class="btn-delete-row" onclick="this.parentElement.parentElement.remove()">X</button>
         </div>
         <div class="edit-row"><input type="text" class="edit-input inp-mapel arab-text" placeholder="Mata Pelajaran" value="${mapel}" style="flex:1;"></div>
-        <div class="edit-row"><input type="text" class="edit-input inp-guru arab-text" placeholder="Nama Guru" value="${guru}" style="flex:1;color:#818cf8;font-weight:600;"></div>`;
+        <div class="edit-row"><input type="text" class="edit-input inp-guru arab-text" placeholder="Nama Guru" value="${guru}" style="flex:1;color:#C9A227;font-weight:600;"></div>`;
       container.appendChild(row);
     }
 
@@ -2005,8 +2097,11 @@
   });
 
   document.addEventListener('DOMContentLoaded', function() {
-    initModulMID();
-    initModulMTsD();
+    // Tunda init modul sampe login anonim ke Firebase kelar, biar db.ref(...) gak ditolak rules.
+    window.authSiapDb.then(function() {
+      initModulMID();
+      initModulMTsD();
+    });
   });
 </script>
 </body>
