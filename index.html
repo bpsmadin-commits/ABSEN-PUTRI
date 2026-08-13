@@ -15,14 +15,14 @@
   <style>
     :root {
       --bg-body: #F6F3FF;
-      --bg-card: rgba(255,255,255,0.6);
+      --bg-card: rgba(255,255,255,0.88);
       --bg-card-soft: rgba(123,92,224,0.08);
       --text-main: #2E2352;
       --text-sub: #7A6FA0;
       --text-header: #4B3A8C;
       --border-card: rgba(123,92,224,0.22);
       --border-strong: rgba(123,92,224,0.38);
-      --shadow-card: 0 6px 20px rgba(107,70,193,0.10);
+      --shadow-card: 0 3px 8px rgba(107,70,193,0.10);
       --badge-bg: rgba(123,92,224,0.14);
       --badge-text: #5B3FC4;
       --sticky-bg: rgba(246,243,255,0.9);
@@ -41,7 +41,7 @@
 
     body.dark-mode {
       --bg-body: #1B1730;
-      --bg-card: rgba(255,255,255,0.06);
+      --bg-card: rgba(35,30,58,0.92);
       --bg-card-soft: rgba(255,255,255,0.04);
       --text-main: #EDE9FA;
       --text-sub: #A79ED1;
@@ -66,11 +66,8 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background:
-        radial-gradient(circle at 10% 8%, #C9B6FF55, transparent 38%),
-        radial-gradient(circle at 92% 18%, #E9DDFF66, transparent 40%),
-        radial-gradient(circle at 20% 92%, #B79CFF44, transparent 42%),
+        radial-gradient(circle at 15% 10%, #C9B6FF44, transparent 45%),
         var(--bg-body);
-      background-attachment: fixed;
       font-family: 'Manrope', sans-serif;
       padding: 12px 10px 90px 10px;
       color: var(--text-main);
@@ -78,10 +75,8 @@
     }
     body.dark-mode {
       background:
-        radial-gradient(circle at 10% 8%, #4B3A8C33, transparent 42%),
-        radial-gradient(circle at 92% 18%, #5B3FC422, transparent 42%),
+        radial-gradient(circle at 15% 10%, #4B3A8C2E, transparent 45%),
         var(--bg-body);
-      background-attachment: fixed;
     }
     /* Cheap theme switch: only color/background/border-color transition on cards & controls, never box-shadow */
     .header, .btn-dark-toggle, .bottom-nav, .sidebar-link-flat, .tab-lembaga .btn,
@@ -92,12 +87,7 @@
     }
     .container { max-width: 1200px; margin: 0 auto; }
 
-    /* Kaca dasar dipakai di banyak elemen */
-    .header, .btn-dark-toggle, .bottom-nav, .nm-card, .btn, .date-nav-btn,
-    .sticky-save-bar, .guru-card, .hari-tab-btn, .edit-card, .tab-lembaga .btn {
-      backdrop-filter: var(--blur);
-      -webkit-backdrop-filter: var(--blur);
-    }
+    /* Kaca dasar dipakai di banyak elemen — backdrop-filter dihapus karena paling berat di HP */
 
     /* Header Utama */
     .header {
@@ -160,7 +150,7 @@
       z-index: 150;
       display: flex;
       background: var(--sticky-bg);
-      box-shadow: 0 -1px 8px rgba(107,70,193,0.10);
+      box-shadow: 0 -1px 4px rgba(107,70,193,0.10);
       padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
       border-top: 1px solid var(--border-card);
     }
@@ -181,7 +171,7 @@
     }
     .sidebar-link-flat i { color: var(--text-sub); font-size: 1.05rem; }
     .sidebar-link-flat:active { background: var(--bg-card-soft); }
-    .sidebar-link-flat.active { color: #fff; background: var(--brass); box-shadow: 0 3px 10px rgba(123,92,224,0.35); }
+    .sidebar-link-flat.active { color: #fff; background: var(--brass); box-shadow: 0 2px 5px rgba(123,92,224,0.30); }
     .sidebar-link-flat.active i { color: #fff; }
 
     /* Tab Lembaga (MID / MTsD) */
@@ -210,7 +200,7 @@
       color: #fff;
       background: var(--brass);
       border-color: transparent;
-      box-shadow: 0 3px 10px rgba(123,92,224,0.35);
+      box-shadow: 0 2px 5px rgba(123,92,224,0.30);
     }
 
     .module-container { display: none; }
@@ -264,7 +254,7 @@
     .btn-block-simpan {
       background: linear-gradient(135deg, var(--brass), var(--brass-strong));
       color: #fff;
-      box-shadow: 0 8px 20px rgba(123,92,224,0.35);
+      box-shadow: 0 3px 8px rgba(123,92,224,0.30);
       border: none;
       padding: 14px;
       border-radius: 13px;
@@ -308,7 +298,7 @@
       background: var(--sticky-bg);
       padding: 12px;
       border-radius: 14px;
-      box-shadow: 0 -2px 12px rgba(107,70,193,0.12);
+      box-shadow: 0 -1px 6px rgba(107,70,193,0.12);
       border: 1px solid var(--border-card);
       margin-top: 15px;
     }
@@ -420,7 +410,7 @@
       color: #fff;
       background: var(--brass);
       border-color: transparent;
-      box-shadow: 0 3px 10px rgba(123,92,224,0.3);
+      box-shadow: 0 2px 5px rgba(123,92,224,0.25);
     }
     .hari-tab-btn.hari-ini {
       background: #21A37422;
