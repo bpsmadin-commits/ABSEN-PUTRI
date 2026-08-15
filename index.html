@@ -516,43 +516,22 @@
 
   <!-- MODAL LOGIN ADMIN -->
   <div id="modalLoginAdmin" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
-    <div class="nm-card" style="width:min(320px, 90vw); margin:0;">
+    <div class="nm-card" style="width:min(340px, 90vw); margin:0;">
       <h3 style="margin-bottom:10px;"><i class="fas fa-user-lock"></i> <span id="loginAdminTitle">Login Admin</span></h3>
       <div id="loginAdminForm">
-        <div class="form-group"><label>Email</label><input type="email" id="inputEmailAdmin" placeholder="email admin"></div>
-        <div class="form-group">
-          <label>Password</label>
-          <div class="pass-wrap">
-            <input type="password" id="inputPassAdmin" placeholder="password">
-            <i class="fas fa-eye toggle-mata" data-target="inputPassAdmin"></i>
-          </div>
-        </div>
-        <button class="btn-block-simpan" id="btnSubmitLoginAdmin" style="width:100%;">Masuk</button>
+        <p style="font-size:13px; color:var(--text-sub); margin-bottom:14px;">Masuk pakai akun Google yang sudah didaftarkan sebagai admin biar bisa ngedit absen &amp; jadwal.</p>
+        <button class="btn-block-simpan" id="btnSubmitLoginAdmin" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <i class="fab fa-google"></i> Masuk dengan Google
+        </button>
         <div id="loginAdminError" style="color:var(--danger-border, #c0392b); font-size:12px; margin-top:8px; display:none;"></div>
       </div>
       <div id="loginAdminSudahMasuk" style="display:none;">
-        <p style="font-size:13px; margin-bottom:12px;">Login sebagai <b id="loginAdminEmailAktif"></b></p>
+        <p style="font-size:13px; margin-bottom:6px;">Login sebagai <b id="loginAdminEmailAktif"></b></p>
+        <div id="loginAdminBelumAdmin" style="display:none; font-size:12px; background:var(--danger-bg); color:var(--danger-text); border:1px solid var(--danger-border); border-radius:8px; padding:8px 10px; margin-bottom:12px;">
+          Akun ini belum terdaftar sebagai admin. Kirim UID di bawah ini ke admin utama buat didaftarkan lewat Firebase Console (Realtime Database → roles → &lt;UID&gt; → "admin"):
+          <div style="word-break:break-all; font-family:monospace; margin-top:4px; font-weight:700;" id="loginAdminUidAktif"></div>
+        </div>
         <button class="btn btn-danger" id="btnLogoutAdmin" style="width:100%;">Keluar</button>
-
-        <hr style="margin:16px 0; border:none; border-top:1px solid var(--border-strong);">
-        <p style="font-size:13px; font-weight:700; margin-bottom:10px;">🔑 Ganti Email / Password Admin</p>
-        <div class="form-group">
-          <label>Password sekarang (wajib)</label>
-          <div class="pass-wrap">
-            <input type="password" id="inputPassSekarang" placeholder="buat verifikasi">
-            <i class="fas fa-eye toggle-mata" data-target="inputPassSekarang"></i>
-          </div>
-        </div>
-        <div class="form-group"><label>Email baru (kosongin kalau gak diganti)</label><input type="email" id="inputEmailBaru" placeholder="email baru"></div>
-        <div class="form-group">
-          <label>Password baru (kosongin kalau gak diganti)</label>
-          <div class="pass-wrap">
-            <input type="password" id="inputPassBaru" placeholder="password baru, min 6 karakter">
-            <i class="fas fa-eye toggle-mata" data-target="inputPassBaru"></i>
-          </div>
-        </div>
-        <button class="btn btn-accent" id="btnUbahKredensial" style="width:100%;">💾 Simpan Perubahan</button>
-        <div id="ubahKredensialPesan" style="font-size:12px; margin-top:8px; display:none;"></div>
       </div>
       <button class="btn" id="btnTutupModalLogin" style="width:100%; margin-top:10px; background:transparent;">Tutup</button>
     </div>
@@ -847,6 +826,8 @@
     }
   }
 
+  const googleProvider = new firebase.auth.GoogleAuthProvider();
+
   window.authSiapDb = new Promise((resolve) => {
     firebase.auth().onAuthStateChanged(user => {
       if (user && !user.isAnonymous) {
@@ -855,7 +836,14 @@
           document.getElementById('loginAdminForm').style.display = 'none';
           document.getElementById('loginAdminSudahMasuk').style.display = 'block';
           document.getElementById('loginAdminEmailAktif').textContent = user.email;
-          document.getElementById('btnLoginAdmin').innerHTML = '<i class="fas fa-user-check"></i>';
+          const kotakBelumAdmin = document.getElementById('loginAdminBelumAdmin');
+          if (window.isAdmin) {
+            kotakBelumAdmin.style.display = 'none';
+          } else {
+            document.getElementById('loginAdminUidAktif').textContent = user.uid;
+            kotakBelumAdmin.style.display = 'block';
+          }
+          document.getElementById('btnLoginAdmin').innerHTML = window.isAdmin ? '<i class="fas fa-user-check"></i>' : '<i class="fas fa-user-clock"></i>';
           terapkanStatusAdmin();
           resolve();
         });
@@ -875,31 +863,19 @@
     document.getElementById('btnLoginAdmin').addEventListener('click', () => { modal.style.display = 'flex'; });
     document.getElementById('btnTutupModalLogin').addEventListener('click', () => { modal.style.display = 'none'; });
 
-    document.querySelectorAll('.toggle-mata').forEach(icon => {
-      icon.addEventListener('click', function() {
-        const target = document.getElementById(this.dataset.target);
-        const buka = target.type === 'password';
-        target.type = buka ? 'text' : 'password';
-        this.classList.toggle('fa-eye', !buka);
-        this.classList.toggle('fa-eye-slash', buka);
-      });
-    });
     document.getElementById('btnSubmitLoginAdmin').addEventListener('click', () => {
-      const email = document.getElementById('inputEmailAdmin').value.trim();
-      const pass = document.getElementById('inputPassAdmin').value;
-      document.getElementById('loginAdminError').style.display = 'none';
-      firebase.auth().signInWithEmailAndPassword(email, pass).then(() => {
+      const errBox = document.getElementById('loginAdminError');
+      errBox.style.display = 'none';
+      firebase.auth().signInWithPopup(googleProvider).then(() => {
         modal.style.display = 'none';
-        document.getElementById('inputEmailAdmin').value = '';
-        document.getElementById('inputPassAdmin').value = '';
       }).catch(err => {
         let msg = 'Login gagal: ' + err.message;
-        if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') msg = 'Login gagal: password salah.';
-        if (err.code === 'auth/user-not-found') msg = 'Login gagal: email gak terdaftar.';
-        if (err.code === 'auth/too-many-requests') msg = 'Kebanyakan percobaan gagal, akun ini sementara diblokir. Tunggu beberapa menit lalu coba lagi.';
-        if (err.code === 'auth/user-disabled') msg = 'Akun ini dinonaktifkan di Firebase Console.';
-        document.getElementById('loginAdminError').textContent = msg;
-        document.getElementById('loginAdminError').style.display = 'block';
+        if (err.code === 'auth/popup-closed-by-user') msg = 'Login dibatalkan.';
+        if (err.code === 'auth/popup-blocked') msg = 'Popup diblokir browser. Izinkan popup buat situs ini lalu coba lagi.';
+        if (err.code === 'auth/network-request-failed') msg = 'Gagal konek internet. Cek koneksi lalu coba lagi.';
+        if (err.code === 'auth/unauthorized-domain') msg = 'Domain ini belum diizinkan di Firebase Console (Authentication → Settings → Authorized domains).';
+        errBox.textContent = msg;
+        errBox.style.display = 'block';
       });
     });
     document.getElementById('btnLogoutAdmin').addEventListener('click', () => {
@@ -911,59 +887,6 @@
         modal.style.display = 'none';
         terapkanStatusAdmin();
         firebase.auth().signInAnonymously();
-      });
-    });
-
-    document.getElementById('btnUbahKredensial').addEventListener('click', () => {
-      const user = firebase.auth().currentUser;
-      const pesan = document.getElementById('ubahKredensialPesan');
-      pesan.style.display = 'none';
-      if (!user || user.isAnonymous) return;
-
-      const passSekarang = document.getElementById('inputPassSekarang').value;
-      const emailBaru = document.getElementById('inputEmailBaru').value.trim();
-      const passBaru = document.getElementById('inputPassBaru').value;
-
-      if (!passSekarang) {
-        pesan.textContent = 'Isi password sekarang dulu buat verifikasi.';
-        pesan.style.color = 'var(--danger-border, #c0392b)';
-        pesan.style.display = 'block';
-        return;
-      }
-      if (!emailBaru && !passBaru) {
-        pesan.textContent = 'Isi email baru atau password baru dulu, minimal salah satu.';
-        pesan.style.color = 'var(--danger-border, #c0392b)';
-        pesan.style.display = 'block';
-        return;
-      }
-      if (passBaru && passBaru.length < 6) {
-        pesan.textContent = 'Password baru minimal 6 karakter.';
-        pesan.style.color = 'var(--danger-border, #c0392b)';
-        pesan.style.display = 'block';
-        return;
-      }
-
-      const kredensial = firebase.auth.EmailAuthProvider.credential(user.email, passSekarang);
-      user.reauthenticateWithCredential(kredensial).then(() => {
-        const tugas = [];
-        if (emailBaru && emailBaru !== user.email) tugas.push(user.updateEmail(emailBaru));
-        if (passBaru) tugas.push(user.updatePassword(passBaru));
-        return Promise.all(tugas);
-      }).then(() => {
-        pesan.textContent = '✅ Berhasil diubah! Kalau ganti email, inget email barunya buat login besok.';
-        pesan.style.color = 'var(--hadir)';
-        pesan.style.display = 'block';
-        document.getElementById('inputPassSekarang').value = '';
-        document.getElementById('inputEmailBaru').value = '';
-        document.getElementById('inputPassBaru').value = '';
-        document.getElementById('loginAdminEmailAktif').textContent = user.email;
-      }).catch(err => {
-        let msg = 'Gagal ubah: ' + err.message;
-        if (err.code === 'auth/wrong-password') msg = 'Password sekarang salah.';
-        if (err.code === 'auth/email-already-in-use') msg = 'Email baru udah dipake akun lain.';
-        pesan.textContent = msg;
-        pesan.style.color = 'var(--danger-border, #c0392b)';
-        pesan.style.display = 'block';
       });
     });
   });
