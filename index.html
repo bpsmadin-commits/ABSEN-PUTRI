@@ -583,6 +583,7 @@
         <!-- Sticky Save Bar -->
         <div class="sticky-save-bar" id="mid-areaAksiSimpan" style="display:none;">
           <button class="btn-block-simpan" id="mid-btnSimpan"><i class="fas fa-save"></i> Simpan Absensi</button>
+          <button class="btn btn-accent" id="mid-btnKirimLaporan" style="margin-top:8px; width:100%;"><i class="fab fa-whatsapp"></i> Kirim Laporan Harian ke WA</button>
           <button class="btn btn-danger" id="mid-btnResetPilihan" style="margin-top:8px; width:100%; box-shadow:none; background:transparent;">🔄 Reset Pilihan Hari Ini</button>
         </div>
 
@@ -620,6 +621,7 @@
         <!-- Sticky Save Bar -->
         <div class="sticky-save-bar" id="mtsd-areaAksiSimpan" style="display:none;">
           <button class="btn-block-simpan" id="mtsd-btnSimpan"><i class="fas fa-save"></i> Simpan Absensi</button>
+          <button class="btn btn-accent" id="mtsd-btnKirimLaporan" style="margin-top:8px; width:100%;"><i class="fab fa-whatsapp"></i> Kirim Laporan Harian ke WA</button>
           <button class="btn btn-danger" id="mtsd-btnResetPilihan" style="margin-top:8px; width:100%; box-shadow:none; background:transparent;">🔄 Reset Pilihan Hari Ini</button>
         </div>
 
@@ -720,6 +722,14 @@
           <button class="btn btn-danger" id="mid-btnResetJadwalDefault" style="margin-top:10px;">⚠️ Kembalikan ke Jadwal Asli (Default)</button>
         </div>
 
+        <!-- Nomor WA tujuan laporan harian -->
+        <div class="nm-card" style="border-left:3px solid #25D366;">
+          <h4 style="font-size:0.9rem; margin-bottom:6px; color:var(--text-header);"><i class="fab fa-whatsapp"></i> Laporan Harian WhatsApp</h4>
+          <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:10px;">Nomor tujuan laporan otomatis saat tombol "Kirim Laporan" ditekan. Pakai format internasional tanpa 0 di depan (contoh: 6281234567890).</p>
+          <div class="form-group" style="margin-bottom:8px;"><input type="tel" id="mid-nowaTujuan" placeholder="628xxx..."></div>
+          <button class="btn btn-accent" id="mid-btnSimpanNowa" style="width:100%;"><i class="fas fa-save"></i> Simpan Nomor WA</button>
+        </div>
+
         <!-- Diagnostik path Firebase -->
         <div class="nm-card" style="border-left:3px solid var(--brass);">
           <h4 style="font-size:0.9rem; margin-bottom:6px; color:var(--text-header);"><i class="fas fa-magnifying-glass"></i> Diagnostik Data Absensi</h4>
@@ -750,6 +760,14 @@
           <button class="btn btn-accent" id="mtsd-btnTambahBaris">➕ Tambah Jadwal Baru</button>
           <button class="btn-block-simpan" id="mtsd-btnSimpanPengaturan">💾 Simpan Perubahan Jadwal</button>
           <button class="btn btn-danger" id="mtsd-btnResetJadwalDefault" style="margin-top:10px;">⚠️ Kembalikan ke Jadwal Asli (Default)</button>
+        </div>
+
+        <!-- Nomor WA tujuan laporan harian -->
+        <div class="nm-card" style="border-left:3px solid #25D366;">
+          <h4 style="font-size:0.9rem; margin-bottom:6px; color:var(--text-header);"><i class="fab fa-whatsapp"></i> Laporan Harian WhatsApp</h4>
+          <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:10px;">Nomor tujuan laporan otomatis saat tombol "Kirim Laporan" ditekan. Pakai format internasional tanpa 0 di depan (contoh: 6281234567890).</p>
+          <div class="form-group" style="margin-bottom:8px;"><input type="tel" id="mtsd-nowaTujuan" placeholder="628xxx..."></div>
+          <button class="btn btn-accent" id="mtsd-btnSimpanNowa" style="width:100%;"><i class="fas fa-save"></i> Simpan Nomor WA</button>
         </div>
 
         <!-- Zona Bahaya MTsD -->
@@ -1263,6 +1281,62 @@
 
   const LIST_HARI = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Ahad'];
 
+  // ===== Laporan Harian via WhatsApp (Kepala Madrasah) =====
+  function getNomorWaTujuan() { return (localStorage.getItem('nowaTujuan') || '').trim(); }
+  function setNomorWaTujuan(num) {
+    const bersih = String(num).replace(/[^\d]/g, '');
+    if (bersih.length < 10) {
+      alert('Nomor WA tidak valid. Pakai format internasional tanpa 0 di depan (contoh: 6281234567890).');
+      return false;
+    }
+    localStorage.setItem('nowaTujuan', bersih);
+    return true;
+  }
+
+  function namaHariDariTanggal(tanggalStr) {
+    const [y, m, d] = tanggalStr.split('-');
+    const tgl = new Date(y, m - 1, d);
+    return LIST_HARI[tgl.getDay() === 0 ? 6 : tgl.getDay() - 1];
+  }
+
+  function buatLaporanHarian(tanggal, lembaga, jadwalAktif, dataAbsensi) {
+    const hari = namaHariDariTanggal(tanggal);
+    const items = jadwalAktif[hari] || [];
+    const records = dataAbsensi.filter(r => r.tanggal === tanggal && r.lembaga === lembaga);
+    const jamLine = item => {
+      const rec = records.find(r => r.kelas === item.kelas && r.jam === item.jam && r.guru === item.guru);
+      const st = rec ? rec.status : '';
+      const lbl = st === 'H' ? '✅ Hadir' : st === 'I' ? '🟡 Izin' : st === 'A' ? '🔴 Alpa' : '⚪ Belum diisi';
+      return `▫️ ${item.jam} • ${item.kelas}\n  📖 ${item.mapel}\n  👤 ${item.guru} → ${lbl}`;
+    };
+    const h = records.filter(r => r.status === 'H').length;
+    const i = records.filter(r => r.status === 'I').length;
+    const a = records.filter(r => r.status === 'A').length;
+    const belum = items.length - records.length;
+
+    if (items.length === 0) return `📋 *LAPORAN ABSENSI ${lembaga}*\n📅 ${tanggal} (${hari})\n\nℹ️ Tidak ada jadwal pada hari ini.`;
+
+    let pesan = `📋 *LAPORAN ABSENSI ${lembaga}*\n📅 ${tanggal} (${hari})\n`;
+    pesan += `✅ Hadir: ${h}   🟡 Izin: ${i}   🔴 Alpa: ${a}   ⚪ Belum: ${belum}\n`;
+    pesan += `📊 Total jadwal: ${items.length}\n━━━━━━━━━━━━━━━━━\n`;
+    pesan += items.map(jamLine).join('\n');
+    pesan += '\n━━━━━━━━━━━━━━━━━\n_Dikirim dari Aplikasi Absensi MID & MTsD_';
+    return pesan;
+  }
+
+  function bukaLaporanWhatsApp(tanggal, lembaga, jadwalAktif, dataAbsensi) {
+    if (!tanggal) { alert('Pilih tanggal terlebih dahulu.'); return; }
+    let nomor = getNomorWaTujuan();
+    if (!nomor) {
+      nomor = prompt('Belum ada nomor WA tujuan. Masukkan nomor kepala madrasah (format internasional tanpa 0 di depan):\n\nContoh: 6281234567890');
+      if (!nomor) return;
+      if (!setNomorWaTujuan(nomor)) return;
+      nomor = getNomorWaTujuan();
+    }
+    const pesan = buatLaporanHarian(tanggal, lembaga, jadwalAktif, dataAbsensi);
+    window.open(`https://wa.me/${nomor}?text=${encodeURIComponent(pesan)}`, '_blank');
+  }
+
   // MODUL MID
   function initModulMID() {
     const P = 'mid-';
@@ -1722,6 +1796,11 @@
     $('btnHadirSemua').addEventListener('click', tandaiSemuaHadir);
     $('btnSimpan').addEventListener('click', simpanAbsensi);
     $('btnResetPilihan').addEventListener('click', resetPilihanHariIni);
+    $('btnKirimLaporan').addEventListener('click', () => bukaLaporanWhatsApp($('tanggal').value, 'MID', jadwalAktif, dataAbsensi));
+    $('nowaTujuan').value = getNomorWaTujuan();
+    $('btnSimpanNowa').addEventListener('click', () => {
+      if (setNomorWaTujuan($('nowaTujuan').value)) alert('✅ Nomor WA tujuan tersimpan.');
+    });
     $('btnRekap').addEventListener('click', tampilkanRekap);
     $('searchGuru').addEventListener('input', filterRekapGuru);
     $('btnExportExcel').addEventListener('click', exportKeExcel);
@@ -2175,6 +2254,11 @@
     $('btnHadirSemua').addEventListener('click', tandaiSemuaHadir);
     $('btnSimpan').addEventListener('click', simpanAbsensi);
     $('btnResetPilihan').addEventListener('click', resetPilihanHariIni);
+    $('btnKirimLaporan').addEventListener('click', () => bukaLaporanWhatsApp($('tanggal').value, 'MTsD', jadwalAktif, dataAbsensi));
+    $('nowaTujuan').value = getNomorWaTujuan();
+    $('btnSimpanNowa').addEventListener('click', () => {
+      if (setNomorWaTujuan($('nowaTujuan').value)) alert('✅ Nomor WA tujuan tersimpan.');
+    });
     $('btnRekap').addEventListener('click', tampilkanRekap);
     $('searchGuru').addEventListener('input', filterRekapGuru);
     $('btnExportExcel').addEventListener('click', exportKeExcel);
