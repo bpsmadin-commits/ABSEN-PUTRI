@@ -519,6 +519,7 @@
     <div class="sub">
       <button class="btn-dark-toggle" id="btnLoginAdmin" title="Login Admin"><i class="fas fa-user-lock"></i></button>
       <button class="btn-dark-toggle" id="btnThemeToggle" title="Ganti Mode Gelap/Terang"><i class="fas fa-moon"></i></button>
+      <button class="btn-dark-toggle" id="btnInstallApp" title="Pasang Aplikasi di HP/Komputer" style="display:none;"><i class="fas fa-download"></i></button>
     </div>
   </div>
 
@@ -2249,6 +2250,35 @@
       initModulMTsD();
       terapkanStatusAdmin();
     });
+  });
+
+  // ===== Tombol Pasang Aplikasi (PWA Install) =====
+  // Muncul otomatis pas browser siap nerima install (Android Chrome, desktop, dll).
+  let deferredInstall = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstall = e;
+    const btn = document.getElementById('btnInstallApp');
+    if (btn) btn.style.display = 'flex';
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredInstall = null;
+    const btn = document.getElementById('btnInstallApp');
+    if (btn) btn.style.display = 'none';
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const btnInstall = document.getElementById('btnInstallApp');
+    if (btnInstall) {
+      btnInstall.addEventListener('click', async () => {
+        if (!deferredInstall) return;
+        deferredInstall.prompt();
+        await deferredInstall.userChoice;
+        deferredInstall = null;
+        btnInstall.style.display = 'none';
+      });
+    }
   });
 
   if ('serviceWorker' in navigator) {
