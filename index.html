@@ -544,6 +544,32 @@
       margin-bottom: 10px;
     }
 
+    /* Baris pilih nomor WA di modal kirim laporan */
+    .wa-pick-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 12px;
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      background: var(--bg-card);
+    }
+    .wa-pick-row input {
+      width: 20px;
+      height: 20px;
+      flex: none;
+      margin: 0;
+      padding: 0;
+      accent-color: var(--brass);
+    }
+    .wa-pick-row .wa-num {
+      font-family: 'Overpass Mono', monospace;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-main);
+      letter-spacing: .02em;
+    }
+
     /* Utility — kurangi inline style di JS */
     .guru-card-spaced { margin-bottom: 12px; }
     .hari-tab-count { font-size: 11px; opacity: 0.8; font-family: 'Overpass Mono', monospace; }
@@ -608,6 +634,17 @@
         <button class="btn btn-danger" id="btnLogoutAdmin" style="width:100%;">Keluar</button>
       </div>
       <button class="btn" id="btnTutupModalLogin" style="width:100%; margin-top:10px; background:transparent;">Tutup</button>
+    </div>
+  </div>
+
+  <!-- MODAL PILIH NOMOR WA -->
+  <div id="modalKirimLaporan" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:999; align-items:center; justify-content:center;">
+    <div class="nm-card" style="width:min(360px, 92vw); margin:0;">
+      <h3 style="margin-bottom:6px;"><i class="fab fa-whatsapp"></i> Kirim Laporan ke</h3>
+      <p style="font-size:13px; color:var(--text-sub); margin-bottom:12px;">Centang nomor tujuan. Setiap nomor yang dicentang akan dibuka di WhatsApp.</p>
+      <div id="waPickList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px; max-height:50vh; overflow-y:auto;"></div>
+      <button class="btn-block-simpan" id="btnWaNext" style="font-size:14px; padding:13px;"></button>
+      <button class="btn" id="btnWaBatal" style="width:100%; margin-top:10px; background:transparent;">Batal</button>
     </div>
   </div>
 
@@ -1397,6 +1434,39 @@
     return pesan;
   }
 
+  let waKonteksLaporan = null; // { pesan, nomors } dari modal kirim WA
+
+  function formatNomorWa(n) {
+    const s = String(n);
+    if (s.length <= 4) return s;
+    return s.slice(0, 3) + ' ' + s.slice(3).replace(/(\d{3})(?=\d)/g, '$1 ');
+  }
+
+  function tampilModalPilihNomor() {
+    const modal = document.getElementById('modalKirimLaporan');
+    const list = document.getElementById('waPickList');
+    const btnNext = document.getElementById('btnWaNext');
+    list.innerHTML = waKonteksLaporan.nomors.map(n => `
+      <label class="wa-pick-row">
+        <input type="checkbox" value="${n}" checked>
+        <span class="wa-num">${formatNomorWa(n)}</span>
+      </label>
+    `).join('');
+    btnNext.innerHTML = `<i class="fab fa-whatsapp"></i> Buka WhatsApp (${waKonteksLaporan.nomors.length})`;
+    modal.style.display = 'flex';
+  }
+
+  function kirimLaporanKeNomorTerpilih() {
+    const modal = document.getElementById('modalKirimLaporan');
+    if (!waKonteksLaporan) return;
+    const checked = [...document.querySelectorAll('#waPickList input:checked')].map(i => i.value);
+    if (checked.length === 0) { alert('Centang minimal satu nomor.'); return; }
+    modal.style.display = 'none';
+    const pesan = waKonteksLaporan.pesan;
+    waKonteksLaporan = null;
+    checked.forEach(n => window.open(`https://wa.me/${n}?text=${encodeURIComponent(pesan)}`, '_blank'));
+  }
+
   function bukaLaporanWhatsApp(tanggal, lembaga, jadwalAktif, dataAbsensi) {
     if (!tanggal) { alert('Pilih tanggal terlebih dahulu.'); return; }
     let nomors = getNomorWaTujuan();
@@ -1407,9 +1477,12 @@
       nomors = getNomorWaTujuan();
     }
     const pesan = buatLaporanHarian(tanggal, lembaga, jadwalAktif, dataAbsensi);
-    nomors.forEach((nomor, idx) => {
-      setTimeout(() => window.open(`https://wa.me/${nomor}?text=${encodeURIComponent(pesan)}`, '_blank'), idx * 600);
-    });
+    if (nomors.length === 1) {
+      window.open(`https://wa.me/${nomors[0]}?text=${encodeURIComponent(pesan)}`, '_blank');
+      return;
+    }
+    waKonteksLaporan = { pesan, nomors };
+    tampilModalPilihNomor();
   }
 
   // ===== HELPERS JADWAL DEFAULT =====
@@ -1985,6 +2058,12 @@
 
   document.addEventListener('DOMContentLoaded', function() {
     setupModalLoginAdmin();
+
+    document.getElementById('btnWaNext').addEventListener('click', kirimLaporanKeNomorTerpilih);
+    document.getElementById('btnWaBatal').addEventListener('click', () => {
+      document.getElementById('modalKirimLaporan').style.display = 'none';
+      waKonteksLaporan = null;
+    });
 
     const btnInstall = document.getElementById('btnInstallApp');
     if (btnInstall) {
