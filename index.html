@@ -1545,7 +1545,7 @@
         if (isToday) classes += ' hari-ini';
         if (isLibur) classes += ' hari-libur-tab';
         if (hariAktifDipilih === hari) classes += ' active';
-        html += `<button class="${classes}" data-hari="${hari}">${hari} <span class="hari-tab-count">(${items.length})</span> ${isToday ? '🔆' : ''}</button>`;
+        html += `<button class="${classes}" data-hari="${hari}">${hari} <span class="hari-tab-count">(${items.length})</span></button>`;
       });
       container.innerHTML = html;
 
