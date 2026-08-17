@@ -763,8 +763,8 @@
 
         <div class="table-container" id="mid-tabelRekap"></div>
         <div class="master-actions">
-          <button class="btn btn-accent" id="mid-btnExportExcel" style="display:none; width:100%;">📥 Export ke Excel (.xlsx)</button>
-          <button class="btn btn-accent" id="mid-btnKirimLaporan" style="width:100%; margin-top:8px;"><i class="fab fa-whatsapp"></i> Kirim Laporan Harian ke WA</button>
+          <button class="btn btn-accent btn-export-admin" id="mid-btnExportExcel" style="display:none; width:100%;">📥 Export ke Excel (.xlsx)</button>
+          <button class="btn btn-accent hanya-admin" id="mid-btnKirimLaporan" style="width:100%; margin-top:8px;"><i class="fab fa-whatsapp"></i> Kirim Laporan Harian ke WA</button>
         </div>
       </div>
     </div>
@@ -786,8 +786,8 @@
 
         <div class="table-container" id="mtsd-tabelRekap"></div>
         <div class="master-actions">
-          <button class="btn btn-accent" id="mtsd-btnExportExcel" style="display:none; width:100%;">📥 Export ke Excel (.xlsx)</button>
-          <button class="btn btn-accent" id="mtsd-btnKirimLaporan" style="width:100%; margin-top:8px;"><i class="fab fa-whatsapp"></i> Kirim Laporan Harian ke WA</button>
+          <button class="btn btn-accent btn-export-admin" id="mtsd-btnExportExcel" style="display:none; width:100%;">📥 Export ke Excel (.xlsx)</button>
+          <button class="btn btn-accent hanya-admin" id="mtsd-btnKirimLaporan" style="width:100%; margin-top:8px;"><i class="fab fa-whatsapp"></i> Kirim Laporan Harian ke WA</button>
         </div>
       </div>
     </div>
@@ -940,6 +940,9 @@
     document.querySelectorAll('.hanya-admin').forEach(el => {
       el.style.display = window.isAdmin ? '' : 'none';
     });
+    if (!window.isAdmin) {
+      document.querySelectorAll('.btn-export-admin').forEach(el => el.style.display = 'none');
+    }
     document.body.classList.toggle('mode-guest', !window.isAdmin);
     // Kalau lagi ada di halaman Seting (edit jadwal) terus statusnya bukan admin (mis. abis logout), tendang ke Rekap.
     // Halaman Absen TETEP boleh dibuka guest, cuma buat liat jadwal (gak bisa edit).
@@ -1738,7 +1741,7 @@
       });
       html += '</tbody></table>';
       container.innerHTML = html;
-      exportBtn.style.display = 'block';
+      exportBtn.style.display = window.isAdmin ? 'block' : 'none';
     }
 
     function filterRekapGuru() {
