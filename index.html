@@ -16,7 +16,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -765,7 +764,6 @@
         <div class="table-container" id="mid-tabelRekap"></div>
         <div class="master-actions">
           <button class="btn btn-accent" id="mid-btnExportExcel" style="display:none; width:100%;">📥 Export ke Excel (.xlsx)</button>
-          <button class="btn btn-accent" id="mid-btnExportPNG" style="display:none; width:100%; margin-top:8px;">📸 Export PNG HD</button>
           <button class="btn btn-accent" id="mid-btnKirimLaporan" style="width:100%; margin-top:8px;"><i class="fab fa-whatsapp"></i> Kirim Laporan Harian ke WA</button>
         </div>
       </div>
@@ -789,7 +787,6 @@
         <div class="table-container" id="mtsd-tabelRekap"></div>
         <div class="master-actions">
           <button class="btn btn-accent" id="mtsd-btnExportExcel" style="display:none; width:100%;">📥 Export ke Excel (.xlsx)</button>
-          <button class="btn btn-accent" id="mtsd-btnExportPNG" style="display:none; width:100%; margin-top:8px;">📸 Export PNG HD</button>
           <button class="btn btn-accent" id="mtsd-btnKirimLaporan" style="width:100%; margin-top:8px;"><i class="fab fa-whatsapp"></i> Kirim Laporan Harian ke WA</button>
         </div>
       </div>
@@ -1024,66 +1021,6 @@
 
   function slugKey(s) {
     return String(s).trim().replace(/[.#$\[\]\/]/g, '_');
-  }
-
-  // Export tabel rekap jadi gambar PNG resolusi tinggi (siap share ke WA/grup)
-  function renderExportPNG(table, judul, subjudul, namaFile) {
-    if (typeof html2canvas === 'undefined') {
-      alert('Gagal memuat pustaka export gambar. Cek koneksi internet lalu coba lagi.');
-      return;
-    }
-    const isDark = document.body.classList.contains('dark-mode') || document.documentElement.classList.contains('dark-mode');
-    const bgCard = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.6)';
-    const textMain = isDark ? '#F1F4FA' : '#0F172A';
-    const textSub = isDark ? '#949DB1' : '#5C6470';
-    const border = isDark ? 'rgba(255,255,255,0.14)' : 'rgba(79,70,229,0.22)';
-
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText = `position:fixed; left:-9999px; top:0; width:640px; padding:28px; background:${bgCard}; font-family:-apple-system,'Segoe UI',sans-serif;`;
-    wrapper.innerHTML = `
-      <div style="margin-bottom:18px;">
-        <div style="font-size:20px; font-weight:800; color:${textMain};">${judul}</div>
-        <div style="font-size:14px; font-weight:600; color:${textSub}; margin-top:2px;">${subjudul}</div>
-      </div>
-    `;
-    const clonedTable = table.cloneNode(true);
-    clonedTable.style.width = '100%';
-    clonedTable.style.borderCollapse = 'collapse';
-    clonedTable.style.fontSize = '14px';
-    clonedTable.querySelectorAll('th, td').forEach(cell => {
-      cell.style.padding = '10px 8px';
-      cell.style.border = `1px solid ${border}`;
-    });
-    clonedTable.querySelectorAll('th').forEach(cell => {
-      cell.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(79,70,229,0.08)';
-      cell.style.color = textMain;
-    });
-    // buang baris yang lagi disembunyikan oleh filter pencarian guru
-    const originalRows = table.querySelectorAll('tbody tr');
-    const clonedRows = clonedTable.querySelectorAll('tbody tr');
-    clonedRows.forEach((row, i) => {
-      if (originalRows[i] && originalRows[i].style.display === 'none') row.remove();
-    });
-    wrapper.appendChild(clonedTable);
-
-    const footer = document.createElement('div');
-    footer.style.cssText = `margin-top:14px; font-size:11px; color:${textSub}; text-align:right;`;
-    footer.textContent = 'Diekspor ' + new Date().toLocaleString('id-ID');
-    wrapper.appendChild(footer);
-
-    document.body.appendChild(wrapper);
-
-    html2canvas(wrapper, { scale: 3, backgroundColor: bgCard, useCORS: true }).then(canvas => {
-      const link = document.createElement('a');
-      link.download = `${namaFile}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      document.body.removeChild(wrapper);
-    }).catch(err => {
-      console.error('Gagal export PNG:', err);
-      alert('Gagal membuat gambar PNG. Coba lagi.');
-      document.body.removeChild(wrapper);
-    });
   }
 
   function kirimKeFirebase(tanggal, lembaga, records) {
@@ -1784,13 +1721,11 @@
       });
       const container = $('tabelRekap');
       const exportBtn = $('btnExportExcel');
-      const exportPngBtn = $('btnExportPNG');
       const searchGroup = $('groupSearchGuru');
       const listNamaGuru = Object.keys(rekap).sort();
       if (listNamaGuru.length === 0) {
         container.innerHTML = '<div class="msg-empty">Belum ada data rekap pada bulan ini.</div>';
         exportBtn.style.display = 'none';
-        if (exportPngBtn) exportPngBtn.style.display = 'none';
         searchGroup.style.display = 'none';
         return;
       }
@@ -1804,7 +1739,6 @@
       html += '</tbody></table>';
       container.innerHTML = html;
       exportBtn.style.display = 'block';
-      if (exportPngBtn) exportPngBtn.style.display = 'block';
     }
 
     function filterRekapGuru() {
@@ -1822,15 +1756,6 @@
       if (!table) return;
       const wb = XLSX.utils.table_to_book(table, { sheet: "Rekap" });
       XLSX.writeFile(wb, `Rekap_Absensi_${cfg.lembaga}_${nBulan}_${tahun}.xlsx`);
-    }
-
-    function exportKePNG() {
-      const bSel = $('bulanRekap');
-      const nBulan = bSel.options[bSel.selectedIndex].text;
-      const tahun = $('tahunRekap').value;
-      const table = document.querySelector(`${sel('tabelRekap')} table`);
-      if (!table) return;
-      renderExportPNG(table, `Rekap Absensi ${cfg.lembaga}`, `${nBulan} ${tahun}`, `Rekap_Absensi_${cfg.lembaga}_${nBulan}_${tahun}`);
     }
 
     function clearAllDatabase() {
@@ -1961,7 +1886,6 @@
     $('btnRekap').addEventListener('click', tampilkanRekap);
     $('searchGuru').addEventListener('input', filterRekapGuru);
     $('btnExportExcel').addEventListener('click', exportKeExcel);
-    if ($('btnExportPNG')) $('btnExportPNG').addEventListener('click', exportKePNG);
     $('btnClearAllDB').addEventListener('click', clearAllDatabase);
 
     if (cfg.hasDiagnostik && $('btnDiagnostikFirebase')) {
