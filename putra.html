@@ -640,6 +640,16 @@
     </div>
   </div>
 
+  <!-- GERBANG LOGIN — wajib masuk Google dulu sebelum membuka sistem -->
+  <div id="loginGate" style="display:flex; position:fixed; inset:0; background:rgba(248,249,251,0.97); z-index:2000; align-items:center; justify-content:center;">
+    <div class="nm-card" style="width:min(360px,92vw); margin:0; text-align:center;">
+      <h3 style="margin-bottom:10px;"><i class="fas fa-lock"></i> Masuk untuk Absensi</h3>
+      <p style="font-size:13px; color:var(--text-sub); margin-bottom:16px;">Masuk pakai akun Google untuk membuka aplikasi absensi.</p>
+      <button class="btn-block-simpan" id="btnGateLogin" style="justify-content:center;"><i class="fab fa-google"></i> Masuk dengan Google</button>
+      <div id="gateError" style="color:var(--danger-border, #c0392b); font-size:12px; margin-top:10px; display:none;"></div>
+    </div>
+  </div>
+
   <!-- MODAL PILIH NOMOR WA -->
   <div id="modalKirimLaporan" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:999; align-items:center; justify-content:center;">
     <div class="nm-card" style="width:min(360px, 92vw); margin:0;">
@@ -758,16 +768,13 @@
             kotakBelumAdmin.style.display = 'block';
           }
           document.getElementById('btnLoginAdmin').innerHTML = window.isAdmin ? '<i class="fas fa-user-check"></i>' : '<i class="fas fa-user-clock"></i>';
+          document.getElementById('loginGate').style.display = 'none';
           terapkanStatusAdmin();
           resolve();
         });
         return;
       }
-      if (user && user.isAnonymous) { terapkanStatusAdmin(); resolve(); return; }
-      firebase.auth().signInAnonymously().catch(err => {
-        console.error('Gagal login anonim ke Firebase:', err);
-        alert('Gagal konek ke database (auth). Cek koneksi internet lalu reload halaman.');
-      });
+      document.getElementById('loginGate').style.display = 'flex';
     });
   });
 
@@ -792,6 +799,26 @@
         errBox.style.display = 'block';
       });
     });
+
+    const btnGateLogin = document.getElementById('btnGateLogin');
+    if (btnGateLogin) {
+      btnGateLogin.addEventListener('click', () => {
+        const errBox = document.getElementById('gateError');
+        errBox.style.display = 'none';
+        firebase.auth().signInWithPopup(googleProvider).then(() => {
+          document.getElementById('loginGate').style.display = 'none';
+        }).catch(err => {
+          let msg = 'Login gagal: ' + err.message;
+          if (err.code === 'auth/popup-closed-by-user') msg = 'Login dibatalkan.';
+          if (err.code === 'auth/popup-blocked') msg = 'Popup diblokir browser. Izinkan popup buat situs ini lalu coba lagi.';
+          if (err.code === 'auth/network-request-failed') msg = 'Gagal konek internet. Cek koneksi lalu coba lagi.';
+          if (err.code === 'auth/unauthorized-domain') msg = 'Domain ini belum diizinkan di Firebase Console (Authentication → Settings → Authorized domains).';
+          errBox.textContent = msg;
+          errBox.style.display = 'block';
+        });
+      });
+    }
+
     document.getElementById('btnLogoutAdmin').addEventListener('click', () => {
       firebase.auth().signOut().then(() => {
         window.isAdmin = false;
@@ -799,8 +826,8 @@
         document.getElementById('loginAdminSudahMasuk').style.display = 'none';
         document.getElementById('btnLoginAdmin').innerHTML = '<i class="fas fa-user-lock"></i>';
         modal.style.display = 'none';
+        document.getElementById('loginGate').style.display = 'flex';
         terapkanStatusAdmin();
-        firebase.auth().signInAnonymously();
       });
     });
   }
