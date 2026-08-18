@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jadwal & Absensi - MID & MTsD (Dark Mode)</title>
+  <title>Jadwal & Absensi - PUTRA</title>
   <meta name="theme-color" content="#4F46E5" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -684,12 +684,15 @@
   });
 
   // ===== SECTION: FIREBASE & AUTH =====
-  // CONFIG FIREBASE
+  // CONFIG FIREBASE — PROJECT KHUSUS PUTRA.
+  // Buat Firebase project baru di https://console.firebase.google.com (misal: "absenputra"),
+  // lalu salin nilai apiKey / authDomain / databaseURL / projectId-nya ke sini.
+  // Data PUTRA tersimpan di database project ini — terpisah total dari PUTRI.
   const firebaseConfig = {
-    apiKey: "AIzaSyCnLPbLi5a0REFooVcRdIeJGPi0OyvPb24",
-    authDomain: "absenputri-5d8a1.firebaseapp.com",
-    databaseURL: "https://absenputri-5d8a1-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "absenputri-5d8a1"
+    apiKey: "AIzaSyDclcxh0z5buVXsKxrMjK6LNNcOsKxKo6E",
+    authDomain: "absenputra-3bf6a.firebaseapp.com",
+    databaseURL: "https://absenputra-3bf6a-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "absenputra-3bf6a"
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
@@ -1310,16 +1313,6 @@
   const NAMA_BULAN_MASEHI = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
   const DAFTAR_LEMBAGA = [
-    { id: 'mid', prefix: 'mid-', lsAbsen: 'mid_absenGuru', lsJadwal: 'mid_jadwalCustom',
-      lembaga: 'MID', hapusKeyword: 'HAPUS MID', rekapPaths: ['MID', 'MI Miftahul Ulum'],
-      getDefaultJadwal: groupDefaultDataMID, hasDiagnostik: true,
-      label: 'MID', icon: 'fas fa-school', kalendar: 'masehi', namaBulan: NAMA_BULAN_MASEHI,
-      nowaKey: 'nowaTujuan' },
-    { id: 'mtsd', prefix: 'mtsd-', lsAbsen: 'mtsd_absenGuru', lsJadwal: 'mtsd_jadwalCustom',
-      lembaga: 'MTsD', hapusKeyword: 'HAPUS MTSD', rekapPaths: ['MTsD'],
-      getDefaultJadwal: () => JSON.parse(JSON.stringify(jadwalDefaultMTsD)), hasDiagnostik: false,
-      label: 'MTsD', icon: 'fas fa-mosque', kalendar: 'masehi', namaBulan: NAMA_BULAN_MASEHI,
-      nowaKey: 'nowaTujuan' },
     { id: 'putra', prefix: 'putra-', lsAbsen: 'putra_absenGuru', lsJadwal: 'putra_jadwalCustom',
       lembaga: 'PUTRA', hapusKeyword: 'HAPUS PUTRA', rekapPaths: ['PUTRA'],
       getDefaultJadwal: () => { const j = {}; LIST_HARI.forEach(h => j[h] = []); return j; }, hasDiagnostik: false,
