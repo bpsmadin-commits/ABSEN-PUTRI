@@ -1,9 +1,8 @@
-const CACHE_NAME = 'absen-putri-v3';
+const CACHE_NAME = 'absen-putri-v4';
 
 const CORE_ASSETS = [
   './',
   './index.html',
-  './putra.html',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png'

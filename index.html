@@ -1371,12 +1371,7 @@
       lembaga: 'MTsD', hapusKeyword: 'HAPUS MTSD', rekapPaths: ['MTsD'],
       getDefaultJadwal: () => JSON.parse(JSON.stringify(jadwalDefaultMTsD)), hasDiagnostik: false,
       label: 'MTsD', icon: 'fas fa-mosque', kalendar: 'masehi', namaBulan: NAMA_BULAN_MASEHI,
-      nowaKey: 'nowaTujuan' },
-    { id: 'putra', prefix: 'putra-', lsAbsen: 'putra_absenGuru', lsJadwal: 'putra_jadwalCustom',
-      lembaga: 'PUTRA', hapusKeyword: 'HAPUS PUTRA', rekapPaths: ['PUTRA'],
-      getDefaultJadwal: () => { const j = {}; LIST_HARI.forEach(h => j[h] = []); return j; }, hasDiagnostik: false,
-      label: 'PUTRA', icon: 'fas fa-male', kalendar: 'hijriah', namaBulan: NAMA_BULAN_HIJRIAH,
-      nowaKey: 'nowaTujuanPutra' }
+      nowaKey: 'nowaTujuan' }
   ];
 
   // ===== DAFTAR LEMBAGA → DAFTAR MODUL (yang menempel penuh tanpa modifikasi) =====
