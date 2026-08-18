@@ -650,6 +650,15 @@
     </div>
   </div>
 
+  <!-- AKSES DITOLAK — akun login bukan admin di sistem ini -->
+  <div id="aksesDitolak" style="display:none; position:fixed; inset:0; background:rgba(248,249,251,0.97); z-index:2100; align-items:center; justify-content:center;">
+    <div class="nm-card" style="width:min(360px,92vw); margin:0; text-align:center;">
+      <h3 style="margin-bottom:10px; color:var(--alpa);"><i class="fas fa-ban"></i> Akses Ditolak</h3>
+      <p style="font-size:13px; color:var(--text-sub); margin-bottom:16px;">Akun <b id="ditolakEmail"></b> tidak terdaftar sebagai admin pada sistem ini.</p>
+      <button class="btn btn-danger" id="btnKeluarDitolak" style="width:100%;"><i class="fas fa-sign-out-alt"></i> Keluar &amp; Ganti Akun</button>
+    </div>
+  </div>
+
   <!-- MODAL PILIH NOMOR WA -->
   <div id="modalKirimLaporan" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:999; align-items:center; justify-content:center;">
     <div class="nm-card" style="width:min(360px, 92vw); margin:0;">
@@ -765,12 +774,21 @@
             kotakBelumAdmin.style.display = 'block';
           }
           document.getElementById('btnLoginAdmin').innerHTML = window.isAdmin ? '<i class="fas fa-user-check"></i>' : '<i class="fas fa-user-clock"></i>';
-          document.getElementById('loginGate').style.display = 'none';
-          terapkanStatusAdmin();
-          resolve();
+
+          if (window.isAdmin) {
+            document.getElementById('loginGate').style.display = 'none';
+            document.getElementById('aksesDitolak').style.display = 'none';
+            terapkanStatusAdmin();
+            resolve();
+          } else {
+            document.getElementById('loginGate').style.display = 'none';
+            document.getElementById('aksesDitolak').style.display = 'flex';
+            document.getElementById('ditolakEmail').textContent = user.email;
+          }
         });
         return;
       }
+      document.getElementById('aksesDitolak').style.display = 'none';
       document.getElementById('loginGate').style.display = 'flex';
     });
   });
@@ -813,6 +831,13 @@
           errBox.textContent = msg;
           errBox.style.display = 'block';
         });
+      });
+    }
+
+    const btnKeluarDitolak = document.getElementById('btnKeluarDitolak');
+    if (btnKeluarDitolak) {
+      btnKeluarDitolak.addEventListener('click', () => {
+        firebase.auth().signOut();
       });
     }
 
