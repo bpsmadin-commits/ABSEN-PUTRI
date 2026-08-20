@@ -1133,33 +1133,72 @@
     return v === 'on';
   }
 
-  function kirimNotifAlpaFonnte(cfg, tanggal, records) {
-    const token = getFonnteToken();
-    if (!token || !isFonnteAktif()) return Promise.resolve(null);
-    const alpa = records.filter(r => r.status === 'A');
-    if (alpa.length === 0) return Promise.resolve(null);
-    const nomors = getNomorWaTujuan(cfg.nowaKey);
-    if (nomors.length === 0) return Promise.resolve(null);
-    const hari = namaHariDariTanggal(tanggal, cfg.kalendar);
-    let pesan = '📢 *NOTIFIKASI ALPA — ' + cfg.lembaga + '*\n';
-    pesan += '📅 ' + tanggal + ' (' + hari + ')\n━━━━━━━━━━━━━━━━━\n';
-    pesan += alpa.map(r => '▫️ ' + r.jam + ' • ' + r.kelas + '\n  👤 ' + r.guru + '\n  📖 ' + r.mapel).join('\n');
-    pesan += '\n━━━━━━━━━━━━━━━━━\n_Dikirim otomatis dari Aplikasi Absensi MID & MTsD_';
+  function kirimViaFonnte(token, target, pesan) {
     return fetch('https://api.fonnte.com/send', {
       method: 'POST',
       mode: 'cors',
       headers: new Headers({ Authorization: token }),
       body: (function () {
         const data = new FormData();
-        data.append('target', nomors.join(','));
+        data.append('target', target);
         data.append('message', pesan);
         data.append('countryCode', '62');
         return data;
       })()
     })
       .then(r => r.json())
-      .then(j => (j && j.status === true) ? { ok: true, terkirim: alpa.length } : { ok: false, err: (j && j.detail) || 'respons tidak dikenal' })
+      .then(j => (j && j.status === true) ? { ok: true } : { ok: false, err: (j && j.detail) || 'respons tidak dikenal' })
       .catch(err => ({ ok: false, err: err.message }));
+  }
+
+  function getNomorWaGuru(lembaga) {
+    try { return JSON.parse(localStorage.getItem('fonnte_noGuru_' + lembaga) || '{}') || {}; } catch (e) { return {}; }
+  }
+  function simpanNomorWaGuru(lembaga, map) {
+    const bersih = {};
+    Object.keys(map).forEach(g => {
+      const n = String(map[g]).replace(/\D/g, '');
+      if (g.trim() && n.length >= 10) bersih[g.trim()] = n;
+    });
+    localStorage.setItem('fonnte_noGuru_' + lembaga, JSON.stringify(bersih));
+    return bersih;
+  }
+
+  function kirimNotifAlpaFonnte(cfg, tanggal, records) {
+    const token = getFonnteToken();
+    if (!token || !isFonnteAktif()) return Promise.resolve(null);
+    const alpa = records.filter(r => r.status === 'A');
+    if (alpa.length === 0) return Promise.resolve(null);
+    const hari = namaHariDariTanggal(tanggal, cfg.kalendar);
+    const barisTanggal = '📅 ' + tanggal + ' (' + hari + ')';
+    const nomorGuru = getNomorWaGuru(cfg.lembaga);
+    const tugas = [];
+
+    const nomors = getNomorWaTujuan(cfg.nowaKey);
+    if (nomors.length) {
+      let pesan = '📢 *NOTIFIKASI ALPA — ' + cfg.lembaga + '*\n' + barisTanggal + '\n━━━━━━━━━━━━━━━━━\n';
+      pesan += alpa.map(r => '▫️ ' + r.jam + ' • ' + r.kelas + '\n  👤 ' + r.guru + '\n  📖 ' + r.mapel).join('\n');
+      pesan += '\n━━━━━━━━━━━━━━━━━\n_Dikirim otomatis dari Aplikasi Absensi MID & MTsD_';
+      tugas.push(kirimViaFonnte(token, nomors.join(','), pesan));
+    }
+
+    alpa.forEach(r => {
+      const no = nomorGuru[r.guru];
+      if (!no) return;
+      let pesan = '📢 *NOTIFIKASI ALPA — ' + cfg.lembaga + '*\n' + barisTanggal + '\n━━━━━━━━━━━━━━━━━\n';
+      pesan += 'Saudara ' + r.guru + ' tercatat *ALPA* hari ini.\n';
+      pesan += '▫️ Jam: ' + r.jam + '\n  🏫 Kelas: ' + r.kelas + '\n  📖 Mapel: ' + r.mapel + '\n';
+      pesan += '\nMohon segera konfirmasi ke pihak madrasah.\n━━━━━━━━━━━━━━━━━\n_Dikirim otomatis dari Aplikasi Absensi MID & MTsD_';
+      tugas.push(kirimViaFonnte(token, no, pesan));
+    });
+
+    if (tugas.length === 0) return Promise.resolve(null);
+    return Promise.all(tugas).then(results => {
+      const okCount = results.filter(x => x.ok).length;
+      const gagal = results.filter(x => !x.ok);
+      if (gagal.length) return { ok: false, terkirim: okCount, err: gagal.map(f => f.err).join('; ') };
+      return { ok: true, terkirim: okCount };
+    });
   }
 
   function buatLaporanHarian(tanggal, lembaga, jadwalAktif, dataAbsensi, kalendar) {
@@ -1461,6 +1500,13 @@
           <label style="display:flex; align-items:center; gap:8px; margin:0 0 10px; font-size:0.8rem;"><input type="checkbox" id="${l.prefix}fonnteAktif"> Aktifkan notifikasi Alpa otomatis</label>
           <button class="btn btn-accent" id="${l.prefix}btnSimpanFonnte" style="width:100%;"><i class="fas fa-save"></i> Simpan Pengaturan Fonnte</button>
           <div id="${l.prefix}statusFonnte" class="status-box"></div>
+        </div>
+        <div class="nm-card" style="border-left:3px solid var(--brass);">
+          <h4 style="font-size:0.9rem; margin-bottom:6px; color:var(--text-header);"><i class="fas fa-address-book"></i> Nomor WA Guru (Notifikasi Alpa)</h4>
+          <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:10px;">Isi nomor WhatsApp tiap guru di bawah. Saat guru berstatus <strong>Alpa</strong>, pesan otomatis juga terkirim ke nomor guru tersebut (selain kiriman ke nomor tujuan di atas). Lista diambil otomatis dari jadwal. Format internasional tanpa 0 di depan (contoh: 6281234567890).</p>
+          <div id="${l.prefix}listGuruWa"></div>
+          <button class="btn btn-accent" id="${l.prefix}btnSimpanNoGuru" style="width:100%;"><i class="fas fa-save"></i> Simpan Nomor WA Guru</button>
+          <div id="${l.prefix}statusGuruWa" class="status-box"></div>
         </div>
         ${l.hasDiagnostik ? `
         <div class="nm-card" style="border-left:3px solid var(--brass);">
@@ -1830,6 +1876,25 @@
       items.forEach(item => tambahkanBarisForm(item.kelas, item.jam, item.mapel, item.guru));
     }
 
+    function renderListGuruWa() {
+      const container = $('listGuruWa');
+      const guruSet = {};
+      Object.keys(jadwalAktif).forEach(h => (jadwalAktif[h] || []).forEach(it => {
+        if (it.guru && it.guru.trim()) guruSet[it.guru.trim()] = true;
+      }));
+      const daftar = Object.keys(guruSet).sort();
+      const tersimpan = getNomorWaGuru(cfg.lembaga);
+      if (daftar.length === 0) {
+        container.innerHTML = '<div class="msg-empty-sm">Belum ada data guru di jadwal.</div>';
+        return;
+      }
+      container.innerHTML = daftar.map(g => `
+        <div class="row-guru-no" style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+          <span style="flex:1; font-size:0.85rem;" class="arab-text">${g}</span>
+          <input type="tel" class="inp-no-guru" style="flex:1.2;" placeholder="628xxxxxxxxxx" value="${tersimpan[g] || ''}">
+        </div>`).join('');
+    }
+
     function tambahkanBarisForm(kelas = '', jam = '', mapel = '', guru = '') {
       const container = $('editJadwalContainer');
       const row = document.createElement('div');
@@ -1864,6 +1929,7 @@
       status.className = 'status-box status-success';
       setTimeout(() => { status.style.display = 'none'; }, 3000);
       renderSemuaHari($('tanggal').value);
+      renderListGuruWa();
     }
 
     function kembalikanJadwalDefault() {
@@ -1874,6 +1940,7 @@
         kirimJadwalKeFirebase(cfg.lembaga, jadwalAktif);
         renderFormPengaturan();
         renderSemuaHari($('tanggal').value);
+        renderListGuruWa();
         alert(`Jadwal ${cfg.lembaga} berhasil dikembalikan ke versi asli.`);
       }
     }
@@ -1939,6 +2006,21 @@
       const st = $('statusFonnte');
       st.innerHTML = aktif ? '✅ Pengaturan tersimpan. Notifikasi Alpa otomatis AKTIF.' : '✅ Pengaturan tersimpan. Notifikasi Alpa dimatikan.';
       st.className = 'status-box status-success';
+      setTimeout(() => { st.style.display = 'none'; }, 3500);
+    });
+    renderListGuruWa();
+    $('btnSimpanNoGuru').addEventListener('click', () => {
+      const map = {};
+      document.querySelectorAll(`${sel('listGuruWa')} .row-guru-no`).forEach(row => {
+        const g = row.querySelector('span').textContent.trim();
+        const n = row.querySelector('.inp-no-guru').value.trim();
+        if (g && n.replace(/\D/g, '').length >= 10) map[g] = n;
+      });
+      const hasil = simpanNomorWaGuru(cfg.lembaga, map);
+      const st = $('statusGuruWa');
+      const jumlah = Object.keys(hasil).length;
+      st.innerHTML = jumlah > 0 ? `✅ Nomor WA ${jumlah} guru tersimpan.` : '⚠️ Tidak ada nomor valid. Gunakan format internasional (contoh: 6281234567890).';
+      st.className = jumlah > 0 ? 'status-box status-success' : 'status-box status-error';
       setTimeout(() => { st.style.display = 'none'; }, 3500);
     });
     $('btnRekap').addEventListener('click', tampilkanRekap);
