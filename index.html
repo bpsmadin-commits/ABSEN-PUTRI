@@ -1174,24 +1174,20 @@
     const nomorGuru = getNomorWaGuru(cfg.lembaga);
     const tugas = [];
 
-    const nomors = getNomorWaTujuan(cfg.nowaKey);
-    const guruNos = {};
-    alpa.forEach(r => { const no = nomorGuru[r.guru]; if (no) guruNos[no] = true; });
-    const nomorsRingkasan = nomors.filter(n => !guruNos[n]);
-    if (nomorsRingkasan.length) {
-      let pesan = '📢 *NOTIFIKASI ALPA — ' + cfg.lembaga + '*\n' + barisTanggal + '\n━━━━━━━━━━━━━━━━━\n';
-      pesan += alpa.map(r => '▫️ ' + r.jam + ' • ' + r.kelas + '\n  👤 ' + r.guru + '\n  📖 ' + r.mapel).join('\n');
-      pesan += '\n━━━━━━━━━━━━━━━━━\n_Dikirim otomatis dari Aplikasi Absensi MID & MTsD_';
-      tugas.push(kirimViaFonnte(token, nomorsRingkasan.join(','), pesan));
-    }
-
+    const perGuru = {};
     alpa.forEach(r => {
-      const no = nomorGuru[r.guru];
+      const no = nomorGuru[(r.guru || '').trim()];
       if (!no) return;
+      if (!perGuru[no]) perGuru[no] = { guru: r.guru, items: [] };
+      perGuru[no].items.push(r);
+    });
+
+    Object.keys(perGuru).forEach(no => {
+      const { guru, items } = perGuru[no];
       let pesan = '📢 *NOTIFIKASI ALPA — ' + cfg.lembaga + '*\n' + barisTanggal + '\n━━━━━━━━━━━━━━━━━\n';
-      pesan += 'Saudara ' + r.guru + ' tercatat *ALPA* hari ini.\n';
-      pesan += '▫️ Jam: ' + r.jam + '\n  🏫 Kelas: ' + r.kelas + '\n  📖 Mapel: ' + r.mapel + '\n';
-      pesan += '\nMohon segera konfirmasi ke pihak madrasah.\n━━━━━━━━━━━━━━━━━\n_Dikirim otomatis dari Aplikasi Absensi MID & MTsD_';
+      pesan += 'Saudara ' + guru + ' tercatat *ALPA* hari ini:\n';
+      pesan += items.map(r => '▫️ Jam: ' + r.jam + '\n  🏫 Kelas: ' + r.kelas + '\n  📖 Mapel: ' + r.mapel).join('\n');
+      pesan += '\n\nMohon segera konfirmasi ke pihak madrasah.\n━━━━━━━━━━━━━━━━━\n_Dikirim otomatis dari Aplikasi Absensi MID & MTsD_';
       tugas.push(kirimViaFonnte(token, no, pesan));
     });
 
@@ -1498,7 +1494,7 @@
         </div>
         <div class="nm-card" style="border-left:3px solid #128C7E;">
           <h4 style="font-size:0.9rem; margin-bottom:6px; color:var(--text-header);"><i class="fab fa-whatsapp"></i> Notifikasi Alpa Otomatis (Fonnte)</h4>
-          <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:10px;">Setiap kali tombol Simpan ditekan dan ada guru berstatus <strong>Alpa</strong>, pesan WA langsung terkirim otomatis ke nomor tujuan di atas (tanpa perlu tekan kirim). Cara: daftar gratis lalu login di <strong>md.fonnte.com</strong> &rarr; buka menu <strong>Device</strong> untuk menyambungkan nomor WA bot (scan QR). <strong>API Token</strong>-nya ada di menu <strong>Device</strong> juga &mdash; pada baris device yang tersambung, klik kotak <strong>Token</strong>, otomatis tersalin ke clipboard, lalu tempel di kolom di bawah.</p>
+          <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:10px;">Setiap kali tombol Simpan ditekan dan ada guru berstatus <strong>Alpa</strong>, pesan WA langsung terkirim <strong>otomatis ke nomor guru yang bersangkutan</strong> (isi dulu nomornya pada kartu "Nomor WA Guru" di bawah). Laporan harian ke Kepala Madrasah tetap manual lewat tombol "Kirim Laporan Harian ke WA". Cara: daftar gratis lalu login di <strong>md.fonnte.com</strong> &rarr; buka menu <strong>Device</strong> untuk menyambungkan nomor WA bot (scan QR). <strong>API Token</strong>-nya ada di menu <strong>Device</strong> juga &mdash; pada baris device yang tersambung, klik kotak <strong>Token</strong>, otomatis tersalin ke clipboard, lalu tempel di kolom di bawah.</p>
           <div class="form-group" style="margin-bottom:8px;"><label>API Token Fonnte</label><input type="password" id="${l.prefix}fonnteToken" placeholder="Token dari fonnte.com"></div>
           <label style="display:flex; align-items:center; gap:8px; margin:0 0 10px; font-size:0.8rem;"><input type="checkbox" id="${l.prefix}fonnteAktif"> Aktifkan notifikasi Alpa otomatis</label>
           <button class="btn btn-accent" id="${l.prefix}btnSimpanFonnte" style="width:100%;"><i class="fas fa-save"></i> Simpan Pengaturan Fonnte</button>
@@ -1506,7 +1502,7 @@
         </div>
         <div class="nm-card" style="border-left:3px solid var(--brass);">
           <h4 style="font-size:0.9rem; margin-bottom:6px; color:var(--text-header);"><i class="fas fa-address-book"></i> Nomor WA Guru (Notifikasi Alpa)</h4>
-          <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:10px;">Isi nomor WhatsApp tiap guru di bawah. Saat guru berstatus <strong>Alpa</strong>, pesan otomatis juga terkirim ke nomor guru tersebut (selain kiriman ke nomor tujuan di atas). Lista diambil otomatis dari jadwal. Format internasional tanpa 0 di depan (contoh: 6281234567890).</p>
+          <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:10px;">Isi nomor WhatsApp tiap guru di bawah. Saat guru berstatus <strong>Alpa</strong>, pesan otomatis terkirim ke nomor guru tersebut. Lista diambil otomatis dari jadwal. Format internasional tanpa 0 di depan (contoh: 6281234567890).</p>
           <div id="${l.prefix}listGuruWa"></div>
           <button class="btn btn-accent" id="${l.prefix}btnSimpanNoGuru" style="width:100%;"><i class="fas fa-save"></i> Simpan Nomor WA Guru</button>
           <div id="${l.prefix}statusGuruWa" class="status-box"></div>
@@ -2000,10 +1996,6 @@
       const token = $('fonnteToken').value.trim();
       if (!token) { alert('Masukkan API token Fonnte.'); return; }
       const aktif = $('fonnteAktif').checked;
-      if (getNomorWaTujuan(cfg.nowaKey).length === 0) {
-        alert('Isi dulu nomor WA tujuan pada kartu "Laporan Harian WhatsApp" di atas.');
-        return;
-      }
       localStorage.setItem('fonnte_token', token);
       localStorage.setItem('fonnte_aktif', aktif ? 'on' : 'off');
       const st = $('statusFonnte');
