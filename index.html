@@ -1164,6 +1164,11 @@
     return bersih;
   }
 
+  const KUNCI_ALPA_TERKIRIM = 'fonnte_alpa_terkirim';
+  function getAlpaTerkirim() {
+    try { return JSON.parse(localStorage.getItem(KUNCI_ALPA_TERKIRIM) || '[]') || []; } catch (e) { return []; }
+  }
+
   function kirimNotifAlpaFonnte(cfg, tanggal, records) {
     const token = getFonnteToken();
     if (!token || !isFonnteAktif()) return Promise.resolve(null);
@@ -1173,8 +1178,15 @@
     const barisTanggal = '📅 ' + tanggal + ' (' + hari + ')';
     const nomorGuru = getNomorWaGuru(cfg.lembaga);
 
+    const kunci = g => cfg.lembaga + '|' + tanggal + '|' + (g || '').trim();
+    const alpaKeys = alpa.map(r => kunci(r.guru));
+    // kunci lama utk tanggal/lembaga ini yg sudah tidak Alpa dibuang, sisanya dipertahankan
+    const sentSet = new Set(getAlpaTerkirim().filter(k => !k.startsWith(cfg.lembaga + '|' + tanggal + '|') || alpaKeys.indexOf(k) >= 0));
+    const alpaBaru = alpa.filter(r => !sentSet.has(kunci(r.guru)));
+    if (alpaBaru.length === 0) return Promise.resolve(null);
+
     const perGuru = {};
-    alpa.forEach(r => {
+    alpaBaru.forEach(r => {
       const no = nomorGuru[(r.guru || '').trim()];
       if (!no) return;
       if (!perGuru[no]) perGuru[no] = { guru: r.guru, items: [] };
@@ -1187,7 +1199,7 @@
       pesan += 'Saudara ' + guru + ' tercatat *ALPA* hari ini:\n';
       pesan += items.map(r => '▫️ Jam: ' + r.jam + '\n  🏫 Kelas: ' + r.kelas + '\n  📖 Mapel: ' + r.mapel).join('\n');
       pesan += '\n\nMohon segera konfirmasi ke pihak madrasah.\n━━━━━━━━━━━━━━━━━\n_Dikirim otomatis dari Aplikasi Absensi MID & MTsD_';
-      return { no, pesan };
+      return { no, pesan, keys: items.map(r => kunci(r.guru)) };
     });
 
     if (targets.length === 0) return Promise.resolve(null);
@@ -1201,8 +1213,10 @@
           await new Promise(r => setTimeout(r, 1500));
           res = await kirimViaFonnte(token, t.no, t.pesan);
         }
+        if (res.ok) t.keys.forEach(k => sentSet.add(k));
         hasil.push(res);
       }
+      localStorage.setItem(KUNCI_ALPA_TERKIRIM, JSON.stringify([...sentSet]));
       return hasil;
     }
 
