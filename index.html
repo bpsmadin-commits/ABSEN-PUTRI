@@ -831,10 +831,11 @@
   }
 
   function gabungkanDataSheet(dataLokal, dataSheet) {
+    const sekarang = getLocalISOString();
     const kunci = r => [r.tanggal, r.lembaga, r.kelas, r.jam, r.guru].join('|');
     const map = {};
-    dataLokal.forEach(r => map[kunci(r)] = r);
-    dataSheet.forEach(r => map[kunci(r)] = r);
+    dataLokal.forEach(r => { if (!r.tanggal || r.tanggal <= sekarang) map[kunci(r)] = r; });
+    dataSheet.forEach(r => { if (!r.tanggal || r.tanggal <= sekarang) map[kunci(r)] = r; });
     return Object.values(map);
   }
 
@@ -849,6 +850,23 @@
     return db.ref('jadwal/' + lembagaKey).once('value')
       .then(snap => snap.val() || null)
       .catch(err => { console.error('Gagal tarik jadwal Firebase:', err); return null; });
+  }
+
+  function bersihkanDataMasaDepan() {
+    const sekarang = getLocalISOString();
+    const paths = {};
+    DAFTAR_LEMBAGA.forEach(l => (l.rekapPaths || [l.lembaga]).forEach(p => { paths[slugKey(p)] = true; }));
+    Object.keys(paths).forEach(key => {
+      db.ref('absensi/' + key).once('value').then(snap => {
+        const val = snap.val() || {};
+        Object.keys(val).forEach(tgl => {
+          if (tgl > sekarang) {
+            db.ref('absensi/' + key + '/' + tgl).remove()
+              .catch(err => console.error('Gagal hapus data masa depan Firebase:', err));
+          }
+        });
+      }).catch(err => console.error('Gagal cek data Firebase:', err));
+    });
   }
 
   function getLocalISOString(dateObj) {
@@ -1585,6 +1603,12 @@
       if (modKey === 'mid') migrasiDataLamaMI();
       const savedAbsen = localStorage.getItem(cfg.lsAbsen);
       dataAbsensi = savedAbsen ? JSON.parse(savedAbsen) : [];
+      const sekarang = getLocalISOString();
+      const bersih = dataAbsensi.filter(r => !r.tanggal || r.tanggal <= sekarang);
+      if (bersih.length !== dataAbsensi.length) {
+        dataAbsensi = bersih;
+        saveDataAbsen();
+      }
       const savedJadwal = localStorage.getItem(cfg.lsJadwal);
       jadwalAktif = savedJadwal ? JSON.parse(savedJadwal) : cfg.getDefaultJadwal();
     }
@@ -2166,6 +2190,7 @@
 
     // Tunda init modul sampe login anonim ke Firebase kelar, biar db.ref(...) gak ditolak rules.
     window.authSiapDb.then(function() {
+      bersihkanDataMasaDepan();
       DAFTAR_LEMBAGA.forEach(l => initModul(l.id));
       terapkanStatusAdmin();
     });
