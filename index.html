@@ -1172,7 +1172,6 @@
     const hari = namaHariDariTanggal(tanggal, cfg.kalendar);
     const barisTanggal = '📅 ' + tanggal + ' (' + hari + ')';
     const nomorGuru = getNomorWaGuru(cfg.lembaga);
-    const tugas = [];
 
     const perGuru = {};
     alpa.forEach(r => {
@@ -1182,17 +1181,32 @@
       perGuru[no].items.push(r);
     });
 
-    Object.keys(perGuru).forEach(no => {
+    const targets = Object.keys(perGuru).map(no => {
       const { guru, items } = perGuru[no];
       let pesan = '📢 *NOTIFIKASI ALPA — ' + cfg.lembaga + '*\n' + barisTanggal + '\n━━━━━━━━━━━━━━━━━\n';
       pesan += 'Saudara ' + guru + ' tercatat *ALPA* hari ini:\n';
       pesan += items.map(r => '▫️ Jam: ' + r.jam + '\n  🏫 Kelas: ' + r.kelas + '\n  📖 Mapel: ' + r.mapel).join('\n');
       pesan += '\n\nMohon segera konfirmasi ke pihak madrasah.\n━━━━━━━━━━━━━━━━━\n_Dikirim otomatis dari Aplikasi Absensi MID & MTsD_';
-      tugas.push(kirimViaFonnte(token, no, pesan));
+      return { no, pesan };
     });
 
-    if (tugas.length === 0) return Promise.resolve(null);
-    return Promise.all(tugas).then(results => {
+    if (targets.length === 0) return Promise.resolve(null);
+
+    async function kirimSekuensial() {
+      const hasil = [];
+      for (let i = 0; i < targets.length; i++) {
+        const t = targets[i];
+        let res = await kirimViaFonnte(token, t.no, t.pesan);
+        if (!res.ok) {
+          await new Promise(r => setTimeout(r, 1500));
+          res = await kirimViaFonnte(token, t.no, t.pesan);
+        }
+        hasil.push(res);
+      }
+      return hasil;
+    }
+
+    return kirimSekuensial().then(results => {
       const okCount = results.filter(x => x.ok).length;
       const gagal = results.filter(x => !x.ok);
       if (gagal.length) return { ok: false, terkirim: okCount, err: gagal.map(f => f.err).join('; ') };

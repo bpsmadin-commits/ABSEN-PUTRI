@@ -1,4 +1,4 @@
-const CACHE_NAME = 'absen-putri-v10';
+const CACHE_NAME = 'absen-putri-v11';
 
 const CORE_ASSETS = [
   './',
