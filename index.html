@@ -1125,6 +1125,43 @@
     return true;
   }
 
+  // ===== Notifikasi Alpa Otomatis via WA (Fonnte) =====
+  function getFonnteToken() { return localStorage.getItem('fonnte_token') || ''; }
+  function isFonnteAktif() {
+    const v = localStorage.getItem('fonnte_aktif');
+    if (v === null) return false;
+    return v === 'on';
+  }
+
+  function kirimNotifAlpaFonnte(cfg, tanggal, records) {
+    const token = getFonnteToken();
+    if (!token || !isFonnteAktif()) return Promise.resolve(null);
+    const alpa = records.filter(r => r.status === 'A');
+    if (alpa.length === 0) return Promise.resolve(null);
+    const nomors = getNomorWaTujuan(cfg.nowaKey);
+    if (nomors.length === 0) return Promise.resolve(null);
+    const hari = namaHariDariTanggal(tanggal, cfg.kalendar);
+    let pesan = '📢 *NOTIFIKASI ALPA — ' + cfg.lembaga + '*\n';
+    pesan += '📅 ' + tanggal + ' (' + hari + ')\n━━━━━━━━━━━━━━━━━\n';
+    pesan += alpa.map(r => '▫️ ' + r.jam + ' • ' + r.kelas + '\n  👤 ' + r.guru + '\n  📖 ' + r.mapel).join('\n');
+    pesan += '\n━━━━━━━━━━━━━━━━━\n_Dikirim otomatis dari Aplikasi Absensi MID & MTsD_';
+    return fetch('https://api.fonnte.com/send', {
+      method: 'POST',
+      mode: 'cors',
+      headers: new Headers({ Authorization: token }),
+      body: (function () {
+        const data = new FormData();
+        data.append('target', nomors.join(','));
+        data.append('message', pesan);
+        data.append('countryCode', '62');
+        return data;
+      })()
+    })
+      .then(r => r.json())
+      .then(j => (j && j.status === true) ? { ok: true, terkirim: alpa.length } : { ok: false, err: (j && j.detail) || 'respons tidak dikenal' })
+      .catch(err => ({ ok: false, err: err.message }));
+  }
+
   function buatLaporanHarian(tanggal, lembaga, jadwalAktif, dataAbsensi, kalendar) {
     const hari = namaHariDariTanggal(tanggal, kalendar);
     const items = jadwalAktif[hari] || [];
@@ -1417,6 +1454,14 @@
           <div class="form-group" style="margin-bottom:8px;"><textarea rows="3" id="${l.prefix}nowaTujuan" placeholder="628xxx1, 628xxx2&#10;628xxx3"></textarea></div>
           <button class="btn btn-accent" id="${l.prefix}btnSimpanNowa" style="width:100%;"><i class="fas fa-save"></i> Simpan Nomor WhatsApp</button>
         </div>
+        <div class="nm-card" style="border-left:3px solid #128C7E;">
+          <h4 style="font-size:0.9rem; margin-bottom:6px; color:var(--text-header);"><i class="fab fa-whatsapp"></i> Notifikasi Alpa Otomatis (Fonnte)</h4>
+          <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:10px;">Setiap kali tombol Simpan ditekan dan ada guru berstatus <strong>Alpa</strong>, pesan WA langsung terkirim otomatis ke nomor tujuan di atas (tanpa perlu tekan kirim). Cara: daftar gratis lalu login di <strong>md.fonnte.com</strong> &rarr; buka menu <strong>Device</strong> untuk menyambungkan nomor WA bot (scan QR). <strong>API Token</strong>-nya ada di menu <strong>Device</strong> juga &mdash; pada baris device yang tersambung, klik kotak <strong>Token</strong>, otomatis tersalin ke clipboard, lalu tempel di kolom di bawah.</p>
+          <div class="form-group" style="margin-bottom:8px;"><label>API Token Fonnte</label><input type="password" id="${l.prefix}fonnteToken" placeholder="Token dari fonnte.com"></div>
+          <label style="display:flex; align-items:center; gap:8px; margin:0 0 10px; font-size:0.8rem;"><input type="checkbox" id="${l.prefix}fonnteAktif"> Aktifkan notifikasi Alpa otomatis</label>
+          <button class="btn btn-accent" id="${l.prefix}btnSimpanFonnte" style="width:100%;"><i class="fas fa-save"></i> Simpan Pengaturan Fonnte</button>
+          <div id="${l.prefix}statusFonnte" class="status-box"></div>
+        </div>
         ${l.hasDiagnostik ? `
         <div class="nm-card" style="border-left:3px solid var(--brass);">
           <h4 style="font-size:0.9rem; margin-bottom:6px; color:var(--text-header);"><i class="fas fa-magnifying-glass"></i> Diagnostik Data Absensi</h4>
@@ -1651,6 +1696,16 @@
         statusEl.innerHTML = `✅ Sukses! ${savedCount} data absensi berhasil disimpan.`;
         statusEl.className = 'status-box status-success';
         kirimKeFirebase(tanggal, cfg.lembaga, recordsForSheet);
+        kirimNotifAlpaFonnte(cfg, tanggal, recordsForSheet).then(hasil => {
+          if (!hasil) return;
+          if (hasil.ok) {
+            statusEl.innerHTML = `✅ Sukses! ${savedCount} data disimpan + ${hasil.terkirim} notif Alpa otomatis terkirim ke WA.`;
+          } else {
+            statusEl.innerHTML = `✅ ${savedCount} data disimpan, tapi notif WA gagal: ${hasil.err}`;
+          }
+          statusEl.className = 'status-box status-success';
+          statusEl.style.display = 'block';
+        });
       }
       setTimeout(() => { statusEl.style.display = 'none'; }, 3500);
     }
@@ -1868,6 +1923,23 @@
     $('nowaTujuan').value = getNomorWaTujuan(cfg.nowaKey).join(', ');
     $('btnSimpanNowa').addEventListener('click', () => {
       if (setNomorWaTujuan($('nowaTujuan').value, cfg.nowaKey)) alert('✅ Nomor WA tujuan tersimpan.');
+    });
+    $('fonnteToken').value = getFonnteToken();
+    $('fonnteAktif').checked = isFonnteAktif();
+    $('btnSimpanFonnte').addEventListener('click', () => {
+      const token = $('fonnteToken').value.trim();
+      if (!token) { alert('Masukkan API token Fonnte.'); return; }
+      const aktif = $('fonnteAktif').checked;
+      if (getNomorWaTujuan(cfg.nowaKey).length === 0) {
+        alert('Isi dulu nomor WA tujuan pada kartu "Laporan Harian WhatsApp" di atas.');
+        return;
+      }
+      localStorage.setItem('fonnte_token', token);
+      localStorage.setItem('fonnte_aktif', aktif ? 'on' : 'off');
+      const st = $('statusFonnte');
+      st.innerHTML = aktif ? '✅ Pengaturan tersimpan. Notifikasi Alpa otomatis AKTIF.' : '✅ Pengaturan tersimpan. Notifikasi Alpa dimatikan.';
+      st.className = 'status-box status-success';
+      setTimeout(() => { st.style.display = 'none'; }, 3500);
     });
     $('btnRekap').addEventListener('click', tampilkanRekap);
     $('searchGuru').addEventListener('input', filterRekapGuru);
