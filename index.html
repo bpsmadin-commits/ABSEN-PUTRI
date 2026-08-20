@@ -1175,11 +1175,14 @@
     const tugas = [];
 
     const nomors = getNomorWaTujuan(cfg.nowaKey);
-    if (nomors.length) {
+    const guruNos = {};
+    alpa.forEach(r => { const no = nomorGuru[r.guru]; if (no) guruNos[no] = true; });
+    const nomorsRingkasan = nomors.filter(n => !guruNos[n]);
+    if (nomorsRingkasan.length) {
       let pesan = '📢 *NOTIFIKASI ALPA — ' + cfg.lembaga + '*\n' + barisTanggal + '\n━━━━━━━━━━━━━━━━━\n';
       pesan += alpa.map(r => '▫️ ' + r.jam + ' • ' + r.kelas + '\n  👤 ' + r.guru + '\n  📖 ' + r.mapel).join('\n');
       pesan += '\n━━━━━━━━━━━━━━━━━\n_Dikirim otomatis dari Aplikasi Absensi MID & MTsD_';
-      tugas.push(kirimViaFonnte(token, nomors.join(','), pesan));
+      tugas.push(kirimViaFonnte(token, nomorsRingkasan.join(','), pesan));
     }
 
     alpa.forEach(r => {
