@@ -47,10 +47,8 @@ Gunakan Bubblewrap (TWA) atau WebView APK Generator. Pastikan URL yang dipakai s
         }
       },
       "roles": {
-        "$uid": {
-          ".read": "auth != null",
-          ".write": false
-        }
+        ".read": "auth != null",
+        ".write": "auth != null && root.child('roles').child(auth.uid).val() === 'admin'"
       }
     }
   }
