@@ -596,14 +596,131 @@
       /* Cegah zoom otomatis iOS pas fokus di input (native apps gak zoom) */
       input, select, textarea { font-size: 16px; }
     }
+
+    /* Chat AI */
+    #btnOpenChat {
+      position: fixed;
+      bottom: 96px;
+      right: 16px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--grad-native);
+      color: #fff;
+      border: none;
+      box-shadow: var(--shadow-card);
+      font-size: 1.3rem;
+      cursor: pointer;
+      z-index: 199;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #chatPanel {
+      display: none;
+      position: fixed;
+      bottom: 96px;
+      right: 16px;
+      width: min(360px, calc(100% - 32px));
+      height: 460px;
+      background: var(--bg-card);
+      border-radius: 16px;
+      box-shadow: var(--shadow-out);
+      border: 1px solid var(--border-card);
+      z-index: 200;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #chatHeader {
+      padding: 12px 16px;
+      background: var(--grad-native);
+      color: #fff;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+    #chatHeader button {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
+    #chatHeader button:active { background: rgba(255,255,255,0.15); }
+    #chatMessages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .chat-msg {
+      max-width: 82%;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.45;
+      word-wrap: break-word;
+    }
+    .chat-msg.user {
+      align-self: flex-end;
+      background: var(--grad-native);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-msg.ai {
+      align-self: flex-start;
+      background: var(--bg-card-soft);
+      color: var(--text-main);
+      border: 1px solid var(--border-card);
+      border-bottom-left-radius: 4px;
+    }
+    #chatInputRow {
+      padding: 8px 12px;
+      border-top: 1px solid var(--border-card);
+      display: flex;
+      gap: 8px;
+    }
+    #chatInput {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-card);
+      background: var(--input-bg);
+      color: var(--input-color);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+    }
+    #chatInput:focus { border-color: var(--brass); }
+    #btnSendChat {
+      background: var(--grad-native);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    #btnSendChat:active { opacity: 0.85; }
   </style>
 </head>
 <body>
 
 <!-- Bottom Nav: langsung 1 tap, gak perlu buka menu dulu -->
 <nav class="bottom-nav">
-  <button class="sidebar-link sidebar-link-flat" data-page="absen"><i class="fas fa-pen"></i>Absen</button>
-  <button class="sidebar-link sidebar-link-flat active" data-page="rekap"><i class="fas fa-chart-bar"></i>Rekap</button>
+  <button class="sidebar-link sidebar-link-flat active" data-page="absen"><i class="fas fa-pen"></i>Absen</button>
+  <button class="sidebar-link sidebar-link-flat" data-page="rekap"><i class="fas fa-chart-bar"></i>Rekap</button>
   <button class="sidebar-link sidebar-link-flat hanya-admin" data-page="setting" style="display:none;"><i class="fas fa-cog"></i>Seting</button>
 </nav>
 
@@ -652,16 +769,48 @@
   </div>
 
   <!-- HALAMAN ABSEN HARIAN (panel dibangkitkan dari DAFTAR_LEMBAGA) -->
-  <div id="module-absen" class="module-container"></div>
+  <div id="module-absen" class="module-container active"></div>
 
   <!-- HALAMAN REKAP BULANAN (panel dibangkitkan dari DAFTAR_LEMBAGA) -->
-  <div id="module-rekap" class="module-container active"></div>
+  <div id="module-rekap" class="module-container"></div>
 
   <!-- MODUL SETTING (panel dibangkitkan dari DAFTAR_LEMBAGA) -->
   <div id="module-setting" class="module-container"></div>
 
   <div style="text-align:center; font-size:0.8rem; color:var(--text-sub); margin-top:30px; border-top:2px dashed rgba(79,70,229,0.30); padding-top:16px;">
     <span style="background:var(--bg-card); padding:6px 14px; border-radius:20px; box-shadow:var(--shadow-out); display:inline-flex; align-items:center; gap:6px;">© 2026</span>
+  </div>
+
+  <!-- Chat AI -->
+  <button id="btnOpenChat" title="Tanya AI Absensi"><i class="fas fa-robot"></i></button>
+  <div id="chatPanel">
+    <div id="chatHeader">
+      <span><i class="fas fa-robot"></i> AI Absensi</span>
+      <button id="btnCloseChat" title="Tutup"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="chatMessages"></div>
+    <div id="chatInputRow">
+      <input type="text" id="chatInput" placeholder="Contoh: siapa yang alpa hari ini?" autocomplete="off">
+      <button id="btnSendChat">Kirim</button>
+    </div>
+  </div>
+
+  <!-- Modal API Key -->
+  <div id="modalApiKey" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
+    <div class="nm-card" style="width:min(400px, 90vw); margin:0;">
+      <h3 style="margin-bottom:10px;"><i class="fas fa-key"></i> API Key AI</h3>
+      <p style="font-size:13px; color:var(--text-sub); margin-bottom:14px;">Masukkan API key OpenAI/Groq. Disimpan hanya di browser ini.</p>
+      <div class="form-group">
+        <label>API Key</label>
+        <input type="password" id="inputApiKey" placeholder="sk-..." style="width:100%;">
+      </div>
+      <div class="form-group">
+        <label>Base URL (opsional)</label>
+        <input type="text" id="inputApiBase" value="https://kenari.id/v1" placeholder="https://kenari.id/v1" style="width:100%;">
+      </div>
+      <button class="btn-block-simpan" id="btnSimpanApiKey">Simpan</button>
+      <button class="btn" id="btnBatalApiKey" style="width:100%; margin-top:10px; background:transparent;">Batal</button>
+    </div>
   </div>
 </div>
 
@@ -2217,6 +2366,119 @@
       navigator.serviceWorker.register('sw.js');
     });
   }
+
+  // ===== CHAT AI ABSENSI =====
+  const btnOpenChat = document.getElementById('btnOpenChat');
+  const chatPanel = document.getElementById('chatPanel');
+  const btnCloseChat = document.getElementById('btnCloseChat');
+  const chatInput = document.getElementById('chatInput');
+  const btnSendChat = document.getElementById('btnSendChat');
+  const chatMessages = document.getElementById('chatMessages');
+
+  let aiApiKey = localStorage.getItem('ai_api_key') || '';
+  let aiApiBase = localStorage.getItem('ai_api_base') || 'https://kenari.id/v1';
+
+  function toggleChat() {
+    const isOpen = chatPanel.style.display === 'flex';
+    if (isOpen) {
+      chatPanel.style.display = 'none';
+      btnOpenChat.style.display = 'flex';
+    } else {
+      if (!aiApiKey) {
+        document.getElementById('modalApiKey').style.display = 'flex';
+        return;
+      }
+      chatPanel.style.display = 'flex';
+      btnOpenChat.style.display = 'none';
+    }
+  }
+
+  btnOpenChat.addEventListener('click', toggleChat);
+  btnCloseChat.addEventListener('click', () => {
+    chatPanel.style.display = 'none';
+    btnOpenChat.style.display = 'flex';
+  });
+
+  document.getElementById('btnSimpanApiKey').addEventListener('click', () => {
+    const key = document.getElementById('inputApiKey').value.trim();
+    const base = document.getElementById('inputApiBase').value.trim();
+    if (!key) { alert('Masukkan API key.'); return; }
+    aiApiKey = key;
+    aiApiBase = base || 'https://api.openai.com/v1';
+    localStorage.setItem('ai_api_key', aiApiKey);
+    localStorage.setItem('ai_api_base', aiApiBase);
+    document.getElementById('modalApiKey').style.display = 'none';
+    toggleChat();
+  });
+
+  document.getElementById('btnBatalApiKey').addEventListener('click', () => {
+    document.getElementById('modalApiKey').style.display = 'none';
+  });
+
+  function appendChat(role, text) {
+    const div = document.createElement('div');
+    div.className = 'chat-msg ' + role;
+    div.textContent = text;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  async function sendChat() {
+    const question = chatInput.value.trim();
+    if (!question) return;
+
+    chatInput.value = '';
+    appendChat('user', question);
+
+    const allData = [];
+    DAFTAR_LEMBAGA.forEach(l => {
+      const raw = localStorage.getItem(l.lsAbsen);
+      if (!raw) return;
+      try {
+        const data = JSON.parse(raw);
+        data.forEach(r => { if (r.tanggal) allData.push(r); });
+      } catch (e) {}
+    });
+
+    const today = new Date().toISOString().slice(0, 10);
+    const systemPrompt = 'Kamu adalah asisten absensi sekolah. Jawab singkat, jelas, dalam bahasa Indonesia. Jika ditanya tentang hari ini, gunakan tanggal ' + today + '. Jika data tidak ada, katakan bahwa data belum tersedia. Format jawaban dengan emoji yang rapi.';
+    const userPrompt = 'Pertanyaan: ' + question + '\n\nData absensi terbaru (maks 200 record terakhir):\n' + JSON.stringify(allData.slice(-200));
+
+    try {
+      const resp = await fetch(aiApiBase.replace(/\/$/, '') + '/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + aiApiKey
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          max_tokens: 400,
+          temperature: 0.3
+        })
+      });
+
+      const result = await resp.json();
+      if (result.choices && result.choices[0] && result.choices[0].message) {
+        appendChat('ai', result.choices[0].message.content);
+      } else if (result.error) {
+        appendChat('ai', '⚠️ Error: ' + result.error.message);
+      } else {
+        appendChat('ai', '⚠️ Respons tidak dikenali.');
+      }
+    } catch (err) {
+      appendChat('ai', '⚠️ Gagal konek ke AI: ' + err.message);
+    }
+  }
+
+  btnSendChat.addEventListener('click', sendChat);
+  chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') sendChat();
+  });
 </script>
 </body>
 </html>

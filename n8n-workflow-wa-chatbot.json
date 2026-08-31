@@ -1,0 +1,151 @@
+{
+  "name": "WA Chatbot Absensi - Fonnte + Firebase",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fonnte-webhook",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook (Fonnte)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -380,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse pesan masuk dari Fonnte\nconst body = $input.first().json;\nconst sender = body.sender || '';\nconst message = (body.message || '').trim().toLowerCase();\nconst device = body.device || '';\n\n// Default: MID, tanggal hari ini\nconst today = new Date();\nconst yyyy = today.getFullYear();\nconst mm = String(today.getMonth() + 1).padStart(2, '0');\nconst dd = String(today.getDate()).padStart(2, '0');\nconst tanggal = `${yyyy}-${mm}-${dd}`;\n\nlet lembagaKey = 'MID';\nlet filterStatus = null; // null = semua\n\n// Deteksi lembaga\nif (message.includes('mtsd') || message.includes('mts d') || message.includes('mts-d')) {\n  lembagaKey = 'MTsD';\n}\n\n// Deteksi tanggal format YYYY-MM-DD\nconst tglMatch = message.match(/(\\d{4}-\\d{2}-\\d{2})/);\nif (tglMatch) {\n  return [{ json: { sender, tanggal: tglMatch[1], lembagaKey, filterStatus } }];\n}\n\n// Deteksi keyword\nif (message.includes('alpa')) {\n  filterStatus = 'A';\n} else if (message.includes('hadir')) {\n  filterStatus = 'H';\n} else if (message.includes('izin')) {\n  filterStatus = 'I';\n} else if (message.includes('belum')) {\n  filterStatus = '';\n} else {\n  filterStatus = null;\n}\n\nreturn [{ json: { sender, tanggal, lembagaKey, filterStatus } }];"
+      },
+      "id": "parse-message",
+      "name": "Parse Pesan",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://absenputri-5d8a1-default-rtdb.asia-southeast1.firebasedatabase.app/absensi/{{ $json.lembagaKey }}/{{ $json.tanggal }}.json",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "firebase-read",
+      "name": "Baca Firebase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -20,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Filter & Format jawaban\nconst fbData = $input.first().json;\nconst ctx = $input.first().item.json.previousParse || {};\n\n// Ambil data dari node sebelumnya (simpan di workflow data)\nconst allItems = $input.all();\nconst parseNode = allItems.find(i => i.node.name === 'Parse Pesan');\nconst { sender, tanggal, lembagaKey, filterStatus } = parseNode ? parseNode.json : {};\n\nif (!fbData || typeof fbData !== 'object') {\n  return [{ json: { sender, message: '⚠️ Data absensi tidak ditemukan untuk tanggal tersebut.' } }];\n}\n\nconst records = Object.values(fbData).filter(r => r && typeof r === 'object');\n\nlet filtered = records;\nif (filterStatus !== null) {\n  if (filterStatus === '') {\n    filtered = records.filter(r => !r.status);\n  } else {\n    filtered = records.filter(r => r.status === filterStatus);\n  }\n}\n\nconst labelStatus = filterStatus === 'H' ? 'Hadir' : filterStatus === 'I' ? 'Izin' : filterStatus === 'A' ? 'Alpa' : 'Belum diisi';\nconst emojiStatus = filterStatus === 'H' ? '✅' : filterStatus === 'I' ? '🟡' : filterStatus === 'A' ? '🔴' : '⚪';\n\nlet pesan = `📋 *Laporan Absensi ${lembagaKey}*\\n📅 ${tanggal}\\n`;\nif (filterStatus !== null) {\n  pesan += `${emojiStatus} ${labelStatus}: ${filtered.length} orang\\n`;\n} else {\n  const h = records.filter(r => r.status === 'H').length;\n  const i = records.filter(r => r.status === 'I').length;\n  const a = records.filter(r => r.status === 'A').length;\n  const b = records.filter(r => !r.status).length;\n  pesan += `✅ Hadir: ${h}  🟡 Izin: ${i}  🔴 Alpa: ${a}  ⚪ Belum: ${b}\\n`;\n}\npesan += '━━━━━━━━━━━━━━━━━\\n';\n\nif (filtered.length === 0) {\n  pesan += 'Tidak ada data untuk filter ini.';\n} else {\n  const grouped = {};\n  filtered.forEach(r => {\n    const key = r.guru || 'Unknown';\n    if (!grouped[key]) grouped[key] = [];\n    grouped[key].push(r);\n  });\n  Object.keys(grouped).sort().forEach(guru => {\n    pesan += `👤 ${guru}\\n`;\n    grouped[guru].forEach(r => {\n      pesan += `  ▫️ ${r.jam || ''} • ${r.kelas || ''} • ${r.mapel || ''}\\n`;\n    });\n  });\n}\npesan += '━━━━━━━━━━━━━━━━━\\n_Dibot Absensi MID & MTsD_';\n\nreturn [{ json: { sender, message: pesan } }];"
+      },
+      "id": "format-response",
+      "name": "Format Jawaban",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.fonnte.com/send",
+        "method": "POST",
+        "headers": {
+          "Authorization": "={{ $credentials.fonnteToken }}"
+        },
+        "bodyParameters": {
+          "target": "={{ $json.sender }}",
+          "message": "={{ $json.message }}"
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "fonnte-send",
+      "name": "Kirim Balasan WA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        340,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook (Fonnte)": {
+      "main": [
+        [
+          {
+            "node": "Parse Pesan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Pesan": {
+      "main": [
+        [
+          {
+            "node": "Baca Firebase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baca Firebase": {
+      "main": [
+        [
+          {
+            "node": "Format Jawaban",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Jawaban": {
+      "main": [
+        [
+          {
+            "node": "Kirim Balasan WA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kirim Balasan WA": {
+      "main": [
+        [
+          {
+            "node": "Webhook (Fonnte)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0
+}

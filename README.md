@@ -1,1 +1,80 @@
-# ABSEN-PUTRI
+# Absen Putri
+
+Aplikasi absensi dan jadwal pelajaran untuk pondok pesantren. Bisa dibuka lewat browser atau dipasang sebagai APK di HP.
+
+## Fitur
+
+- Absensi harian: Hadir / Izin / Alpa per sesi
+- Rekap bulanan: ringkasan per santri
+- Kirim laporan WhatsApp
+- Jadwal pelajaran per hari dan kelas
+- Dark mode
+- Login admin: cuma admin yang bisa edit absensi dan jadwal
+- Data tersimpan di Firebase Realtime Database
+- Install sebagai aplikasi (Add to Home Screen)
+
+## Cara Pakai
+
+### Browser
+
+Buka `index.html` lewat server statis apapun, atau buka langsung via `file://`. Disarankan pakai HTTPS kalau deploy.
+
+### Pasang sebagai APK (TWA / WebView)
+
+Gunakan Bubblewrap (TWA) atau WebView APK Generator. Pastikan URL yang dipakai sudah HTTPS.
+
+## Setup Firebase
+
+1. Buat project di [Firebase Console](https://console.firebase.google.com/).
+2. Aktifkan **Realtime Database** dan set rules:
+
+```json
+{
+  "rules": {
+    "absensi": {
+      "$lembaga": {
+        "$tanggal": {
+          "$key": {
+            ".read": true,
+            ".write": "auth != null && root.child('roles').child(auth.uid).val() === 'admin'"
+          }
+        }
+      },
+      "jadwal": {
+        "$lembaga": {
+          ".read": true,
+          ".write": "auth != null && root.child('roles').child(auth.uid).val() === 'admin'"
+        }
+      },
+      "roles": {
+        "$uid": {
+          ".read": "auth != null",
+          ".write": false
+        }
+      }
+    }
+  }
+}
+```
+
+3. Enable **Anonymous auth** dan **Google auth**.
+4. Salin config Firebase dan ganti isinya di `index.html` bagian `firebaseConfig`.
+5. Daftarkan UID admin di `roles/<UID>` dengan value `"admin"`.
+
+## Daftar Admin
+
+Setiap Google akun yang login akan dicek di `roles/<UID>`. Kalau nilainya `"admin"`, akun tersebut bisa edit data. Kalau belum, tampilkan UID dan minta didaftarkan lewat Firebase Console.
+
+## Jadwal Default
+
+Jadwal awal tersimpan di `index.html` pada bagian `defaultDataMID`. Untuk mengganti, edit array tersebut atau hapus dan isi manual lewat halaman Seting setelah login sebagai admin.
+
+## Build / Deploy
+
+- Deploy ke hosting statis apapun (Netlify, Vercel, GitHub Pages, Firebase Hosting).
+- Pastikan service worker (`sw.js`) ikut ter-deploy agar bisa offline.
+- Set `start_url` dan `scope` di `manifest.webmanifest` sesuai URL host.
+
+## Lisensi
+
+Proprietary - Hak cipta milik pengembang. Dilarang disebarluaskan tanpa izin.
