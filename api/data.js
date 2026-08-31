@@ -2,32 +2,39 @@ export default async function handler(req, res) {
   const DB_URL = "https://absenputri-5d8a1-default-rtdb.asia-southeast1.firebasedatabase.app";
   const { tanggal } = req.query;
 
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+
   try {
-    const [absensiRes, jadwalRes] = await Promise.all([
-      fetch(`${DB_URL}/absensi.json`),
-      fetch(`${DB_URL}/jadwal.json`)
-    ]);
-
-    let absensi = await absensiRes.json();
-    const jadwal = await jadwalRes.json();
-
     if (tanggal) {
-      const hasil = {};
-      for (const lembaga in absensi) {
-        if (absensi[lembaga][tanggal]) {
-          hasil[lembaga] = { [tanggal]: absensi[lembaga][tanggal] };
+      const absensi = await fetch(`${DB_URL}/absensi.json`).then(r => r.json());
+      const hasil = { tanggal, alpa: [], izin: [], sakit: [] };
+
+      for (const lembaga in absensi || {}) {
+        const dataTanggal = absensi[lembaga]?.[tanggal];
+        if (!dataTanggal) continue;
+
+        for (const key in dataTanggal) {
+          const rec = dataTanggal[key];
+          const status = String(rec.status).toUpperCase();
+          const data = { nama: rec.guru, kelas: rec.kelas, jam: rec.jam, mapel: rec.mapel, lembaga };
+
+          if (status === "A") hasil.alpa.push(data);
+          else if (status === "I") hasil.izin.push(data);
+          else if (status === "S") hasil.sakit.push(data);
         }
       }
-      absensi = hasil;
+
+      return res.status(200).json(hasil);
     }
 
-    res.setHeader("Content-Type", "text/plain; charset=utf-8");
-    res.status(200).send(
-      "=== DATA ABSENSI" + (tanggal ? ` (${tanggal})` : "") + " ===\n" +
-      JSON.stringify(absensi, null, 2) +
-      (tanggal ? "" : "\n\n=== DATA JADWAL ===\n" + JSON.stringify(jadwal, null, 2))
-    );
+    const [absensi, jadwal] = await Promise.all([
+      fetch(`${DB_URL}/absensi.json`).then(r => r.json()),
+      fetch(`${DB_URL}/jadwal.json`).then(r => r.json())
+    ]);
+    return res.status(200).json({ absensi, jadwal });
+
   } catch (err) {
-    res.status(500).send("Gagal ambil data: " + err.message);
+    return res.status(500).json({ error: "Gagal ambil data", message: err.message });
   }
 }
