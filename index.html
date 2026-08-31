@@ -369,6 +369,54 @@
       background: var(--danger-bg);
     }
 
+    .admin-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: var(--bg-card-soft);
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+    .admin-item .admin-uid {
+      font-family: 'Overpass Mono', monospace;
+      font-size: 12px;
+      color: var(--text-sub);
+      word-break: break-all;
+      flex: 1;
+      margin-right: 10px;
+    }
+    .admin-item .admin-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+    .admin-item .btn-hapus-admin {
+      background: transparent;
+      border: 1px solid var(--danger-border);
+      color: var(--alpa);
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .admin-item .btn-hapus-admin:active { background: var(--danger-bg); }
+    .admin-item-you {
+      border-left: 3px solid var(--hadir);
+    }
+    .admin-empty-msg {
+      font-size: 13px;
+      color: var(--text-sub);
+      text-align: center;
+      padding: 16px;
+      background: var(--bg-card-soft);
+      border-radius: 10px;
+    }
+
     .status-box {
       margin-top: 15px;
       font-weight: 600;
@@ -757,6 +805,7 @@
           }
           document.getElementById('btnLoginAdmin').innerHTML = window.isAdmin ? '<i class="fas fa-user-check"></i>' : '<i class="fas fa-user-clock"></i>';
           terapkanStatusAdmin();
+          loadAdminList();
           resolve();
         });
         return;
@@ -799,9 +848,81 @@
         document.getElementById('btnLoginAdmin').innerHTML = '<i class="fas fa-user-lock"></i>';
         modal.style.display = 'none';
         terapkanStatusAdmin();
+        loadAdminList();
         firebase.auth().signInAnonymously();
       });
     });
+  }
+
+  // ===== MANAJEMEN ROLE ADMIN =====
+  function loadAdminList() {
+    const container = document.getElementById('adminListContainer');
+    if (!container) return;
+    db.ref('roles').once('value').then(snap => {
+      const roles = snap.val() || {};
+      const adminUids = Object.keys(roles).filter(uid => roles[uid] === 'admin');
+      if (adminUids.length === 0) {
+        container.innerHTML = '<div class="admin-empty-msg">Belum ada admin terdaftar.</div>';
+        return;
+      }
+      const currentUser = firebase.auth().currentUser;
+      container.innerHTML = adminUids.map(uid => {
+        const isYou = currentUser && uid === currentUser.uid;
+        return `<div class="admin-item ${isYou ? 'admin-item-you' : ''}">
+          <div style="flex:1; min-width:0;">
+            <div class="admin-label">${isYou ? ' Kamu' : ''}</div>
+            <div class="admin-uid">${uid}</div>
+          </div>
+          ${isYou ? '' : `<button class="btn-hapus-admin" data-uid="${uid}" title="Hapus admin ini"><i class="fas fa-times"></i> Hapus</button>`}
+        </div>`;
+      }).join('');
+      container.querySelectorAll('.btn-hapus-admin').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const uid = this.dataset.uid;
+          if (!confirm('Yakin hapus admin ini? Dia ga akan bisa edit absen lagi.')) return;
+          db.ref('roles/' + uid).remove().then(() => {
+            showAdminStatus('Admin berhasil dihapus.', 'success');
+            loadAdminList();
+          }).catch(err => {
+            showAdminStatus('Gagal hapus admin: ' + err.message, 'error');
+          });
+        });
+      });
+    }).catch(err => {
+      container.innerHTML = '<div class="admin-empty-msg">Gagal memuat data admin.</div>';
+    });
+  }
+
+  function setupAdminPanel() {
+    const btnTambah = document.getElementById('btnTambahAdmin');
+    const inputUid = document.getElementById('adminInputUid');
+    if (!btnTambah || !inputUid) return;
+    btnTambah.addEventListener('click', function() {
+      const uid = inputUid.value.trim();
+      if (!uid) { showAdminStatus('Masukkan UID dulu.', 'error'); return; }
+      if (!/^[a-zA-Z0-9]+$/.test(uid)) { showAdminStatus('UID hanya boleh huruf & angka.', 'error'); return; }
+      db.ref('roles/' + uid).once('value').then(snap => {
+        if (snap.val() === 'admin') {
+          showAdminStatus('UID ini sudah jadi admin.', 'error');
+          return;
+        }
+        db.ref('roles/' + uid).set('admin').then(() => {
+          inputUid.value = '';
+          showAdminStatus('Admin baru berhasil ditambahkan!', 'success');
+          loadAdminList();
+        });
+      }).catch(err => {
+        showAdminStatus('Gagal tambah admin: ' + err.message, 'error');
+      });
+    });
+  }
+
+  function showAdminStatus(msg, type) {
+    const el = document.getElementById('statusAdminPanel');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = 'status-box status-' + type;
+    setTimeout(() => { el.className = 'status-box'; }, 3500);
   }
 
   function slugKey(s) {
@@ -1575,13 +1696,30 @@
       DAFTAR_LEMBAGA.map(l => `<button class="btn" data-mod="${l.id}"><i class="${l.icon}"></i> ${l.label}</button>`).join('') +
       `</div>`;
   }
+  function buildAdminPanelHtml() {
+    return `
+    <div id="adminRolePanel" class="hanya-admin" style="margin-top:16px;">
+      <div class="nm-card" style="border-left:3px solid var(--secondary);">
+        <h4 style="font-size:0.9rem; margin-bottom:6px; color:var(--text-header);"><i class="fas fa-user-shield"></i> Manajemen Admin</h4>
+        <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:12px;">Kelola siapa yang bisa edit absen &amp; jadwal. Tambah pakai UID akun Google yang sudah login. UID terlihat di modal login (<i class="fas fa-user-lock"></i>) kalau akun belum terdaftar sebagai admin.</p>
+        <div id="adminListContainer" style="margin-bottom:14px;"></div>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="adminInputUid" placeholder="Tempel UID di sini..." style="flex:1; font-size:13px; padding:10px 12px;">
+          <button class="btn btn-accent" id="btnTambahAdmin" style="white-space:nowrap;"><i class="fas fa-plus"></i> Tambah</button>
+        </div>
+        <div id="statusAdminPanel" class="status-box"></div>
+      </div>
+    </div>`;
+  }
   function bangunSemuaModul() {
     const pages = ['absen', 'rekap', 'setting'];
     const builders = { absen: buildAbsenHtml, rekap: buildRekapHtml, setting: buildSettingHtml };
     pages.forEach(page => {
       const container = document.getElementById('module-' + page);
       const modPertama = DAFTAR_LEMBAGA[0].id;
-      container.innerHTML = buildTabsHtml(page) + DAFTAR_LEMBAGA.map(builders[page]).join('');
+      let html = buildTabsHtml(page) + DAFTAR_LEMBAGA.map(builders[page]).join('');
+      if (page === 'setting') html += buildAdminPanelHtml();
+      container.innerHTML = html;
       container.querySelector('.page-switcher .btn[data-mod="' + modPertama + '"]').classList.add('active');
       container.querySelector('.mod-wrap[data-mod="' + modPertama + '"]').style.display = 'block';
     });
@@ -2171,6 +2309,7 @@
 
   document.addEventListener('DOMContentLoaded', function() {
     setupModalLoginAdmin();
+    setupAdminPanel();
 
     document.getElementById('btnWaNext').addEventListener('click', kirimLaporanKeNomorTerpilih);
     document.getElementById('btnWaBatal').addEventListener('click', () => {
@@ -2194,6 +2333,7 @@
       bersihkanDataMasaDepan();
       DAFTAR_LEMBAGA.forEach(l => initModul(l.id));
       terapkanStatusAdmin();
+      loadAdminList();
     });
   });
 
