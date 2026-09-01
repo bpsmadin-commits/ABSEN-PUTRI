@@ -1,0 +1,7 @@
+node_modules/
+.kilo/
+package-lock.json
+package.json
+test_*.js
+check.js
+icons/WhatsApp*.jpeg
