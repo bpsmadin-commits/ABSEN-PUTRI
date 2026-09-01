@@ -1656,11 +1656,10 @@
           <button class="btn btn-danger" id="${l.prefix}btnResetJadwalDefault" style="margin-top:10px;"><i class="fas fa-undo"></i> Kembalikan ke Jadwal Asli (Default)</button>
         </div>
         <div class="nm-card" style="border-left:3px solid #6366f1;">
-          <h4 style="font-size:0.9rem; margin-bottom:6px; color:var(--text-header);"><i class="fas fa-file-csv"></i> Import / Export CSV Jadwal</h4>
-          <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:10px;">Download template CSV sebagai panduan format, atau upload file CSV/Excel untuk mengganti jadwal secara massal. Format kolom: <code>lembaga,hari,jam,kelas,mapel,guru</code></p>
+          <h4 style="font-size:0.9rem; margin-bottom:6px; color:var(--text-header);"><i class="fas fa-file-excel"></i> Import Jadwal dari Excel</h4>
+          <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:10px;">Upload file Excel (.xlsx) format grid jadwal. App akan otomatis membaca struktur hari, kelas, mapel, dan kode guru.</p>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn btn-accent" id="${l.prefix}btnDownloadTemplate"><i class="fas fa-download"></i> Download Template CSV</button>
-            <button class="btn btn-primary" id="${l.prefix}btnUploadCsv"><i class="fas fa-upload"></i> Upload CSV / Excel</button>
+            <button class="btn btn-primary" id="${l.prefix}btnUploadCsv"><i class="fas fa-upload"></i> Upload Excel Jadwal</button>
             <input type="file" id="${l.prefix}inputCsvFile" accept=".csv,.xlsx,.xls" style="display:none;">
           </div>
           <div id="${l.prefix}statusCsv" class="status-box" style="margin-top:10px;"></div>
@@ -2146,53 +2145,12 @@
       }
     }
 
-    function downloadTemplateCsv() {
-      const header = 'lembaga,hari,jam,kelas,mapel,guru';
-      const sampleRows = [
-        'MID,Ahad,Jam 1,IV J,Bidayatul Hidayah,Ustadz Indra Wahyudi',
-        'MID,Ahad,Jam 2,IV J,Tanqihul Qoul,Ustadz Badruddin',
-        'MID,Ahad,Jam 1,IV K,Tanqihul Qoul,Ustadz Misykatul Munir',
-        'MID,Ahad,Jam 2,IV K,Bidayatul Hidayah,Ustadz Indra Wahyudi',
-        'MID,Ahad,Jam 1,IV L,Mukhtashar Jiddan,Ustadz Hariyudianta',
-        'MID,Ahad,Jam 2,IV L,Mushohab Fiqhiyyah,Ustadz Hariyudianta',
-        'MID,Senin,Jam 1,IV J,Mukhtashar Jiddan,Ustadz Badruddin',
-        'MID,Senin,Jam 2,IV J,Mushohab Fiqhiyyah,Ustadz Badruddin',
-        'MID,Senin,Jam 1,IV K,Tashrih,Ustadz Misykatul Munir',
-        'MID,Senin,Jam 2,IV K,Mushohab Fiqhiyyah,Ustadz Misykatul Munir',
-        'MID,Senin,Jam 1,IV L,Tashrih,Ustadz Hariyudianta',
-        'MID,Senin,Jam 2,IV L,Akhlaq Lil Banat,Ustadz Hariyudianta',
-        'MID,Selasa,Jam 1,IV J,Tashrih,Ustadz Badruddin',
-        'MID,Selasa,Jam 2,IV J,Khulashatul Nur Yaqin,Ustadz Badruddin',
-        'MID,Selasa,Jam 1,IV K,Mukhtashar Jiddan,Ustadz Misykatul Munir',
-        'MID,Selasa,Jam 2,IV K,Khulashatul Nur Yaqin,Ustadz Misykatul Munir',
-        'MID,Selasa,Jam 1,IV L,Khulashatul Nur Yaqin,Ustadz Hariyudianta',
-        'MID,Selasa,Jam 2,IV L,Tanqihul Qoul,Ustadz Hariyudianta',
-        'MID,Rabu,Jam 1,IV J,Mukhtashar Jiddan,Ustadz Badruddin',
-        'MID,Rabu,Jam 2,IV J,Akhlaq Lil Banat,Ustadz Badruddin',
-        'MID,Rabu,Jam 1,IV K,Mukhtashar Jiddan,Ustadz Misykatul Munir',
-        'MID,Rabu,Jam 2,IV K,Akhlaq Lil Banat,Ustadz Misykatul Munir',
-        'MID,Rabu,Jam 1,IV L,Mukhtashar Jiddan,Ustadz Hariyudianta',
-        'MID,Rabu,Jam 2,IV L,Bidayatul Hidayah,Ustadz Indra Wahyudi',
-        'MID,Kamis,Jam 1,IV J,Tamrin (Mukhtashar Jiddan),Ustadz Badruddin',
-        'MID,Kamis,Jam 2,IV J,Jawahir Kalamiyyah,Ustadz Badruddin',
-        'MID,Kamis,Jam 1,IV K,Tamrin (Mukhtashar Jiddan),Ustadz Misykatul Munir',
-        'MID,Kamis,Jam 2,IV K,Jawahir Kalamiyyah,Ustadz Misykatul Munir',
-        'MID,Kamis,Jam 1,IV L,Tamrin (Mukhtashar Jiddan),Ustadz Hariyudianta',
-        'MID,Kamis,Jam 2,IV L,Jawahir Kalamiyyah,Ustadz Hariyudianta',
-        'MID,Sabtu,Jam 1,IV J,Tashrih,Ustadz Badruddin',
-        'MID,Sabtu,Jam 2,IV J,Riyadhul Badi\'ah,Ustadz Badruddin',
-        'MID,Sabtu,Jam 1,IV K,Tashrih,Ustadz Misykatul Munir',
-        'MID,Sabtu,Jam 2,IV K,Riyadhul Badi\'ah,Ustadz Misykatul Munir',
-        'MID,Sabtu,Jam 1,IV L,Tashrih,Ustadz Hariyudianta',
-        'MID,Sabtu,Jam 2,IV L,Riyadhul Badi\'ah,Ustadz Hariyudianta'
-      ];
-      const csvContent = '﻿' + header + '\n' + sampleRows.join('\n');
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'template-jadwal.csv';
-      link.click();
-      URL.revokeObjectURL(link.href);
+    function showStatusCsv(msg, type) {
+      const st = $('statusCsv');
+      st.innerHTML = msg;
+      st.className = 'status-box status-' + type;
+      st.style.display = 'block';
+      setTimeout(() => { st.style.display = 'none'; }, 5000);
     }
 
     function showStatusCsv(msg, type) {
@@ -2203,173 +2161,87 @@
       setTimeout(() => { st.style.display = 'none'; }, 5000);
     }
 
+    const CLASS_MAP = { 'ألرابع J': 'IV J', 'ألرابع K': 'IV K', 'ألرابع L': 'IV L', 'ألرابع M': 'IV M', 'ألرابع N': 'IV N', 'الخامس G': 'V G', 'الخامس H': 'V H', 'الخامس I': 'V I', 'الخامس J': 'V J', 'السادس G': 'VI G', 'السادس H': 'VI H', 'السادس I': 'VI I', 'السادس J': 'VI J' };
+
+    const MAPEL_MAP = { 'بداية الهداية': 'Bidayatul Hidayah', 'تنقيح القول': 'Tanqihul Qoul', 'مختصر جدا': 'Mukhtashar Jiddan', 'مختصر جدا ': 'Mukhtashar Jiddan', 'مبادئ الفقهية': 'Mushohab Fiqhiyyah', 'التصريف': 'Tashrih', 'خلاصة نور اليقين': 'Khulashatul Nur Yaqin', 'اخلاق للبنات': 'Akhlaq Lil Banat', 'تمرين ( مختصر جدا )': 'Tamrin (Mukhtashar)', 'جواهر الكلامية': 'Jawahir Kalamiyyah', 'رياض البديعة': 'Riyadhul Badi\'ah', 'عقود للجين': 'Uquud Lil Jeen', 'الاربعين النواوية': 'Al-Arba\'in Nawawiyyah', 'العصفورية': 'Al-Ashfuriyyah', 'الامثلة التصريفية': 'Al-Atsal Tashriifiyyah', 'هداية الاذكياء': 'Hidayatul Adzkiya', 'قواعد الاعلال': 'Qawa\'idul I\'lal', 'فتح القريب': 'Fathul Qarib', 'قطر الغيث': 'Qouthrul Ghaits', 'نظم العوامل': 'Nazhul Amil', 'شرح الورقات': 'Syurhul Waraqat', 'نظم العريطى': 'Nazhul Arithi', 'كفاية العوام': 'Kifayatul Awam', 'تسهيل نيل المعاني': 'Tashil Nilil Ma\'ani', 'قاعدة كيلاني عزي': 'Qa\'idatul Kilani \'Izzi', 'متن الزبد': 'Matnut Zamrut', 'منح السنية': 'Manhus Saniyyah', 'بلوغ المرام': 'Bulughul Marom', 'تفسير يس': 'Tafsir Yaa Siin' };
+
+    const GURU_MAP = { 'الأستاذ إيندرا وحيودى': 'Ustadz Indra Wahyudi', 'الاستاذ إيندرا وحيودى': 'Ustadz Indra Wahyudi', 'الأستاذ بدر الدين': 'Ustadz Badruddin', 'الاستاذ بدر الدين': 'Ustadz Badruddin', 'الأستاذ مصباح المنير': 'Ustadz Misykatul Munir', 'الاستاذ مصباح المنير': 'Ustadz Misykatul Munir', 'الأستاذ حاري يوديانطا': 'Ustadz Hariyudianta', 'الاستاذ حاري يوديانطا': 'Ustadz Hariyudianta', 'الأستاذ محمد خليلي': 'Ustadz Muhammad Khalili', 'الاستاذ محمد خليلي': 'Ustadz Muhammad Khalili', 'الأستاذ علي مكي': 'Ustadz Ali Makki', 'الاستاذ علي مكي': 'Ustadz Ali Makki', 'الأستاذ علي مغكي': 'Ustadz Ali Makki', 'الاستاذ علي مغكي': 'Ustadz Ali Makki', 'الأستاذ خير الأمم': 'Ustadz Khairul Umam', 'الاستاذ خير الأمم': 'Ustadz Khairul Umam', 'الأستاذ أحمد ريحان': 'Ustadz Ahmad Rayhan', 'الاستاذ أحمد ريحان': 'Ustadz Ahmad Rayhan', 'الأستاذ محمد شرطا': 'Ustadz Muhammad Syartha', 'الاستاذ محمد شرطا': 'Ustadz Muhammad Syartha', 'الأستاذ بخاري مسلم': 'Ustadz Bukhori Muslim', 'الاستاذ بخاري مسلم': 'Ustadz Bukhori Muslim', 'الأستاذ بهاء الدين': 'Ustadz Bahauddin', 'الاستاذ بهاء الدين': 'Ustadz Bahauddin', 'الأستاذ محمد محيى': 'Ustadz Muhammad Muhyin', 'الاستاذ محمد محيى': 'Ustadz Muhammad Muhyin', 'الأستاذ نور حافي': 'Ustadz Nurl Haifi', 'الاستاذ نور حافي': 'Ustadz Nurl Haifi', 'الأستاذ نور عارفين': 'Ustadz Nurl Arifin', 'الاستاذ نور عارفين': 'Ustadz Nurl Arifin', 'الأستاذ بسطامي مسلم': 'Ustadz Mustomi Muslim', 'الاستاذ بسطامي مسلم': 'Ustadz Mustomi Muslim', 'الأستاذ علي وفى': 'Ustadz Ali Wafa', 'الاستاذ علي وافى': 'Ustadz Ali Wafa', 'الأستاذ عبد المجيب': 'Ustadz Abdul Majib', 'الاستاذ عبد المجيب': 'Ustadz Abdul Majib', 'الأستاذ محمد حسين': 'Ustadz Muhammad Husen', 'الاستاذ محمد حسين': 'Ustadz Muhammad Husen', 'الأستاذ عبد القادر': 'Ustadz Abdul Qodir', 'الأستاذ شريف هداية': 'Ustadz Syarif Hidayah', 'الأستاذ عبد الرحمن': 'Ustadz Abdurrahman', 'الاستاذ أحمد مولنا': 'Ustadz Ahmad Mulna', 'الاستاذ مكيل العلوم': 'Ustadz Ma\'kul Ulum' };
+
+    function parseExcelGrid(rawData) {
+      const days = ['Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Sabtu'];
+      const dayCols = [10, 8, 6, 4, 2, 0];
+      let guruTable = {};
+      for (let i = rawData.length - 1; i >= 0; i--) {
+        const row = rawData[i];
+        if (!row || row.length < 2) continue;
+        let hasGuru = false;
+        for (let j = 0; j < row.length - 1; j++) {
+          const val = row[j];
+          if (val && typeof val === 'string' && val.includes('الأستاذ')) { hasGuru = true; break; }
+        }
+        if (hasGuru) {
+          for (let j = 0; j < row.length - 1; j += 2) {
+            const nama = row[j]; const kode = row[j + 1];
+            if (nama && kode) { const namaStr = String(nama).trim(); const kodeNum = Number(kode); if (GURU_MAP[namaStr]) guruTable[kodeNum] = GURU_MAP[namaStr]; }
+          }
+          break;
+        }
+      }
+      const jadwal = {}; days.forEach(h => { jadwal[h] = []; });
+      let i = 4;
+      while (i < rawData.length) {
+        const row = rawData[i];
+        if (!row || row.length < 13) { i++; continue; }
+        const kelasRaw = row[row.length - 1];
+        if (!kelasRaw || !String(kelasRaw).trim()) { i++; continue; }
+        const kelas = CLASS_MAP[String(kelasRaw).trim()] || String(kelasRaw).trim();
+        const row2 = rawData[i + 1];
+        if (!row2) { i++; continue; }
+        dayCols.forEach((col, idx) => {
+          const mapel1 = row[col]; const guruCode1 = row[col + 1];
+          const mapel2 = row2[col]; const guruCode2 = row2[col + 1];
+          if (mapel1 && String(mapel1).trim()) { const mapelLatin = MAPEL_MAP[String(mapel1).trim()] || String(mapel1).trim(); const guru = guruTable[Number(guruCode1)] || 'Unknown'; jadwal[days[idx]].push({ kelas, jam: 'Jam 1', mapel: mapelLatin, guru }); }
+          if (mapel2 && String(mapel2).trim()) { const mapelLatin = MAPEL_MAP[String(mapel2).trim()] || String(mapel2).trim(); const guru = guruTable[Number(guruCode2)] || 'Unknown'; jadwal[days[idx]].push({ kelas, jam: 'Jam 2', mapel: mapelLatin, guru }); }
+        });
+        i += 2;
+      }
+      return jadwal;
+    }
+
     function uploadCsvFile(file) {
       if (!file) return;
       const status = $('statusCsv');
       status.innerHTML = '⏳ Memproses file...';
       status.className = 'status-box';
       status.style.display = 'block';
-
       const reader = new FileReader();
       reader.onload = function(e) {
         try {
-          let data = e.target.result;
-          let rows;
-          if (file.name.endsWith('.csv')) {
-            const text = new TextDecoder('utf-8').decode(data);
-            rows = parseCsv(text);
-          } else {
-            const wb = XLSX.read(data, { type: 'array' });
-            const sheet = wb.Sheets[wb.SheetNames[0]];
-            rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-          }
-          if (!rows || rows.length === 0) {
-            showStatusCsv('❌ File kosong atau tidak bisa dibaca.', 'error');
-            return;
-          }
-          const requiredCols = ['lembaga', 'hari', 'jam', 'kelas', 'mapel', 'guru'];
-          const firstRow = rows[0];
-          const missingCols = requiredCols.filter(col => !(col in firstRow));
-          if (missingCols.length > 0) {
-            showStatusCsv('❌ Kolom wajib tidak ditemukan: ' + missingCols.join(', ') + '. Pastikan header: lembaga,hari,jam,kelas,mapel,guru', 'error');
-            return;
-          }
-          const validLembaga = ['MID', 'MTsD'];
-          const validHari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Sabtu', 'Ahad'];
-          const validJam = ['Jam 1', 'Jam 2'];
-          const errors = [];
-          const validRows = [];
-          rows.forEach((row, idx) => {
-            const lineNum = idx + 2;
-            const lembaga = String(row.lembaga || '').trim();
-            const hari = String(row.hari || '').trim();
-            const jam = String(row.jam || '').trim();
-            const kelas = String(row.kelas || '').trim();
-            const mapel = String(row.mapel || '').trim();
-            const guru = String(row.guru || '').trim();
-            if (!lembaga && !hari && !jam && !kelas && !mapel && !guru) return;
-            if (!lembaga) { errors.push(`Baris ${lineNum}: lembaga kosong`); return; }
-            if (!validLembaga.includes(lembaga)) { errors.push(`Baris ${lineNum}: lembaga "${lembaga}" tidak valid (harus MID atau MTsD)`); return; }
-            if (!hari) { errors.push(`Baris ${lineNum}: hari kosong`); return; }
-            if (!validHari.includes(hari)) { errors.push(`Baris ${lineNum}: hari "${hari}" tidak valid`); return; }
-            if (!jam) { errors.push(`Baris ${lineNum}: jam kosong`); return; }
-            if (!validJam.includes(jam)) { errors.push(`Baris ${lineNum}: jam "${jam}" tidak valid (harus Jam 1 atau Jam 2)`); return; }
-            if (!kelas) { errors.push(`Baris ${lineNum}: kelas kosong`); return; }
-            if (!mapel) { errors.push(`Baris ${lineNum}: mapel kosong`); return; }
-            if (!guru) { errors.push(`Baris ${lineNum}: guru kosong`); return; }
-            validRows.push({ lembaga, hari, jam, kelas, mapel, guru });
-          });
-          if (errors.length > 0) {
-            const errorPreview = errors.slice(0, 5).join('<br>');
-            const moreErrors = errors.length > 5 ? `<br>...dan ${errors.length - 5} error lainnya` : '';
-            showStatusCsv(`❌ Validasi gagal:<br>${errorPreview}${moreErrors}`, 'error');
-            return;
-          }
-          if (validRows.length === 0) {
-            showStatusCsv('❌ Tidak ada data valid di file.', 'error');
-            return;
-          }
-          const grouped = {};
-          validRows.forEach(r => {
-            if (!grouped[r.lembaga]) grouped[r.lembaga] = {};
-            if (!grouped[r.lembaga][r.hari]) grouped[r.lembaga][r.hari] = [];
-            grouped[r.lembaga][r.hari].push({ kelas: r.kelas, jam: r.jam, mapel: r.mapel, guru: r.guru });
-          });
-          const lembagaList = Object.keys(grouped);
-          const confirmMsg = `⚠️ Upload akan MENGGANTIKAN jadwal untuk:\n\n` +
-            lembagaList.map(l => {
-              const hariCount = Object.keys(grouped[l]).length;
-              const rowCount = Object.values(grouped[l]).reduce((sum, arr) => sum + arr.length, 0);
-              return `• ${l}: ${rowCount} jadwal di ${hariCount} hari`;
-            }).join('\n') +
-            `\n\nYakin ingin melanjutkan?`;
-          if (!confirm(confirmMsg)) {
-            status.style.display = 'none';
-            return;
-          }
-          const allLembagaData = {};
-          lembagaList.forEach(lembaga => {
-            const existingJadwal = lembaga === cfg.lembaga ? jadwalAktif : null;
-            if (existingJadwal) {
-              allLembagaData[lembaga] = JSON.parse(JSON.stringify(existingJadwal));
-            } else {
-              allLembagaData[lembaga] = {};
-              validHari.forEach(h => { allLembagaData[lembaga][h] = []; });
-            }
-            Object.keys(grouped[lembaga]).forEach(hari => {
-              allLembagaData[lembaga][hari] = grouped[lembaga][hari];
-            });
-          });
-          lembagaList.forEach(lembaga => {
-            kirimJadwalKeFirebase(lembaga, allLembagaData[lembaga]);
-          });
-          if (lembagaList.includes(cfg.lembaga)) {
-            jadwalAktif = allLembagaData[cfg.lembaga];
-            saveJadwalCustom();
-            renderFormPengaturan();
-            renderSemuaHari($('tanggal').value);
-            renderListGuruWa();
-          }
-          showStatusCsv(`✅ Berhasil import ${validRows.length} jadwal untuk ${lembagaList.join(', ')}.`, 'success');
-        } catch (err) {
-          showStatusCsv('❌ Gagal memproses file: ' + err.message, 'error');
-        }
+          const data = e.target.result;
+          const wb = XLSX.read(data, { type: 'array' });
+          const sheet = wb.Sheets[wb.SheetNames[0]];
+          const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+          const jadwal = parseExcelGrid(rawData);
+          let totalItems = 0; Object.values(jadwal).forEach(arr => { totalItems += arr.length; });
+          if (totalItems === 0) { showStatusCsv('❌ Tidak ada data yang bisa dibaca dari file.', 'error'); return; }
+          const hariList = Object.keys(jadwal).filter(h => jadwal[h].length > 0);
+          const confirmMsg = '⚠️ Upload akan MENGGANTIKAN jadwal ' + cfg.lembaga + ':
+
+' + hariList.map(h => '• ' + h + ': ' + jadwal[h].length + ' jadwal').join('
+') + '
+
+Total: ' + totalItems + ' jadwal
+Yakin ingin melanjutkan?';
+          if (!confirm(confirmMsg)) { status.style.display = 'none'; return; }
+          kirimJadwalKeFirebase(cfg.lembaga, jadwal);
+          jadwalAktif = jadwal; saveJadwalCustom(); renderFormPengaturan(); renderSemuaHari($('tanggal').value); renderListGuruWa();
+          showStatusCsv('✅ Berhasil import ' + totalItems + ' jadwal ' + cfg.lembaga + '.', 'success');
+        } catch (err) { showStatusCsv('❌ Gagal memproses file: ' + err.message, 'error'); }
       };
-      reader.onerror = function() {
-        showStatusCsv('❌ Gagal membaca file.', 'error');
-      };
-      if (file.name.endsWith('.csv')) {
-        reader.readAsArrayBuffer(file);
-      } else {
-        reader.readAsArrayBuffer(file);
-      }
+      reader.onerror = function() { showStatusCsv('❌ Gagal membaca file.', 'error'); };
+      reader.readAsArrayBuffer(file);
     }
 
-    function parseCsv(text) {
-      const lines = text.split(/\r?\n/).filter(l => l.trim());
-      if (lines.length === 0) return [];
-      const headers = parseCsvLine(lines[0]);
-      const rows = [];
-      for (let i = 1; i < lines.length; i++) {
-        const values = parseCsvLine(lines[i]);
-        const row = {};
-        headers.forEach((h, idx) => {
-          row[h.trim()] = values[idx] ? values[idx].trim() : '';
-        });
-        rows.push(row);
-      }
-      return rows;
-    }
-
-    function parseCsvLine(line) {
-      const result = [];
-      let current = '';
-      let inQuotes = false;
-      for (let i = 0; i < line.length; i++) {
-        const ch = line[i];
-        if (inQuotes) {
-          if (ch === '"' && line[i + 1] === '"') {
-            current += '"';
-            i++;
-          } else if (ch === '"') {
-            inQuotes = false;
-          } else {
-            current += ch;
-          }
-        } else {
-          if (ch === '"') {
-            inQuotes = true;
-          } else if (ch === ',') {
-            result.push(current);
-            current = '';
-          } else {
-            current += ch;
-          }
-        }
-      }
-      result.push(current);
-      return result;
-    }
 
     loadSemuaData();
     syncJadwalDariFirebase();
@@ -2484,7 +2356,6 @@
     $('btnTambahBaris').addEventListener('click', () => tambahkanBarisForm());
     $('btnSimpanPengaturan').addEventListener('click', simpanPerubahanJadwal);
     $('btnResetJadwalDefault').addEventListener('click', kembalikanJadwalDefault);
-    $('btnDownloadTemplate').addEventListener('click', downloadTemplateCsv);
     $('btnUploadCsv').addEventListener('click', () => $('inputCsvFile').click());
     $('inputCsvFile').addEventListener('change', function(e) {
       const file = e.target.files[0];
