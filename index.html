@@ -2148,16 +2148,16 @@
     function downloadTemplateCsv() {
       const header = 'lembaga,hari,jam,kelas,mapel,guru';
       const sampleRows = [
-        'MTsD,Ahad,Jam 1,الأول (د),كفاية الأتقياء,الأستاذ عبد الخالق',
-        'MTsD,Ahad,Jam 2,الأول (د),شرح أم الراهين,الأستاذ بهاء الدين',
-        'MID,Senin,Jam 1,IV J,مختصر جدا,الأستاذ بدر الدين',
-        'MID,Senin,Jam 2,IV J,مبادئ الفقهية,الأستاذ بدر الدين',
-        'MTsD,Senin,Jam 1,الأول (د),بلوغ المرام,الأستاذ محمد شرطا',
-        'MTsD,Senin,Jam 2,الأول (د),منحة المغيث,الأستاذ محمد طيب',
-        'MID,Selasa,Jam 1,IV J,التصريف,الأستاذ بدر الدين',
-        'MID,Rabu,Jam 1,IV J,مختصر جدا,الأستاذ بدر الدين',
-        'MTsD,Rabu,Jam 1,الأول (د),متممة الأجرومية,الأستاذ سيف الرجال',
-        'MID,Kamis,Jam 2,IV J,جواهر الكلامية,الأستاذ بدر الدين'
+        'MTsD,Ahad,Jam 1,VII A,Fiqih,Ustadz Ahmad Fauzi',
+        'MTsD,Ahad,Jam 2,VII A,Aqidah,Ustadz Ahmad Fauzi',
+        'MID,Senin,Jam 1,IV B,Hadits,Ustadz Budi Santoso',
+        'MID,Senin,Jam 2,IV B,Tajwid,Ustadz Budi Santoso',
+        'MTsD,Senin,Jam 1,VIII A,Tafsir,Ustadz Choirul Anam',
+        'MTsD,Senin,Jam 2,VIII A,Bahasa Arab,Ustadz Choirul Anam',
+        'MID,Selasa,Jam 1,IV A,Sejarah Islam,Ustadz Deni Kurniawan',
+        'MID,Rabu,Jam 1,IV B,Akhlaq,Ustadz Eko Prasetyo',
+        'MTsD,Rabu,Jam 1,VII B,Fiqih,Ustadz Faisal Rahman',
+        'MID,Kamis,Jam 2,IV A,Tajwid,Ustadz Gunawan Hadi'
       ];
       const csvContent = '﻿' + header + '\n' + sampleRows.join('\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
