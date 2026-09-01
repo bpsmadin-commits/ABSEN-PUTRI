@@ -429,6 +429,7 @@
     .status-success { display: block !important; background: rgba(22,163,74,0.12); color: var(--hadir); border: 1px solid var(--hadir); }
     .status-error { display: block !important; background: rgba(220,38,38,0.10); color: var(--alpa); border: 1px solid var(--alpa); }
     .arab-text { font-family: 'Amiri', serif; direction: rtl; text-align: right; }
+    .latin-text { font-family: 'Inter', sans-serif; direction: ltr; text-align: center; }
 
     /* Kartu jadwal — kaca compact */
     .jadwal-container { display: flex; flex-direction: column; gap: 9px; margin-top: 10px; }
@@ -1840,11 +1841,11 @@
           <div class="guru-card guru-card-spaced">
             <div class="meta-row">
               <div class="jam-tag">${item.jam}</div>
-              <div class="kelas-tag arab-text">${item.kelas}</div>
+              <div class="kelas-tag latin-text">${item.kelas}</div>
             </div>
             <div class="info-row">
-              <div class="mapel-lbl arab-text">${item.mapel}</div>
-              <div class="guru-lbl arab-text">${item.guru}</div>
+              <div class="mapel-lbl latin-text">${item.mapel}</div>
+              <div class="guru-lbl latin-text">${item.guru}</div>
             </div>
             ${renderAreaStatusHIA(activeStatus, item)}
           </div>`;
@@ -2090,7 +2091,7 @@
       }
       container.innerHTML = daftar.map(g => `
         <div class="row-guru-no" style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-          <span style="flex:1; font-size:0.85rem;" class="arab-text">${g}</span>
+          <span style="flex:1; font-size:0.85rem;" class="latin-text">${g}</span>
           <input type="tel" class="inp-no-guru" style="flex:1.2;" placeholder="628xxxxxxxxxx" value="${tersimpan[g] || ''}">
         </div>`).join('');
     }
@@ -2102,11 +2103,11 @@
       row.innerHTML = `
         <div class="edit-row">
           <input type="text" class="edit-input inp-jam flex-1" placeholder="Jam (ex: Jam 1)" value="${jam}">
-          <input type="text" class="edit-input inp-kelas arab-text flex-2" placeholder="Kelas" value="${kelas}">
+          <input type="text" class="edit-input inp-kelas latin-text flex-2" placeholder="Kelas" value="${kelas}">
           <button class="btn-delete-row" onclick="this.parentElement.parentElement.remove()">X</button>
         </div>
-        <div class="edit-row"><input type="text" class="edit-input inp-mapel arab-text flex-1" placeholder="Mata Pelajaran" value="${mapel}"></div>
-        <div class="edit-row"><input type="text" class="edit-input inp-guru arab-text flex-1 inp-guru-highlight" placeholder="Nama Guru" value="${guru}"></div>`;
+        <div class="edit-row"><input type="text" class="edit-input inp-mapel latin-text flex-1" placeholder="Mata Pelajaran" value="${mapel}"></div>
+        <div class="edit-row"><input type="text" class="edit-input inp-guru latin-text flex-1 inp-guru-highlight" placeholder="Nama Guru" value="${guru}"></div>`;
       container.appendChild(row);
     }
 
