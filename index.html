@@ -2160,22 +2160,32 @@
       const days = ['Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Sabtu'];
       const dayCols = [10, 8, 6, 4, 2, 0];
 
+      function toNum(v) {
+        if (v === null || v === undefined) return NaN;
+        if (typeof v === 'number') return v;
+        const s = String(v).replace(/[^\d]/g, '');
+        return s ? Number(s) : NaN;
+      }
+
       let guruTable = {};
       for (let i = rawData.length - 1; i >= 0; i--) {
         const row = rawData[i];
         if (!row || row.length < 4) continue;
+        const hasTeacher = row.some(v => typeof v === 'string' && /^UST\s+/i.test(v.trim()));
+        if (!hasTeacher) continue;
         let numericCount = 0;
         for (let j = 0; j < row.length; j++) {
-          if (row[j] !== null && row[j] !== undefined && !isNaN(Number(row[j]))) numericCount++;
+          if (!isNaN(toNum(row[j]))) numericCount++;
         }
-        if (numericCount >= 5) {
+        if (numericCount >= 2) {
           for (let j = 0; j < row.length - 1; j++) {
             const val = row[j];
-            if (val && typeof val === 'string' && val.trim() && isNaN(Number(val))) {
+            if (val && typeof val === 'string' && val.trim() && isNaN(toNum(val))) {
               for (let k = j + 1; k < row.length; k++) {
                 const code = row[k];
-                if (code !== null && code !== undefined && !isNaN(Number(code))) {
-                  guruTable[Number(code)] = String(val).trim();
+                const numCode = toNum(code);
+                if (code !== null && code !== undefined && !isNaN(numCode)) {
+                  guruTable[numCode] = String(val).trim();
                   break;
                 }
               }
@@ -2205,8 +2215,8 @@
         dayCols.forEach((col, idx) => {
           const mapel1 = row[col]; const guruCode1 = row[col + 1];
           const mapel2 = row2[col]; const guruCode2 = row2[col + 1];
-          if (mapel1 && String(mapel1).trim()) { const guru = guruTable[Number(guruCode1)] || String(guruCode1); jadwal[days[idx]].push({ kelas: mappedKelas, jam: 'Jam 1', mapel: String(mapel1).trim(), guru }); }
-          if (mapel2 && String(mapel2).trim()) { const guru = guruTable[Number(guruCode2)] || String(guruCode2); jadwal[days[idx]].push({ kelas: mappedKelas, jam: 'Jam 2', mapel: String(mapel2).trim(), guru }); }
+          if (mapel1 && String(mapel1).trim()) { const guru = guruTable[toNum(guruCode1)] || String(guruCode1); jadwal[days[idx]].push({ kelas: mappedKelas, jam: 'Jam 1', mapel: String(mapel1).trim(), guru }); }
+          if (mapel2 && String(mapel2).trim()) { const guru = guruTable[toNum(guruCode2)] || String(guruCode2); jadwal[days[idx]].push({ kelas: mappedKelas, jam: 'Jam 2', mapel: String(mapel2).trim(), guru }); }
         });
         i += 2;
       }
