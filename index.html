@@ -1258,6 +1258,7 @@
   }
 
   // ===== Laporan Harian via WhatsApp (Kepala Madrasah) — bisa dikirim ke banyak nomor =====
+  function buatLaporanHarian(tanggal, lembaga, jadwalAktif, dataAbsensi, kalendar) {
     const hari = namaHariDariTanggal(tanggal, kalendar);
     const items = jadwalAktif[hari] || [];
     const records = dataAbsensi.filter(r => r.tanggal === tanggal && r.lembaga === lembaga);
