@@ -1,0 +1,616 @@
+:root {
+      --primary: #4F46E5;
+      --primary-strong: #4338CA;
+      --secondary: #7C3AED;
+      --bg-body: #F8F9FB;
+      --bg-card: rgba(255,255,255,0.94);
+      --bg-card-soft: rgba(79,70,229,0.05);
+      --text-main: #0F172A;
+      --text-sub: #5C6470;
+      --text-header: #1E293B;
+      --border-card: rgba(17,24,39,0.09);
+      --border-strong: rgba(17,24,39,0.16);
+      --shadow-card: 0 1px 2px rgba(15,23,42,0.04), 0 4px 14px rgba(15,23,42,0.06);
+      --shadow-out: 0 1px 2px rgba(15,23,42,0.04), 0 4px 14px rgba(15,23,42,0.06);
+      --badge-bg: rgba(79,70,229,0.08);
+      --badge-text: #4338CA;
+      --sticky-bg: rgba(248,249,251,0.92);
+      --danger-bg: #FEF1F3;
+      --danger-border: #F6BCC6;
+      --danger-text: #BE123C;
+      --input-color: #0F172A;
+      --input-bg: rgba(255,255,255,0.9);
+      --brass: var(--primary);
+      --brass-strong: var(--primary-strong);
+      --hadir: #16A34A;
+      --izin: #D97706;
+      --alpa: #E11D48;
+      --fill-accent: #4F46E5;
+      --grad-native: var(--fill-accent);
+      color-scheme: light;
+    }
+
+    body.dark-mode {
+      --primary: #818CF8;
+      --primary-strong: #A5B4FC;
+      --secondary: #A78BFA;
+      --bg-body: #0F1420;
+      --bg-card: rgba(26,32,50,0.94);
+      --bg-card-soft: rgba(129,140,248,0.09);
+      --text-main: #F1F4FA;
+      --text-sub: #949DB1;
+      --text-header: #CDD3F5;
+      --border-card: rgba(255,255,255,0.10);
+      --border-strong: rgba(255,255,255,0.18);
+      --shadow-card: 0 4px 14px rgba(0,0,0,0.35);
+      --shadow-out: 0 4px 16px rgba(0,0,0,0.45);
+      --badge-bg: rgba(129,140,248,0.15);
+      --badge-text: #B9C4FC;
+      --sticky-bg: rgba(15,20,32,0.92);
+      --danger-bg: #2B1520;
+      --danger-border: #8E3A52;
+      --danger-text: #F7A8BC;
+      --input-color: #F1F4FA;
+      --input-bg: rgba(255,255,255,0.06);
+      --brass: #818CF8;
+      --brass-strong: #A5B4FC;
+      --hadir: #34D399;
+      --izin: #FBBF24;
+      --alpa: #FB7185;
+      --fill-accent: #6366F1;
+      --grad-native: var(--fill-accent);
+      color-scheme: dark;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      padding: calc(80px + env(safe-area-inset-top, 0px)) 10px 100px 10px;
+      color: var(--text-main);
+      transition: background-color .18s ease, color .18s ease;
+      overscroll-behavior-y: none;
+      background:
+        radial-gradient(1200px 480px at 15% -12%, rgba(79,70,229,0.08), transparent 60%),
+        radial-gradient(1000px 620px at 108% 2%, rgba(124,58,237,0.06), transparent 55%),
+        var(--bg-body);
+    }
+    body.dark-mode {
+      background:
+        radial-gradient(1200px 480px at 15% -12%, rgba(99,102,241,0.13), transparent 60%),
+        radial-gradient(1000px 620px at 108% 2%, rgba(124,58,237,0.10), transparent 55%),
+        var(--bg-body);
+    }
+    :where(button, input, select, [tabindex]):focus-visible {
+      outline: 2px solid var(--brass);
+      outline-offset: 2px;
+      border-radius: 6px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; }
+    }
+    /* Cheap theme switch: only color/background/border-color transition on cards & controls, never box-shadow */
+    .header, .btn-dark-toggle, .bottom-nav, .sidebar-link-flat, .tab-lembaga .btn,
+    .nm-card, input, select, .btn, .date-nav-btn, .sticky-save-bar,
+    .guru-card, .btn-hia, .hari-tabs-container, .hari-tab-btn, .hari-libur,
+    .table-container td, .edit-card, .edit-input, .btn-delete-row {
+      transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+    }
+    .container { max-width: 960px; margin: 0 auto; }
+
+    /* Kaca dasar dipakai di banyak elemen — backdrop-filter dihapus karena paling berat di HP */
+
+    /* Header Utama — app bar fixed ala aplikasi mobile */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 120;
+      background: var(--sticky-bg);
+      border-radius: 0 0 18px 18px;
+      padding: calc(8px + env(safe-area-inset-top, 0px)) 18px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      align-items: center;
+      box-shadow: 0 2px 14px rgba(17,24,39,0.08);
+      border: none;
+      border-bottom: 1px solid var(--border-card);
+      gap: 8px;
+    }
+    .header .sub { margin-left: auto; }
+    .header h1 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-header);
+      letter-spacing: -.01em;
+    }
+    .header h1 i {
+      background: var(--grad-native);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .header .sub { font-size: 0.8rem; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .badge {
+      background: var(--badge-bg);
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      color: var(--badge-text);
+      font-size: 0.72rem;
+      font-family: 'Overpass Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    /* Toggle Dark Mode Button */
+    .btn-dark-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      box-shadow: var(--shadow-card);
+      cursor: pointer;
+      color: var(--brass);
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-dark-toggle:active { background: var(--bg-card-soft); }
+
+    /* ===== Bottom Nav — pill mengambang ala aplikasi ===== */
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(480px, calc(100% - 24px));
+      bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+      z-index: 150;
+      display: flex;
+      background: var(--sticky-bg);
+      box-shadow: 0 4px 14px rgba(15,23,42,0.08);
+      padding: 6px;
+      border-radius: 20px;
+      border: 1px solid var(--border-card);
+    }
+    .sidebar-link-flat {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 8px 4px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.68rem;
+      color: var(--text-sub);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .sidebar-link-flat i { color: var(--text-sub); font-size: 1.05rem; }
+    .sidebar-link-flat:active { background: var(--bg-card-soft); }
+    .sidebar-link-flat.active { color: #fff; background: var(--grad-native); box-shadow: none; }
+    .sidebar-link-flat.active i { color: #fff; }
+
+    /* Tab Lembaga (MID / MTsD) */
+    .tab-lembaga {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .tab-lembaga .btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      padding: 8px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: var(--text-sub);
+      box-shadow: var(--shadow-card);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tab-lembaga .btn.active {
+      color: #fff;
+      background: var(--grad-native);
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    .module-container { display: none; }
+    .module-container.active { display: block; }
+
+    .nm-card {
+      background: var(--bg-card);
+      padding: 16px 18px;
+      border-radius: 14px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 16px;
+      border: 1px solid var(--border-card);
+    }
+    .form-group { margin-bottom: 15px; }
+    .form-group label {
+      font-family: 'Overpass Mono', monospace;
+      font-weight: 600; font-size: 11.5px; color: var(--text-sub);
+      display: block; margin-bottom: 6px;
+      text-transform: uppercase; letter-spacing: .05em;
+    }
+    input, select, textarea {
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border-card);
+      font-size: 15px;
+      width: 100%;
+      outline: none;
+      background: var(--input-bg);
+      color: var(--input-color);
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      resize: vertical;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--brass); box-shadow: 0 0 0 3px rgba(79,70,229,0.16); }
+    body.dark-mode input:focus, body.dark-mode select:focus, body.dark-mode textarea:focus { box-shadow: 0 0 0 3px rgba(129,140,248,0.22); }
+    select option { background-color: #ffffff; color: #111827; }
+    body.dark-mode select option { background-color: #241D33; color: #F4F1FA; }
+    .btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn {
+      padding: 11px 16px;
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      background: var(--bg-card);
+      box-shadow: var(--shadow-card);
+      color: var(--text-sub);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn:active { background: var(--bg-card-soft); }
+    .btn-primary { color: var(--brass-strong); }
+    .btn-accent { color: var(--hadir); }
+    .btn-danger { color: var(--alpa); }
+
+    /* Tombol Simpan Utama — solid ungu */
+    .btn-block-simpan {
+      background: var(--grad-native);
+      color: #fff;
+      box-shadow: 0 1px 2px rgba(15,23,42,0.08);
+      border: none;
+      padding: 14px;
+      border-radius: 13px;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      letter-spacing: .01em;
+    }
+    .btn-block-simpan:active { transform: scale(0.98); opacity: 0.9; }
+
+    /* Navigasi Tanggal Cepat */
+    .date-picker-row { display: flex; align-items: center; gap: 8px; }
+    .date-nav-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 11px;
+      border: 1px solid var(--border-card);
+      background: var(--bg-card);
+      box-shadow: var(--shadow-card);
+      font-weight: bold;
+      cursor: pointer;
+      color: var(--brass-strong);
+      font-size: 16px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .date-nav-btn:active { background: var(--bg-card-soft); }
+
+    /* Sticky Bottom Bar untuk Simpan — nangkring di atas nav pill */
+    .sticky-save-bar {
+      position: sticky;
+      bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+      z-index: 99;
+      background: var(--sticky-bg);
+      padding: 12px;
+      border-radius: 14px;
+      box-shadow: 0 -1px 6px rgba(17,24,39,0.08);
+      border: 1px solid var(--border-card);
+      margin-top: 15px;
+    }
+
+    .admin-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: var(--bg-card-soft);
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+    .admin-item .admin-uid {
+      font-family: 'Overpass Mono', monospace;
+      font-size: 12px;
+      color: var(--text-sub);
+      word-break: break-all;
+      flex: 1;
+      margin-right: 10px;
+    }
+    .admin-item .admin-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+    .admin-item .btn-hapus-admin {
+      background: transparent;
+      border: 1px solid var(--danger-border);
+      color: var(--alpa);
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .admin-item .btn-hapus-admin:active { background: var(--danger-bg); }
+    .admin-item-you {
+      border-left: 3px solid var(--hadir);
+    }
+    .admin-empty-msg {
+      font-size: 13px;
+      color: var(--text-sub);
+      text-align: center;
+      padding: 16px;
+      background: var(--bg-card-soft);
+      border-radius: 10px;
+    }
+
+    .status-box {
+      margin-top: 15px;
+      font-weight: 600;
+      text-align: center;
+      padding: 12px;
+      border-radius: 10px;
+      display: none;
+      font-size: 14px;
+    }
+    .status-success { display: block !important; background: rgba(22,163,74,0.12); color: var(--hadir); border: 1px solid var(--hadir); }
+    .status-error { display: block !important; background: rgba(220,38,38,0.10); color: var(--alpa); border: 1px solid var(--alpa); }
+    .arab-text { font-family: 'Amiri', serif; direction: rtl; text-align: right; }
+    .latin-text { font-family: 'Inter', sans-serif; direction: ltr; text-align: center; }
+
+    /* Kartu jadwal — kaca compact */
+    .jadwal-container { display: flex; flex-direction: column; gap: 9px; margin-top: 10px; }
+    .guru-card {
+      background: var(--bg-card);
+      border-radius: 13px;
+      padding: 12px 14px;
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-card);
+      border-left: 3px solid var(--brass);
+    }
+    .meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+    .jam-tag { font-family: 'Overpass Mono', monospace; font-size: 10px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.08em; }
+    .kelas-tag { font-size: 13px; font-weight: 700; color: var(--text-main); }
+    .info-row { margin-bottom: 8px; }
+    .mapel-lbl { color: var(--text-sub); font-size: 12px; margin-bottom: 1px; }
+    .guru-lbl { color: var(--text-header); font-size: 17px; font-weight: 700; font-family: 'Amiri', serif; }
+    .btn-group-hia { display: flex; gap: 6px; }
+    .pass-wrap { position: relative; }
+    .pass-wrap input { width: 100%; padding-right: 36px; box-sizing: border-box; }
+    .pass-wrap .toggle-mata {
+      position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+      color: var(--text-sub); cursor: pointer; font-size: 15px;
+    }
+    .status-badge-readonly {
+      text-align: center;
+      padding: 8px 10px;
+      border-radius: 9px;
+      font-weight: 700;
+      font-size: 12.5px;
+      border: 1.5px solid var(--border-strong);
+      color: var(--text-sub);
+      background: transparent;
+    }
+    .status-badge-readonly.badge-h { color: #ffffff; background: var(--hadir); border-color: var(--hadir); }
+    .status-badge-readonly.badge-i { color: #ffffff; background: var(--izin); border-color: var(--izin); }
+    .status-badge-readonly.badge-a { color: #ffffff; background: var(--alpa); border-color: var(--alpa); }
+    .btn-hia {
+      flex: 1;
+      height: 40px;
+      border: 1.5px solid var(--border-strong);
+      border-radius: 9px;
+      font-weight: 700;
+      font-size: 11.5px;
+      letter-spacing: .02em;
+      background: transparent;
+      color: var(--text-sub);
+      cursor: pointer;
+      opacity: .85;
+      transition: transform .12s ease, background-color .12s ease, color .12s ease, opacity .12s ease;
+    }
+    .btn-hia:active { transform: scale(0.97); }
+    .btn-hia.btn-h { border-color: var(--hadir); color: var(--hadir); }
+    .btn-hia.btn-i { border-color: var(--izin); color: var(--izin); }
+    .btn-hia.btn-a { border-color: var(--alpa); color: var(--alpa); }
+    .btn-hia.btn-h.active {
+      color: #ffffff;
+      background: var(--hadir);
+      border-color: var(--hadir);
+      opacity: 1;
+    }
+    .btn-hia.btn-i.active {
+      color: #ffffff;
+      background: var(--izin);
+      border-color: var(--izin);
+      opacity: 1;
+    }
+    .btn-hia.btn-a.active {
+      color: #ffffff;
+      background: var(--alpa);
+      border-color: var(--alpa);
+      opacity: 1;
+    }
+
+    /* Tab hari — pil kaca ungu */
+    .hari-tabs-container {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 2px 2px 14px;
+      background: transparent;
+      border-bottom: none;
+      margin-bottom: 12px;
+      flex-wrap: nowrap;
+      -webkit-overflow-scrolling: touch;
+    }
+    .hari-tab-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      padding: 7px 13px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 11.5px;
+      cursor: pointer;
+      color: var(--text-sub);
+      white-space: nowrap;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hari-tab-btn.active {
+      color: #fff;
+      background: var(--grad-native);
+      border-color: transparent;
+      box-shadow: none;
+    }
+    .hari-tab-btn.hari-ini {
+      background: rgba(22,163,74,0.12);
+      color: var(--hadir);
+      font-weight: 800;
+    }
+    .hari-tab-btn.hari-libur-tab {
+      color: var(--text-sub);
+      opacity: 0.6;
+    }
+    .hari-content-panel { display: none; }
+    .hari-content-panel.active { display: block; }
+    .hari-libur {
+      padding: 22px;
+      text-align: center;
+      color: var(--text-sub);
+      font-weight: 600;
+      background: var(--bg-card-soft);
+      border-radius: 14px;
+      border: 1px dashed var(--border-strong);
+    }
+
+    /* Rekap Tabel */
+    .table-container { overflow-x: auto; margin-top: 10px; padding: 5px; }
+    .table-container table { width: 100%; border-collapse: separate; border-spacing: 0 6px; min-width: 450px; }
+    .table-container th { padding: 8px 10px; text-align: left; font-size: 10px; color: var(--brass-strong); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; font-family: 'Overpass Mono', monospace; }
+    .table-container td { padding: 11px 10px; background: var(--bg-card); font-size: 13px; color: var(--text-main); border-top: 1px solid var(--border-card); border-bottom: 1px solid var(--border-card); }
+    .table-container td:first-child { border-radius: 10px 0 0 10px; border-left: 1px solid var(--border-card); }
+    .table-container td:last-child { border-radius: 0 10px 10px 0; border-right: 1px solid var(--border-card); }
+
+    /* Edit Jadwal */
+    .edit-card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 13px;
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-card);
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .edit-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .edit-input { padding: 10px; font-size: 14px; border-radius: 8px; border: 1px solid var(--border-card); background: var(--input-bg); color: var(--input-color); flex: 1; }
+    .btn-delete-row { background: var(--danger-bg); color: var(--alpa); border: 1px solid var(--danger-border); border-radius: 8px; font-weight: bold; width: 40px; cursor: pointer; }
+    .master-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
+
+    .sync-indicator {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--brass-strong);
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    /* Baris pilih nomor WA di modal kirim laporan */
+    .wa-pick-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 12px;
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      background: var(--bg-card);
+    }
+    .wa-pick-row input {
+      width: 20px;
+      height: 20px;
+      flex: none;
+      margin: 0;
+      padding: 0;
+      accent-color: var(--brass);
+    }
+    .wa-pick-row .wa-num {
+      font-family: 'Overpass Mono', monospace;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-main);
+      letter-spacing: .02em;
+    }
+
+    /* Utility — kurangi inline style di JS */
+    .guru-card-spaced { margin-bottom: 12px; }
+    .hari-tab-count { font-size: 11px; opacity: 0.8; font-family: 'Overpass Mono', monospace; }
+    .msg-loading, .msg-empty { padding: 20px; text-align: center; color: var(--text-sub); font-weight: 600; }
+    .msg-empty { padding: 30px; }
+    .msg-empty-sm { text-align: center; color: var(--text-sub); padding: 20px; }
+    .text-center { text-align: center; }
+    .table-container th.text-center { text-align: center; }
+    .flex-1 { flex: 1; }
+    .flex-2 { flex: 2; }
+    .inp-guru-highlight { color: var(--brass-strong); font-weight: 600; }
+    .rekap-nama { font-size: 15px; color: var(--text-main); }
+    .rekap-h { color: var(--hadir); font-weight: 700; }
+    .rekap-i { color: var(--izin); font-weight: 700; }
+    .rekap-a { color: var(--alpa); font-weight: 700; }
+    .rekap-total { font-weight: 700; color: var(--brass-strong); }
+
+    @media (max-width: 480px) {
+      .header h1 { font-size: 1.05rem; }
+      .guru-lbl { font-size: 15px; }
+      .hari-tab-btn { font-size: 10.5px; padding: 6px 11px; }
+      /* Cegah zoom otomatis iOS pas fokus di input (native apps gak zoom) */
+      input, select, textarea { font-size: 16px; }
+    }
