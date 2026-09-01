@@ -2173,9 +2173,19 @@
           if (val && typeof val === 'string' && (val.includes('الأستاذ') || val.includes('الاستاذ'))) { hasGuru = true; break; }
         }
         if (hasGuru) {
-          for (let j = 0; j < row.length - 1; j += 2) {
-            const nama = row[j]; const kode = row[j + 1];
-            if (nama && kode) { const namaStr = String(nama).trim(); const kodeNum = Number(kode); if (GURU_MAP[namaStr]) guruTable[kodeNum] = GURU_MAP[namaStr]; }
+          for (let j = 0; j < row.length - 1; j++) {
+            const val = row[j];
+            if (val && typeof val === 'string' && (val.includes('الأستاذ') || val.includes('الاستاذ'))) {
+              for (let k = j + 1; k < row.length; k++) {
+                const code = row[k];
+                if (code !== null && code !== undefined && !isNaN(Number(code))) {
+                  const namaStr = String(val).trim();
+                  const kodeNum = Number(code);
+                  if (GURU_MAP[namaStr]) guruTable[kodeNum] = GURU_MAP[namaStr];
+                  break;
+                }
+              }
+            }
           }
         }
       }
