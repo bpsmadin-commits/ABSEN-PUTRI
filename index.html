@@ -2190,6 +2190,8 @@
         const kelasRaw = row[row.length - 1];
         if (!kelasRaw || !String(kelasRaw).trim()) { i++; continue; }
         const kelas = String(kelasRaw).trim();
+        if (kelas === 'الرموز' || kelas.toLowerCase() === 'kode' || kelas.toLowerCase() === 'code') { i++; continue; }
+        if (/^\d+$/.test(kelas)) { i++; continue; }
         const row2 = rawData[i + 1];
         if (!row2) { i++; continue; }
         dayCols.forEach((col, idx) => {
