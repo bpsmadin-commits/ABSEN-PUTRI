@@ -2177,7 +2177,6 @@
             const nama = row[j]; const kode = row[j + 1];
             if (nama && kode) { const namaStr = String(nama).trim(); const kodeNum = Number(kode); if (GURU_MAP[namaStr]) guruTable[kodeNum] = GURU_MAP[namaStr]; }
           }
-          break;
         }
       }
       const jadwal = {}; days.forEach(h => { jadwal[h] = []; });
