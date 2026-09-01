@@ -2153,13 +2153,6 @@
       setTimeout(() => { st.style.display = 'none'; }, 5000);
     }
 
-    function showStatusCsv(msg, type) {
-      const st = $('statusCsv');
-      st.innerHTML = msg;
-      st.className = 'status-box status-' + type;
-      st.style.display = 'block';
-      setTimeout(() => { st.style.display = 'none'; }, 5000);
-    }
 
     const CLASS_MAP = { 'ألرابع J': 'IV J', 'ألرابع K': 'IV K', 'ألرابع L': 'IV L', 'ألرابع M': 'IV M', 'ألرابع N': 'IV N', 'الخامس G': 'V G', 'الخامس H': 'V H', 'الخامس I': 'V I', 'الخامس J': 'V J', 'السادس G': 'VI G', 'السادس H': 'VI H', 'السادس I': 'VI I', 'السادس J': 'VI J' };
 
@@ -2225,13 +2218,7 @@
           let totalItems = 0; Object.values(jadwal).forEach(arr => { totalItems += arr.length; });
           if (totalItems === 0) { showStatusCsv('❌ Tidak ada data yang bisa dibaca dari file.', 'error'); return; }
           const hariList = Object.keys(jadwal).filter(h => jadwal[h].length > 0);
-          const confirmMsg = '⚠️ Upload akan MENGGANTIKAN jadwal ' + cfg.lembaga + ':
-
-' + hariList.map(h => '• ' + h + ': ' + jadwal[h].length + ' jadwal').join('
-') + '
-
-Total: ' + totalItems + ' jadwal
-Yakin ingin melanjutkan?';
+          const confirmMsg = '⚠️ Upload akan MENGGANTIKAN jadwal ' + cfg.lembaga + ':\n\n' + hariList.map(h => '• ' + h + ': ' + jadwal[h].length + ' jadwal').join('\n') + '\n\nTotal: ' + totalItems + ' jadwal\nYakin ingin melanjutkan?';
           if (!confirm(confirmMsg)) { status.style.display = 'none'; return; }
           kirimJadwalKeFirebase(cfg.lembaga, jadwal);
           jadwalAktif = jadwal; saveJadwalCustom(); renderFormPengaturan(); renderSemuaHari($('tanggal').value); renderListGuruWa();
