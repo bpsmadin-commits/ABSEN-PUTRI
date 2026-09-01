@@ -112,7 +112,7 @@
     }
     /* Cheap theme switch: only color/background/border-color transition on cards & controls, never box-shadow */
     .header, .btn-dark-toggle, .bottom-nav, .sidebar-link-flat, .tab-lembaga .btn,
-    .nm-card, input, select, .btn, .date-nav-btn, .sticky-save-bar, .danger-zone,
+    .nm-card, input, select, .btn, .date-nav-btn, .sticky-save-bar,
     .guru-card, .btn-hia, .hari-tabs-container, .hari-tab-btn, .hari-libur,
     .table-container td, .edit-card, .edit-input, .btn-delete-row {
       transition: background-color .18s ease, border-color .18s ease, color .18s ease;
@@ -358,15 +358,6 @@
       box-shadow: 0 -1px 6px rgba(17,24,39,0.08);
       border: 1px solid var(--border-card);
       margin-top: 15px;
-    }
-
-    /* Danger Zone */
-    .danger-zone {
-      margin-top: 30px;
-      padding: 18px;
-      border: 2px dashed var(--danger-border);
-      border-radius: 14px;
-      background: var(--danger-bg);
     }
 
     .admin-item {
@@ -1556,13 +1547,13 @@
 
   const DAFTAR_LEMBAGA = [
     { id: 'mid', prefix: 'mid-', lsAbsen: 'mid_absenGuru', lsJadwal: 'mid_jadwalCustom',
-      lembaga: 'MID', hapusKeyword: 'HAPUS MID', rekapPaths: ['MID', 'MI Miftahul Ulum'],
-      getDefaultJadwal: groupDefaultDataMID, hasDiagnostik: true,
+      lembaga: 'MID', rekapPaths: ['MID', 'MI Miftahul Ulum'],
+      getDefaultJadwal: groupDefaultDataMID,
       label: 'MID', icon: 'fas fa-school', kalendar: 'masehi', namaBulan: NAMA_BULAN_MASEHI,
       nowaKey: 'nowaTujuan' },
     { id: 'mtsd', prefix: 'mtsd-', lsAbsen: 'mtsd_absenGuru', lsJadwal: 'mtsd_jadwalCustom',
-      lembaga: 'MTsD', hapusKeyword: 'HAPUS MTSD', rekapPaths: ['MTsD'],
-      getDefaultJadwal: () => JSON.parse(JSON.stringify(jadwalDefaultMTsD)), hasDiagnostik: false,
+      lembaga: 'MTsD', rekapPaths: ['MTsD'],
+      getDefaultJadwal: () => JSON.parse(JSON.stringify(jadwalDefaultMTsD)),
       label: 'MTsD', icon: 'fas fa-mosque', kalendar: 'masehi', namaBulan: NAMA_BULAN_MASEHI,
       nowaKey: 'nowaTujuan' }
   ];
@@ -1680,18 +1671,6 @@
           <div id="${l.prefix}listGuruWa"></div>
           <button class="btn btn-accent" id="${l.prefix}btnSimpanNoGuru" style="width:100%;"><i class="fas fa-save"></i> Simpan Nomor WA Guru</button>
           <div id="${l.prefix}statusGuruWa" class="status-box"></div>
-        </div>
-        ${l.hasDiagnostik ? `
-        <div class="nm-card" style="border-left:3px solid var(--brass);">
-          <h4 style="font-size:0.9rem; margin-bottom:6px; color:var(--text-header);"><i class="fas fa-magnifying-glass"></i> Diagnostik Data Absensi</h4>
-          <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:12px;">Cek semua kemungkinan nama path lama di Firebase (mi, MI, Mi, mid, MID, dll) biar ketahuan data bulan lama kesimpen di key yang mana.</p>
-          <button class="btn btn-primary" id="${l.prefix}btnDiagnostikFirebase" style="width:100%;"><i class="fas fa-magnifying-glass"></i> Cek Semua Path Absensi</button>
-          <div id="${l.prefix}hasilDiagnostik" style="margin-top:12px; font-size:12.5px; white-space:pre-wrap; font-family:monospace; color:var(--text-main); display:none; background:var(--bg-card-soft); padding:12px; border-radius:10px; border:1px solid var(--border-card);"></div>
-        </div>` : ''}
-        <div class="danger-zone">
-          <h4 style="color: var(--danger-text); font-size: 0.9rem; margin-bottom: 6px;"><i class="fas fa-exclamation-triangle"></i> Zona Bahaya</h4>
-          <p style="font-size: 0.75rem; color: var(--danger-text); opacity:0.8; margin-bottom: 12px;">Tindakan ini permanen. Auto-backup otomatis terunduh sebelum penghapusan.</p>
-          <button class="btn btn-danger" id="${l.prefix}btnClearAllDB" style="width:100%; border:1px solid var(--danger-border);"><i class="fas fa-trash"></i> Kosongkan Database Absen ${l.label}</button>
         </div>
         <div id="${l.prefix}statusPengaturan" class="status-box"></div>
       </div>
@@ -2017,36 +1996,6 @@
       XLSX.writeFile(wb, `Rekap_Absensi_${cfg.lembaga}_${nBulan}_${tahun}.xlsx`);
     }
 
-    function clearAllDatabase() {
-      if (dataAbsensi.length === 0) {
-        alert(`Database absensi ${cfg.lembaga} saat ini sudah kosong.`);
-        return;
-      }
-      const konfirmasi = prompt(
-        `🚨 PERINGATAN BAHAYA!\n\n` +
-        `Anda akan menghapus SELURUH (${dataAbsensi.length}) data absensi ${cfg.lembaga} secara permanen.\n\n` +
-        `Ketik '${cfg.hapusKeyword}' di bawah ini untuk mengonfirmasi:`
-      );
-
-      if (konfirmasi === cfg.hapusKeyword) {
-        try {
-          const blob = new Blob([JSON.stringify(dataAbsensi, null, 2)], { type: 'application/json' });
-          const link = document.createElement('a');
-          link.href = URL.createObjectURL(blob);
-          link.download = `Backup_Absensi_${cfg.lembaga}_Sebelum_Hapus_${getLocalISOString()}.json`;
-          link.click();
-        } catch (err) { console.error("Auto backup error:", err); }
-
-        localStorage.removeItem(cfg.lsAbsen);
-        dataAbsensi = [];
-        tampilkanRekap();
-        renderSemuaHari($('tanggal').value);
-        alert(`✅ Database absensi ${cfg.lembaga} telah dikosongkan. Salinan cadangan (backup JSON) otomatis diunduh.`);
-      } else if (konfirmasi !== null) {
-        alert("❌ Teks konfirmasi salah. Penghapusan dibatalkan.");
-      }
-    }
-
     function renderFormPengaturan() {
       const hari = $('hariPengaturan').value;
       const container = $('editJadwalContainer');
@@ -2298,37 +2247,6 @@
     $('btnRekap').addEventListener('click', tampilkanRekap);
     $('searchGuru').addEventListener('input', filterRekapGuru);
     $('btnExportExcel').addEventListener('click', exportKeExcel);
-    $('btnClearAllDB').addEventListener('click', clearAllDatabase);
-
-    if (cfg.hasDiagnostik && $('btnDiagnostikFirebase')) {
-      $('btnDiagnostikFirebase').addEventListener('click', function() {
-        const hasil = $('hasilDiagnostik');
-        hasil.style.display = 'block';
-        hasil.textContent = '🔄 Mengecek ke Firebase...';
-        const kandidat = ['MID', 'MI Miftahul Ulum', 'MI', 'mid', 'mi'];
-        Promise.all(kandidat.map(nama =>
-          db.ref('absensi/' + slugKey(nama)).once('value').then(snap => {
-            const val = snap.val();
-            if (!val) return { nama, jumlahTanggal: 0, tanggal: [] };
-            const daftarTanggal = Object.keys(val).sort();
-            return { nama, jumlahTanggal: daftarTanggal.length, tanggal: daftarTanggal };
-          })
-        )).then(hasilSemua => {
-          let teks = '';
-          hasilSemua.forEach(r => {
-            if (r.jumlahTanggal === 0) {
-              teks += `❌ absensi/${slugKey(r.nama)}  →  kosong\n`;
-            } else {
-              const contoh = r.tanggal.slice(0, 3).join(', ') + (r.tanggal.length > 3 ? ', ...' : '');
-              teks += `✅ absensi/${slugKey(r.nama)}  →  ${r.jumlahTanggal} tanggal (${contoh})\n`;
-            }
-          });
-          hasil.textContent = teks;
-        }).catch(err => {
-          hasil.textContent = '⚠️ Gagal cek: ' + err.message;
-        });
-      });
-    }
 
     $('hariPengaturan').addEventListener('change', renderFormPengaturan);
     $('btnTambahBaris').addEventListener('click', () => tambahkanBarisForm());
