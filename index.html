@@ -1654,6 +1654,16 @@
           <button class="btn-block-simpan" id="${l.prefix}btnSimpanPengaturan"><i class="fas fa-save"></i> Simpan Perubahan Jadwal</button>
           <button class="btn btn-danger" id="${l.prefix}btnResetJadwalDefault" style="margin-top:10px;"><i class="fas fa-undo"></i> Kembalikan ke Jadwal Asli (Default)</button>
         </div>
+        <div class="nm-card" style="border-left:3px solid #6366f1;">
+          <h4 style="font-size:0.9rem; margin-bottom:6px; color:var(--text-header);"><i class="fas fa-file-csv"></i> Import / Export CSV Jadwal</h4>
+          <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:10px;">Download template CSV sebagai panduan format, atau upload file CSV/Excel untuk mengganti jadwal secara massal. Format kolom: <code>lembaga,hari,jam,kelas,mapel,guru</code></p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-accent" id="${l.prefix}btnDownloadTemplate"><i class="fas fa-download"></i> Download Template CSV</button>
+            <button class="btn btn-primary" id="${l.prefix}btnUploadCsv"><i class="fas fa-upload"></i> Upload CSV / Excel</button>
+            <input type="file" id="${l.prefix}inputCsvFile" accept=".csv,.xlsx,.xls" style="display:none;">
+          </div>
+          <div id="${l.prefix}statusCsv" class="status-box" style="margin-top:10px;"></div>
+        </div>
         <div class="nm-card" style="border-left:3px solid #25D366;">
           <h4 style="font-size:0.9rem; margin-bottom:6px; color:var(--text-header);"><i class="fab fa-whatsapp"></i> Laporan Harian WhatsApp</h4>
           <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:10px;">Nomor tujuan laporan saat tombol "Kirim Laporan" ditekan. Bisa lebih dari satu — pisahkan dengan koma atau baris baru. Format internasional tanpa 0 di depan (contoh: 6281234567890).</p>
@@ -2135,6 +2145,205 @@
       }
     }
 
+    function downloadTemplateCsv() {
+      const header = 'lembaga,hari,jam,kelas,mapel,guru';
+      const sampleRows = [
+        'MTsD,Ahad,Jam 1,الأول (د),كفاية الأتقياء,الأستاذ عبد الخالق',
+        'MTsD,Ahad,Jam 2,الأول (د),شرح أم الراهين,الأستاذ بهاء الدين',
+        'MID,Senin,Jam 1,IV J,مختصر جدا,الأستاذ بدر الدين',
+        'MID,Senin,Jam 2,IV J,مبادئ الفقهية,الأستاذ بدر الدين',
+        'MTsD,Senin,Jam 1,الأول (د),بلوغ المرام,الأستاذ محمد شرطا',
+        'MTsD,Senin,Jam 2,الأول (د),منحة المغيث,الأستاذ محمد طيب',
+        'MID,Selasa,Jam 1,IV J,التصريف,الأستاذ بدر الدين',
+        'MID,Rabu,Jam 1,IV J,مختصر جدا,الأستاذ بدر الدين',
+        'MTsD,Rabu,Jam 1,الأول (د),متممة الأجرومية,الأستاذ سيف الرجال',
+        'MID,Kamis,Jam 2,IV J,جواهر الكلامية,الأستاذ بدر الدين'
+      ];
+      const csvContent = '﻿' + header + '\n' + sampleRows.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'template-jadwal.csv';
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function showStatusCsv(msg, type) {
+      const st = $('statusCsv');
+      st.innerHTML = msg;
+      st.className = 'status-box status-' + type;
+      st.style.display = 'block';
+      setTimeout(() => { st.style.display = 'none'; }, 5000);
+    }
+
+    function uploadCsvFile(file) {
+      if (!file) return;
+      const status = $('statusCsv');
+      status.innerHTML = '⏳ Memproses file...';
+      status.className = 'status-box';
+      status.style.display = 'block';
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          let data = e.target.result;
+          let rows;
+          if (file.name.endsWith('.csv')) {
+            const text = new TextDecoder('utf-8').decode(data);
+            rows = parseCsv(text);
+          } else {
+            const wb = XLSX.read(data, { type: 'array' });
+            const sheet = wb.Sheets[wb.SheetNames[0]];
+            rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+          }
+          if (!rows || rows.length === 0) {
+            showStatusCsv('❌ File kosong atau tidak bisa dibaca.', 'error');
+            return;
+          }
+          const requiredCols = ['lembaga', 'hari', 'jam', 'kelas', 'mapel', 'guru'];
+          const firstRow = rows[0];
+          const missingCols = requiredCols.filter(col => !(col in firstRow));
+          if (missingCols.length > 0) {
+            showStatusCsv('❌ Kolom wajib tidak ditemukan: ' + missingCols.join(', ') + '. Pastikan header: lembaga,hari,jam,kelas,mapel,guru', 'error');
+            return;
+          }
+          const validLembaga = ['MID', 'MTsD'];
+          const validHari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Sabtu', 'Ahad'];
+          const validJam = ['Jam 1', 'Jam 2'];
+          const errors = [];
+          const validRows = [];
+          rows.forEach((row, idx) => {
+            const lineNum = idx + 2;
+            const lembaga = String(row.lembaga || '').trim();
+            const hari = String(row.hari || '').trim();
+            const jam = String(row.jam || '').trim();
+            const kelas = String(row.kelas || '').trim();
+            const mapel = String(row.mapel || '').trim();
+            const guru = String(row.guru || '').trim();
+            if (!lembaga && !hari && !jam && !kelas && !mapel && !guru) return;
+            if (!lembaga) { errors.push(`Baris ${lineNum}: lembaga kosong`); return; }
+            if (!validLembaga.includes(lembaga)) { errors.push(`Baris ${lineNum}: lembaga "${lembaga}" tidak valid (harus MID atau MTsD)`); return; }
+            if (!hari) { errors.push(`Baris ${lineNum}: hari kosong`); return; }
+            if (!validHari.includes(hari)) { errors.push(`Baris ${lineNum}: hari "${hari}" tidak valid`); return; }
+            if (!jam) { errors.push(`Baris ${lineNum}: jam kosong`); return; }
+            if (!validJam.includes(jam)) { errors.push(`Baris ${lineNum}: jam "${jam}" tidak valid (harus Jam 1 atau Jam 2)`); return; }
+            if (!kelas) { errors.push(`Baris ${lineNum}: kelas kosong`); return; }
+            if (!mapel) { errors.push(`Baris ${lineNum}: mapel kosong`); return; }
+            if (!guru) { errors.push(`Baris ${lineNum}: guru kosong`); return; }
+            validRows.push({ lembaga, hari, jam, kelas, mapel, guru });
+          });
+          if (errors.length > 0) {
+            const errorPreview = errors.slice(0, 5).join('<br>');
+            const moreErrors = errors.length > 5 ? `<br>...dan ${errors.length - 5} error lainnya` : '';
+            showStatusCsv(`❌ Validasi gagal:<br>${errorPreview}${moreErrors}`, 'error');
+            return;
+          }
+          if (validRows.length === 0) {
+            showStatusCsv('❌ Tidak ada data valid di file.', 'error');
+            return;
+          }
+          const grouped = {};
+          validRows.forEach(r => {
+            if (!grouped[r.lembaga]) grouped[r.lembaga] = {};
+            if (!grouped[r.lembaga][r.hari]) grouped[r.lembaga][r.hari] = [];
+            grouped[r.lembaga][r.hari].push({ kelas: r.kelas, jam: r.jam, mapel: r.mapel, guru: r.guru });
+          });
+          const lembagaList = Object.keys(grouped);
+          const confirmMsg = `⚠️ Upload akan MENGGANTIKAN jadwal untuk:\n\n` +
+            lembagaList.map(l => {
+              const hariCount = Object.keys(grouped[l]).length;
+              const rowCount = Object.values(grouped[l]).reduce((sum, arr) => sum + arr.length, 0);
+              return `• ${l}: ${rowCount} jadwal di ${hariCount} hari`;
+            }).join('\n') +
+            `\n\nYakin ingin melanjutkan?`;
+          if (!confirm(confirmMsg)) {
+            status.style.display = 'none';
+            return;
+          }
+          const allLembagaData = {};
+          lembagaList.forEach(lembaga => {
+            const existingJadwal = lembaga === cfg.lembaga ? jadwalAktif : null;
+            if (existingJadwal) {
+              allLembagaData[lembaga] = JSON.parse(JSON.stringify(existingJadwal));
+            } else {
+              allLembagaData[lembaga] = {};
+              validHari.forEach(h => { allLembagaData[lembaga][h] = []; });
+            }
+            Object.keys(grouped[lembaga]).forEach(hari => {
+              allLembagaData[lembaga][hari] = grouped[lembaga][hari];
+            });
+          });
+          lembagaList.forEach(lembaga => {
+            kirimJadwalKeFirebase(lembaga, allLembagaData[lembaga]);
+          });
+          if (lembagaList.includes(cfg.lembaga)) {
+            jadwalAktif = allLembagaData[cfg.lembaga];
+            saveJadwalCustom();
+            renderFormPengaturan();
+            renderSemuaHari($('tanggal').value);
+            renderListGuruWa();
+          }
+          showStatusCsv(`✅ Berhasil import ${validRows.length} jadwal untuk ${lembagaList.join(', ')}.`, 'success');
+        } catch (err) {
+          showStatusCsv('❌ Gagal memproses file: ' + err.message, 'error');
+        }
+      };
+      reader.onerror = function() {
+        showStatusCsv('❌ Gagal membaca file.', 'error');
+      };
+      if (file.name.endsWith('.csv')) {
+        reader.readAsArrayBuffer(file);
+      } else {
+        reader.readAsArrayBuffer(file);
+      }
+    }
+
+    function parseCsv(text) {
+      const lines = text.split(/\r?\n/).filter(l => l.trim());
+      if (lines.length === 0) return [];
+      const headers = parseCsvLine(lines[0]);
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        const values = parseCsvLine(lines[i]);
+        const row = {};
+        headers.forEach((h, idx) => {
+          row[h.trim()] = values[idx] ? values[idx].trim() : '';
+        });
+        rows.push(row);
+      }
+      return rows;
+    }
+
+    function parseCsvLine(line) {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (inQuotes) {
+          if (ch === '"' && line[i + 1] === '"') {
+            current += '"';
+            i++;
+          } else if (ch === '"') {
+            inQuotes = false;
+          } else {
+            current += ch;
+          }
+        } else {
+          if (ch === '"') {
+            inQuotes = true;
+          } else if (ch === ',') {
+            result.push(current);
+            current = '';
+          } else {
+            current += ch;
+          }
+        }
+      }
+      result.push(current);
+      return result;
+    }
+
     loadSemuaData();
     syncJadwalDariFirebase();
     const todayStr = tglHariIniCfg(cfg);
@@ -2248,6 +2457,13 @@
     $('btnTambahBaris').addEventListener('click', () => tambahkanBarisForm());
     $('btnSimpanPengaturan').addEventListener('click', simpanPerubahanJadwal);
     $('btnResetJadwalDefault').addEventListener('click', kembalikanJadwalDefault);
+    $('btnDownloadTemplate').addEventListener('click', downloadTemplateCsv);
+    $('btnUploadCsv').addEventListener('click', () => $('inputCsvFile').click());
+    $('inputCsvFile').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) uploadCsvFile(file);
+      e.target.value = '';
+    });
 
     renderSemuaHari(todayStr);
   }
