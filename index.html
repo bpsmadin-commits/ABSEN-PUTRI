@@ -2170,7 +2170,7 @@
         let hasGuru = false;
         for (let j = 0; j < row.length - 1; j++) {
           const val = row[j];
-          if (val && typeof val === 'string' && val.includes('الأستاذ')) { hasGuru = true; break; }
+          if (val && typeof val === 'string' && (val.includes('الأستاذ') || val.includes('الاستاذ'))) { hasGuru = true; break; }
         }
         if (hasGuru) {
           for (let j = 0; j < row.length - 1; j += 2) {
