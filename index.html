@@ -1653,7 +1653,6 @@
         <div class="master-actions">
           <button class="btn btn-accent" id="${l.prefix}btnTambahBaris"><i class="fas fa-plus"></i> Tambah Jadwal Baru</button>
           <button class="btn-block-simpan" id="${l.prefix}btnSimpanPengaturan"><i class="fas fa-save"></i> Simpan Perubahan Jadwal</button>
-          <button class="btn btn-danger" id="${l.prefix}btnResetJadwalDefault" style="margin-top:10px;"><i class="fas fa-undo"></i> Kembalikan ke Jadwal Asli (Default)</button>
         </div>
         <div class="nm-card" style="border-left:3px solid #6366f1;">
           <h4 style="font-size:0.9rem; margin-bottom:6px; color:var(--text-header);"><i class="fas fa-file-excel"></i> Import Jadwal dari Excel</h4>
@@ -2132,19 +2131,6 @@
       renderListGuruWa();
     }
 
-    function kembalikanJadwalDefault() {
-      if (confirm(`⚠️ Yakin ingin mereset jadwal ${cfg.lembaga} ke pengaturan pabrik?`)) {
-        localStorage.removeItem(cfg.lsJadwal);
-        jadwalAktif = cfg.getDefaultJadwal();
-        saveJadwalCustom();
-        kirimJadwalKeFirebase(cfg.lembaga, jadwalAktif);
-        renderFormPengaturan();
-        renderSemuaHari($('tanggal').value);
-        renderListGuruWa();
-        alert(`Jadwal ${cfg.lembaga} berhasil dikembalikan ke versi asli.`);
-      }
-    }
-
     function showStatusCsv(msg, type) {
       const st = $('statusCsv');
       st.innerHTML = msg;
@@ -2364,7 +2350,6 @@
     $('hariPengaturan').addEventListener('change', renderFormPengaturan);
     $('btnTambahBaris').addEventListener('click', () => tambahkanBarisForm());
     $('btnSimpanPengaturan').addEventListener('click', simpanPerubahanJadwal);
-    $('btnResetJadwalDefault').addEventListener('click', kembalikanJadwalDefault);
     $('btnUploadCsv').addEventListener('click', () => $('inputCsvFile').click());
     $('inputCsvFile').addEventListener('change', function(e) {
       const file = e.target.files[0];
