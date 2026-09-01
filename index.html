@@ -2209,7 +2209,7 @@
           kelas = String(kelasRaw).trim();
         }
         if (!kelas || /^\d+$/.test(kelas)) { i += 2; continue; }
-        if (kelas === 'الرموز' || kelas.toLowerCase() === 'kode' || kelas.toLowerCase() === 'code') { i += 2; continue; }
+        if (/^(الرموز|kode|code)/i.test(kelas)) { i += 2; continue; }
 
         const mappedKelas = CLASS_MAP[kelas] || kelas;
         dayCols.forEach((col, idx) => {
