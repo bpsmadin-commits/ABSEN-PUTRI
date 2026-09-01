@@ -2189,18 +2189,24 @@
       while (i < rawData.length) {
         const row = rawData[i];
         if (!row || row.length < 13) { i++; continue; }
-        const kelasRaw = row[row.length - 1];
-        if (!kelasRaw || !String(kelasRaw).trim()) { i++; continue; }
-        const kelas = String(kelasRaw).trim();
-        if (kelas === 'الرموز' || kelas.toLowerCase() === 'kode' || kelas.toLowerCase() === 'code') { i++; continue; }
-        if (/^\d+$/.test(kelas)) { i++; continue; }
         const row2 = rawData[i + 1];
         if (!row2) { i++; continue; }
+
+        let kelasRaw = row[row.length - 1];
+        let kelas = String(kelasRaw).trim();
+        if (/^\d+$/.test(kelas) || !kelas) {
+          kelasRaw = row2[row2.length - 1];
+          kelas = String(kelasRaw).trim();
+        }
+        if (!kelas || /^\d+$/.test(kelas)) { i += 2; continue; }
+        if (kelas === 'الرموز' || kelas.toLowerCase() === 'kode' || kelas.toLowerCase() === 'code') { i += 2; continue; }
+
+        const mappedKelas = CLASS_MAP[kelas] || kelas;
         dayCols.forEach((col, idx) => {
           const mapel1 = row[col]; const guruCode1 = row[col + 1];
           const mapel2 = row2[col]; const guruCode2 = row2[col + 1];
-          if (mapel1 && String(mapel1).trim()) { const guru = guruTable[Number(guruCode1)] || String(guruCode1); jadwal[days[idx]].push({ kelas, jam: 'Jam 1', mapel: String(mapel1).trim(), guru }); }
-          if (mapel2 && String(mapel2).trim()) { const guru = guruTable[Number(guruCode2)] || String(guruCode2); jadwal[days[idx]].push({ kelas, jam: 'Jam 2', mapel: String(mapel2).trim(), guru }); }
+          if (mapel1 && String(mapel1).trim()) { const guru = guruTable[Number(guruCode1)] || String(guruCode1); jadwal[days[idx]].push({ kelas: mappedKelas, jam: 'Jam 1', mapel: String(mapel1).trim(), guru }); }
+          if (mapel2 && String(mapel2).trim()) { const guru = guruTable[Number(guruCode2)] || String(guruCode2); jadwal[days[idx]].push({ kelas: mappedKelas, jam: 'Jam 2', mapel: String(mapel2).trim(), guru }); }
         });
         i += 2;
       }
