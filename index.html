@@ -2154,6 +2154,8 @@
     }
 
 
+    const CLASS_MAP = { 'ألرابع J': 'IV J', 'ألرابع K': 'IV K', 'ألرابع L': 'IV L', 'ألرابع M': 'IV M', 'ألرابع N': 'IV N', 'الخامس G': 'V G', 'الخامس H': 'V H', 'الخامس I': 'V I', 'الخامس J': 'V J', 'السادس G': 'VI G', 'السادس H': 'VI H', 'السادس I': 'VI I', 'السادس J': 'VI J' };
+
     function parseExcelGrid(rawData) {
       const days = ['Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Sabtu'];
       const dayCols = [10, 8, 6, 4, 2, 0];
