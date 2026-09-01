@@ -2154,15 +2154,10 @@
     }
 
 
-    const CLASS_MAP = { 'ألرابع J': 'IV J', 'ألرابع K': 'IV K', 'ألرابع L': 'IV L', 'ألرابع M': 'IV M', 'ألرابع N': 'IV N', 'الخامس G': 'V G', 'الخامس H': 'V H', 'الخامس I': 'V I', 'الخامس J': 'V J', 'السادس G': 'VI G', 'السادس H': 'VI H', 'السادس I': 'VI I', 'السادس J': 'VI J' };
-
-    const MAPEL_MAP = { 'بداية الهداية': 'Bidayatul Hidayah', 'تنقيح القول': 'Tanqihul Qoul', 'مختصر جدا': 'Mukhtashar Jiddan', 'مختصر جدا ': 'Mukhtashar Jiddan', 'مبادئ الفقهية': 'Mushohab Fiqhiyyah', 'التصريف': 'Tashrih', 'خلاصة نور اليقين': 'Khulashatul Nur Yaqin', 'اخلاق للبنات': 'Akhlaq Lil Banat', 'تمرين ( مختصر جدا )': 'Tamrin (Mukhtashar)', 'جواهر الكلامية': 'Jawahir Kalamiyyah', 'رياض البديعة': 'Riyadhul Badi\'ah', 'عقود للجين': 'Uquud Lil Jeen', 'الاربعين النواوية': 'Al-Arba\'in Nawawiyyah', 'العصفورية': 'Al-Ashfuriyyah', 'الامثلة التصريفية': 'Al-Atsal Tashriifiyyah', 'هداية الاذكياء': 'Hidayatul Adzkiya', 'قواعد الاعلال': 'Qawa\'idul I\'lal', 'فتح القريب': 'Fathul Qarib', 'قطر الغيث': 'Qouthrul Ghaits', 'نظم العوامل': 'Nazhul Amil', 'شرح الورقات': 'Syurhul Waraqat', 'نظم العريطى': 'Nazhul Arithi', 'كفاية العوام': 'Kifayatul Awam', 'تسهيل نيل المعاني': 'Tashil Nilil Ma\'ani', 'قاعدة كيلاني عزي': 'Qa\'idatul Kilani \'Izzi', 'متن الزبد': 'Matnut Zamrut', 'منح السنية': 'Manhus Saniyyah', 'بلوغ المرام': 'Bulughul Marom', 'تفسير يس': 'Tafsir Yaa Siin' };
-
-    const GURU_MAP = { 'الأستاذ إيندرا وحيودى': 'Ustadz Indra Wahyudi', 'الاستاذ إيندرا وحيودى': 'Ustadz Indra Wahyudi', 'الأستاذ بدر الدين': 'Ustadz Badruddin', 'الاستاذ بدر الدين': 'Ustadz Badruddin', 'الأستاذ مصباح المنير': 'Ustadz Misykatul Munir', 'الاستاذ مصباح المنير': 'Ustadz Misykatul Munir', 'الأستاذ حاري يوديانطا': 'Ustadz Hariyudianta', 'الاستاذ حاري يوديانطا': 'Ustadz Hariyudianta', 'الأستاذ محمد خليلي': 'Ustadz Muhammad Khalili', 'الاستاذ محمد خليلي': 'Ustadz Muhammad Khalili', 'الأستاذ علي مكي': 'Ustadz Ali Makki', 'الاستاذ علي مكي': 'Ustadz Ali Makki', 'الأستاذ علي مغكي': 'Ustadz Ali Makki', 'الاستاذ علي مغكي': 'Ustadz Ali Makki', 'الأستاذ خير الأمم': 'Ustadz Khairul Umam', 'الاستاذ خير الأمم': 'Ustadz Khairul Umam', 'الأستاذ أحمد ريحان': 'Ustadz Ahmad Rayhan', 'الاستاذ أحمد ريحان': 'Ustadz Ahmad Rayhan', 'الأستاذ محمد شرطا': 'Ustadz Muhammad Syartha', 'الاستاذ محمد شرطا': 'Ustadz Muhammad Syartha', 'الأستاذ بخاري مسلم': 'Ustadz Bukhori Muslim', 'الاستاذ بخاري مسلم': 'Ustadz Bukhori Muslim', 'الأستاذ بهاء الدين': 'Ustadz Bahauddin', 'الاستاذ بهاء الدين': 'Ustadz Bahauddin', 'الأستاذ محمد محيى': 'Ustadz Muhammad Muhyin', 'الاستاذ محمد محيى': 'Ustadz Muhammad Muhyin', 'الأستاذ نور حافي': 'Ustadz Nurl Haifi', 'الاستاذ نور حافي': 'Ustadz Nurl Haifi', 'الأستاذ نور عارفين': 'Ustadz Nurl Arifin', 'الاستاذ نور عارفين': 'Ustadz Nurl Arifin', 'الأستاذ بسطامي مسلم': 'Ustadz Mustomi Muslim', 'الاستاذ بسطامي مسلم': 'Ustadz Mustomi Muslim', 'الأستاذ علي وفى': 'Ustadz Ali Wafa', 'الاستاذ علي وافى': 'Ustadz Ali Wafa', 'الأستاذ عبد المجيب': 'Ustadz Abdul Majib', 'الاستاذ عبد المجيب': 'Ustadz Abdul Majib', 'الأستاذ محمد حسين': 'Ustadz Muhammad Husen', 'الاستاذ محمد حسين': 'Ustadz Muhammad Husen', 'الأستاذ عبد القادر': 'Ustadz Abdul Qodir', 'الأستاذ شريف هداية': 'Ustadz Syarif Hidayah', 'الأستاذ عبد الرحمن': 'Ustadz Abdurrahman', 'الاستاذ أحمد مولنا': 'Ustadz Ahmad Mulna', 'الاستاذ مكيل العلوم': 'Ustadz Ma\'kul Ulum' };
-
     function parseExcelGrid(rawData) {
       const days = ['Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Sabtu'];
       const dayCols = [10, 8, 6, 4, 2, 0];
+
       let guruTable = {};
       for (let i = rawData.length - 1; i >= 0; i--) {
         const row = rawData[i];
@@ -2170,18 +2165,18 @@
         let hasGuru = false;
         for (let j = 0; j < row.length - 1; j++) {
           const val = row[j];
-          if (val && typeof val === 'string' && (val.includes('الأستاذ') || val.includes('الاستاذ'))) { hasGuru = true; break; }
+          if (val && typeof val === 'string' && /[\u0600-\u06FF]/.test(val)) { hasGuru = true; break; }
         }
         if (hasGuru) {
-          for (let j = 0; j < row.length - 1; j++) {
+          for (let j = 0; j < row.length; j++) {
             const val = row[j];
-            if (val && typeof val === 'string' && (val.includes('الأستاذ') || val.includes('الاستاذ'))) {
+            if (val && typeof val === 'string' && /[\u0600-\u06FF]/.test(val)) {
               for (let k = j + 1; k < row.length; k++) {
                 const code = row[k];
                 if (code !== null && code !== undefined && !isNaN(Number(code))) {
                   const namaStr = String(val).trim();
                   const kodeNum = Number(code);
-                  if (GURU_MAP[namaStr]) guruTable[kodeNum] = GURU_MAP[namaStr];
+                  guruTable[kodeNum] = namaStr;
                   break;
                 }
               }
@@ -2189,6 +2184,7 @@
           }
         }
       }
+
       const jadwal = {}; days.forEach(h => { jadwal[h] = []; });
       let i = 4;
       while (i < rawData.length) {
@@ -2196,14 +2192,14 @@
         if (!row || row.length < 13) { i++; continue; }
         const kelasRaw = row[row.length - 1];
         if (!kelasRaw || !String(kelasRaw).trim()) { i++; continue; }
-        const kelas = CLASS_MAP[String(kelasRaw).trim()] || String(kelasRaw).trim();
+        const kelas = String(kelasRaw).trim();
         const row2 = rawData[i + 1];
         if (!row2) { i++; continue; }
         dayCols.forEach((col, idx) => {
           const mapel1 = row[col]; const guruCode1 = row[col + 1];
           const mapel2 = row2[col]; const guruCode2 = row2[col + 1];
-          if (mapel1 && String(mapel1).trim()) { const mapelLatin = MAPEL_MAP[String(mapel1).trim()] || String(mapel1).trim(); const guru = guruTable[Number(guruCode1)] || 'Unknown'; jadwal[days[idx]].push({ kelas, jam: 'Jam 1', mapel: mapelLatin, guru }); }
-          if (mapel2 && String(mapel2).trim()) { const mapelLatin = MAPEL_MAP[String(mapel2).trim()] || String(mapel2).trim(); const guru = guruTable[Number(guruCode2)] || 'Unknown'; jadwal[days[idx]].push({ kelas, jam: 'Jam 2', mapel: mapelLatin, guru }); }
+          if (mapel1 && String(mapel1).trim()) { const guru = guruTable[Number(guruCode1)] || String(guruCode1); jadwal[days[idx]].push({ kelas, jam: 'Jam 1', mapel: String(mapel1).trim(), guru }); }
+          if (mapel2 && String(mapel2).trim()) { const guru = guruTable[Number(guruCode2)] || String(guruCode2); jadwal[days[idx]].push({ kelas, jam: 'Jam 2', mapel: String(mapel2).trim(), guru }); }
         });
         i += 2;
       }
