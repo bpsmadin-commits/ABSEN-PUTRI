@@ -2161,22 +2161,19 @@
       let guruTable = {};
       for (let i = rawData.length - 1; i >= 0; i--) {
         const row = rawData[i];
-        if (!row || row.length < 2) continue;
-        let hasGuru = false;
-        for (let j = 0; j < row.length - 1; j++) {
-          const val = row[j];
-          if (val && typeof val === 'string' && /[\u0600-\u06FF]/.test(val)) { hasGuru = true; break; }
+        if (!row || row.length < 4) continue;
+        let numericCount = 0;
+        for (let j = 0; j < row.length; j++) {
+          if (row[j] !== null && row[j] !== undefined && !isNaN(Number(row[j]))) numericCount++;
         }
-        if (hasGuru) {
-          for (let j = 0; j < row.length; j++) {
+        if (numericCount >= 5) {
+          for (let j = 0; j < row.length - 1; j++) {
             const val = row[j];
-            if (val && typeof val === 'string' && /[\u0600-\u06FF]/.test(val)) {
+            if (val && typeof val === 'string' && val.trim() && isNaN(Number(val))) {
               for (let k = j + 1; k < row.length; k++) {
                 const code = row[k];
                 if (code !== null && code !== undefined && !isNaN(Number(code))) {
-                  const namaStr = String(val).trim();
-                  const kodeNum = Number(code);
-                  guruTable[kodeNum] = namaStr;
+                  guruTable[Number(code)] = String(val).trim();
                   break;
                 }
               }
