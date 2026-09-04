@@ -1,8 +1,10 @@
-const CACHE_NAME = 'absen-putri-v13';
+const CACHE_NAME = 'absen-putri-v14';
 
 const CORE_ASSETS = [
   './',
   './index.html',
+  './app.js',
+  './style.css',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png'
