@@ -38,9 +38,9 @@
     if (window.isAdmin) {
       return `
       <div class="btn-group-hia">
-        <button class="btn-hia btn-h ${activeStatus==='H'?'active':''}" data-status="H" data-kelas="${item.kelas}" data-jam="${item.jam}" data-mapel="${item.mapel}" data-guru="${item.guru}">H</button>
-        <button class="btn-hia btn-i ${activeStatus==='I'?'active':''}" data-status="I" data-kelas="${item.kelas}" data-jam="${item.jam}" data-mapel="${item.mapel}" data-guru="${item.guru}">I</button>
-        <button class="btn-hia btn-a ${activeStatus==='A'?'active':''}" data-status="A" data-kelas="${item.kelas}" data-jam="${item.jam}" data-mapel="${item.mapel}" data-guru="${item.guru}">A</button>
+        <button class="btn-hia btn-h ${activeStatus==='H'?'active':''}" data-status="H" data-kelas="${item.kelas}" data-jam="${item.jam}" data-mapel="${item.mapel}" data-guru="${item.guru}">Hadir</button>
+        <button class="btn-hia btn-i ${activeStatus==='I'?'active':''}" data-status="I" data-kelas="${item.kelas}" data-jam="${item.jam}" data-mapel="${item.mapel}" data-guru="${item.guru}">Izin</button>
+        <button class="btn-hia btn-a ${activeStatus==='A'?'active':''}" data-status="A" data-kelas="${item.kelas}" data-jam="${item.jam}" data-mapel="${item.mapel}" data-guru="${item.guru}">Alpa</button>
       </div>`;
     }
     const label = activeStatus === 'H' ? 'Hadir' : activeStatus === 'I' ? 'Izin' : activeStatus === 'A' ? 'Alpa' : 'Belum diisi';
@@ -750,7 +750,7 @@
             </div>
             <div class="info-row">
               <div class="mapel-lbl latin-text">${item.mapel}</div>
-              <div class="guru-lbl latin-text">${item.guru}</div>
+              <div class="guru-lbl latin-text"><i class="fas fa-user-tie"></i> ${item.guru}</div>
             </div>
             ${renderAreaStatusHIA(activeStatus, item)}
           </div>`;
