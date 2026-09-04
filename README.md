@@ -79,6 +79,17 @@ Atur environment variable berikut di platform deployment:
 Jangan menaruh API key di `app.js`, GitHub Pages, atau prompt publik. Untuk
 Custom GPT, masukkan API key sebagai authentication header pada Action.
 
+### Endpoint publik alpa
+
+Untuk dipakai dari GPT umum tanpa Action, tersedia endpoint terbatas:
+
+```text
+https://absen-putri.vercel.app/api/public-alpa?tanggal=2026-09-04&lembaga=MID
+```
+
+Endpoint ini tidak memerlukan API key dan hanya mengembalikan data berstatus
+`A` (Alpa). Siapa pun yang mengetahui URL dapat membacanya.
+
 ## Daftar Admin
 
 Setiap Google akun yang login akan dicek di `roles/<UID>`. Kalau nilainya `"admin"`, akun tersebut bisa edit data. Kalau belum, tampilkan UID dan minta didaftarkan lewat Firebase Console.
