@@ -59,6 +59,26 @@ Gunakan Bubblewrap (TWA) atau WebView APK Generator. Pastikan URL yang dipakai s
 4. Salin config Firebase dan ganti isinya di `index.html` bagian `firebaseConfig`.
 5. Daftarkan UID admin di `roles/<UID>` dengan value `"admin"`.
 
+## API untuk AI
+
+Endpoint `api/data.js` dapat di-deploy ke Vercel atau platform serverless lain.
+Endpoint ini hanya menerima `GET`, wajib memakai header `x-api-key`, dan wajib
+memakai parameter tanggal:
+
+```text
+GET https://domain-api-kamu.vercel.app/api/data?tanggal=2026-09-04&lembaga=MID&status=A
+x-api-key: API_KEY_RAHASIA
+```
+
+Atur environment variable berikut di platform deployment:
+
+- `ABSENSI_API_KEY`: API key rahasia untuk GPT, Claude, atau Gemini.
+- `FIREBASE_DATABASE_URL`: URL Firebase (opsional, sudah ada nilai default).
+- `ALLOWED_ORIGIN`: domain yang boleh melakukan request browser (opsional).
+
+Jangan menaruh API key di `app.js`, GitHub Pages, atau prompt publik. Untuk
+Custom GPT, masukkan API key sebagai authentication header pada Action.
+
 ## Daftar Admin
 
 Setiap Google akun yang login akan dicek di `roles/<UID>`. Kalau nilainya `"admin"`, akun tersebut bisa edit data. Kalau belum, tampilkan UID dan minta didaftarkan lewat Firebase Console.
