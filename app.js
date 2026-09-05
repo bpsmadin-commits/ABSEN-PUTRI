@@ -536,6 +536,11 @@
           </div>
           <button class="btn btn-accent" id="${l.prefix}btnHariIni" style="width:100%;"><i class="fas fa-calendar-day"></i> Pakai Tanggal Hari Ini</button>
         </div>
+        <div class="attendance-overview" id="${l.prefix}attendanceOverview">
+          <div class="overview-card overview-total"><span>Total sesi</span><strong id="${l.prefix}statTotal">0</strong></div>
+          <div class="overview-card overview-done"><span>Terisi</span><strong id="${l.prefix}statDone">0</strong></div>
+          <div class="overview-card overview-pending"><span>Belum</span><strong id="${l.prefix}statPending">0</strong></div>
+        </div>
         <div id="${l.prefix}syncIndicator" class="sync-indicator"><i class="fas fa-sync-alt fa-spin"></i> Menyinkronkan data...</div>
         <div class="hari-tabs-container" id="${l.prefix}hariTabs"></div>
         <div id="${l.prefix}hariContentPanels"></div>
@@ -733,6 +738,11 @@
       const existing = dataAbsensi.filter(a => a.tanggal === tanggal);
       const hari = hariAktifDipilih;
       const items = jadwalAktif[hari] || [];
+      const totalSesi = items.length;
+      const terisi = dataAbsensi.filter(a => a.tanggal === tanggal && a.status).length;
+      $('statTotal').textContent = totalSesi;
+      $('statDone').textContent = terisi;
+      $('statPending').textContent = Math.max(totalSesi - terisi, 0);
 
       let html = '';
       if (items.length === 0) {
