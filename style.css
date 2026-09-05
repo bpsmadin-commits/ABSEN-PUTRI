@@ -72,12 +72,14 @@
       background:
         radial-gradient(1200px 480px at 15% -12%, rgba(79,70,229,0.08), transparent 60%),
         radial-gradient(1000px 620px at 108% 2%, rgba(124,58,237,0.06), transparent 55%),
+        radial-gradient(circle at 1px 1px, rgba(79,70,229,0.08) 1px, transparent 1px) 0 0 / 24px 24px,
         var(--bg-body);
     }
     body.dark-mode {
       background:
         radial-gradient(1200px 480px at 15% -12%, rgba(99,102,241,0.13), transparent 60%),
         radial-gradient(1000px 620px at 108% 2%, rgba(124,58,237,0.10), transparent 55%),
+        radial-gradient(circle at 1px 1px, rgba(165,180,252,0.10) 1px, transparent 1px) 0 0 / 24px 24px,
         var(--bg-body);
     }
     :where(button, input, select, [tabindex]):focus-visible {
@@ -585,6 +587,23 @@
 
     /* Rekap Tabel */
     .table-container { overflow-x: auto; margin-top: 10px; padding: 5px; }
+    .rekap-chart {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 14px;
+      padding: 14px;
+      margin: 12px 5px 4px;
+      box-shadow: var(--shadow-card);
+    }
+    .chart-title { color: var(--text-header); font-size: 13px; font-weight: 800; margin-bottom: 12px; }
+    .chart-title i { color: var(--primary); margin-right: 5px; }
+    .chart-row { display: grid; grid-template-columns: 48px 1fr 28px; align-items: center; gap: 8px; margin-top: 8px; font-size: 11px; color: var(--text-sub); }
+    .chart-row b { color: var(--text-main); text-align: right; }
+    .chart-track { height: 8px; background: var(--bg-card-soft); border-radius: 99px; overflow: hidden; }
+    .chart-track i { display: block; height: 100%; min-width: 2px; border-radius: inherit; }
+    .chart-hadir { background: var(--hadir); }
+    .chart-izin { background: var(--izin); }
+    .chart-alpa { background: var(--alpa); }
     .table-container table { width: 100%; border-collapse: separate; border-spacing: 0 6px; min-width: 450px; }
     .table-container th { padding: 8px 10px; text-align: left; font-size: 10px; color: var(--brass-strong); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; font-family: 'Overpass Mono', monospace; }
     .table-container td { padding: 11px 10px; background: var(--bg-card); font-size: 13px; color: var(--text-main); border-top: 1px solid var(--border-card); border-bottom: 1px solid var(--border-card); }

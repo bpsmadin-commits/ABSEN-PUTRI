@@ -571,6 +571,7 @@
         <div class="form-group" id="${l.prefix}groupSearchGuru" style="display:none; margin-top:10px;">
           <input type="text" id="${l.prefix}searchGuru" placeholder="Ketik nama guru untuk memfilter...">
         </div>
+        <div id="${l.prefix}rekapChart" class="rekap-chart" style="display:none;"></div>
         <div class="table-container" id="${l.prefix}tabelRekap"></div>
         <div class="master-actions">
           <button class="btn btn-accent btn-export-admin" id="${l.prefix}btnExportExcel" style="display:none; width:100%;"><i class="fas fa-file-export"></i> Export ke Excel (.xlsx)</button>
@@ -891,13 +892,27 @@
       const container = $('tabelRekap');
       const exportBtn = $('btnExportExcel');
       const searchGroup = $('groupSearchGuru');
+      const chart = $('rekapChart');
       const listNamaGuru = Object.keys(rekap).sort();
       if (listNamaGuru.length === 0) {
         container.innerHTML = '<div class="msg-empty">Belum ada data rekap pada bulan ini.</div>';
         exportBtn.style.display = 'none';
         searchGroup.style.display = 'none';
+        chart.style.display = 'none';
         return;
       }
+      const totals = listNamaGuru.reduce((sum, guru) => {
+        const data = rekap[guru];
+        return { h: sum.h + data.h, i: sum.i + data.i, a: sum.a + data.a };
+      }, { h: 0, i: 0, a: 0 });
+      const total = totals.h + totals.i + totals.a;
+      const bar = (label, value, cssClass) => `
+        <div class="chart-row">
+          <span>${label}</span><div class="chart-track"><i class="${cssClass}" style="width:${total ? (value / total) * 100 : 0}%"></i></div><b>${value}</b>
+        </div>`;
+      chart.innerHTML = `<div class="chart-title"><i class="fas fa-chart-simple"></i> Ringkasan bulan ini</div>
+        ${bar('Hadir', totals.h, 'chart-hadir')}${bar('Izin', totals.i, 'chart-izin')}${bar('Alpa', totals.a, 'chart-alpa')}`;
+      chart.style.display = 'block';
       searchGroup.style.display = 'block';
       let html = `<table id="${P}table-data"><thead><tr><th>Nama Guru</th><th class="text-center">H</th><th class="text-center">I</th><th class="text-center">A</th><th class="text-center">Total</th></tr></thead><tbody>`;
       listNamaGuru.forEach(guru => {
