@@ -559,16 +559,26 @@
     .edit-card {
       background: var(--bg-card);
       border-radius: 12px;
-      padding: 13px;
+      padding: 10px;
       box-shadow: var(--shadow-card);
       border: 1px solid var(--border-card);
       margin-bottom: 12px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 7px;
     }
-    .edit-row { display: flex; gap: 10px; flex-wrap: wrap; }
-    .edit-input { padding: 10px; font-size: 14px; border-radius: 8px; border: 1px solid var(--border-card); background: var(--input-bg); color: var(--input-color); flex: 1; }
+    .edit-row { display: flex; gap: 7px; flex-wrap: wrap; }
+    .edit-row-detail { flex-wrap: nowrap; }
+    .edit-input {
+      min-width: 0;
+      padding: 9px 10px;
+      font-size: 13px;
+      border-radius: 8px;
+      border: 1px solid var(--border-card);
+      background: var(--input-bg);
+      color: var(--input-color);
+      flex: 1;
+    }
     .btn-delete-row { background: var(--danger-bg); color: var(--alpa); border: 1px solid var(--danger-border); border-radius: 8px; font-weight: bold; width: 40px; cursor: pointer; }
     .master-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
 
@@ -631,6 +641,8 @@
       .header h1 { font-size: 1.05rem; }
       .guru-lbl { font-size: 15px; }
       .hari-tab-btn { font-size: 10.5px; padding: 6px 11px; }
+      .edit-row-detail { flex-wrap: wrap; }
+      .edit-row-detail .edit-input { flex-basis: calc(50% - 4px); }
       /* Cegah zoom otomatis iOS pas fokus di input (native apps gak zoom) */
       input, select, textarea { font-size: 16px; }
     }

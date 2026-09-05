@@ -939,8 +939,10 @@
           <input type="text" class="edit-input inp-kelas latin-text flex-2" placeholder="Kelas" value="${kelas}">
           <button class="btn-delete-row" onclick="this.parentElement.parentElement.remove()">X</button>
         </div>
-        <div class="edit-row"><input type="text" class="edit-input inp-mapel latin-text flex-1" placeholder="Mata Pelajaran" value="${mapel}"></div>
-        <div class="edit-row"><input type="text" class="edit-input inp-guru latin-text flex-1 inp-guru-highlight" placeholder="Nama Guru" value="${guru}"></div>`;
+        <div class="edit-row edit-row-detail">
+          <input type="text" class="edit-input inp-mapel latin-text flex-1" placeholder="Mata Pelajaran" value="${mapel}">
+          <input type="text" class="edit-input inp-guru latin-text flex-1 inp-guru-highlight" placeholder="Nama Guru" value="${guru}">
+        </div>`;
       container.appendChild(row);
     }
 
